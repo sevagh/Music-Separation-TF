@@ -1,0 +1,4 @@
+essentia
+soundfile
+numpy
+cdpam

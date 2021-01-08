@@ -10,9 +10,11 @@ defaultBeta = 2;
 defaultPower = 2;
 defaultLHarm = 0.2; % 200 ms
 defaultLPerc = 500; % 500 Hz
+defaultOutDir = 'separated';
 defaultOutPrefix = 'tmp';
 
 addRequired(p, 'filename', @ischar);
+addOptional(p, 'outDir', defaultOutDir, @ischar);
 addOptional(p, 'outPrefix', defaultOutPrefix, @ischar);
 addParameter(p, 'mask', defaultMask, checkMask);
 addParameter(p, 'windowSize', defaultWindowSize, @isnumeric);
@@ -72,8 +74,10 @@ xh = istft(H, "Window", win, "OverlapLength", overlapLen, ...
 xp = istft(P, "Window", win, "OverlapLength", overlapLen,...
   "FFTLength", fftLen, "ConjugateSymmetric", true);
 
-xhOut = sprintf("%s_harm.wav", p.Results.outPrefix);
-xpOut = sprintf("%s_perc.wav", p.Results.outPrefix);
+[~,fname,~] = fileparts(p.Results.filename);
+
+xhOut = sprintf("%s/%s_%s_harm_sep.wav", p.Results.outDir, p.Results.outPrefix, fname);
+xpOut = sprintf("%s/%s_%s_perc_sep.wav", p.Results.outDir, p.Results.outPrefix, fname);
 
 audiowrite(xhOut, xh, fs);
 audiowrite(xpOut, xp, fs);

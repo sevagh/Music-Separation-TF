@@ -8,8 +8,6 @@ import subprocess
 from essentia.standard import MonoLoader
 import soundfile
 
-global_data_dir = "./data"
-
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -31,12 +29,15 @@ def parse_args():
     parser.add_argument(
         "--vocals", action="store_true", help="include vocals in the mix"
     )
+    parser.add_argument(
+        "--limit", type=int, default=-1, help="limit to n tracks"
+    )
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    data_dir = os.path.abspath(global_data_dir)
+    data_dir = os.path.abspath(args.dest_dir)
 
     seq = 0
     for sd in args.stem_dirs:
@@ -94,6 +95,10 @@ def main():
                     )
 
                     seq += 1
+
+                    if args.limit > -1:
+                        if seq == args.limit:
+                            return 0
 
     return 0
 
