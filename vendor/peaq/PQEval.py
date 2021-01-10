@@ -42,8 +42,8 @@ class PQEval(object):
 
 		# Allocate storage
 		self.Eb = np.zeros((2, self.Nc))
-		self.Xw2 = np.zeros((2, self.NF/2+1))
-		self.XwN2 = np.zeros(self.NF/2+1)
+		self.Xw2 = np.zeros((2, int(self.NF/2)+1))
+		self.XwN2 = np.zeros(int(self.NF/2)+1)
 		self.E = np.zeros(self.Eb.shape)
 		self.Es = np.zeros((2, self.Nc))
 
@@ -51,9 +51,9 @@ class PQEval(object):
 		self.df = float(self.Fs) / self.NF
 		self.Emin = 1e-12
 		
-		self.U = np.zeros((self.NF/2+1, self.Nc))
+		self.U = np.zeros((int(self.NF/2)+1, self.Nc))
 
-		for k in range(self.NF/2+1):
+		for k in range(int(self.NF/2)+1):
 			for i in range(self.Nc):
 				temp = (np.amin([self.fu[i], (k+0.5)*self.df]) - np.amax([self.fl[i], (k-0.5)*self.df])) / self.df
 				self.U[k, i] = np.amax([0, temp])
@@ -76,8 +76,8 @@ class PQEval(object):
 		# Critical band grouping and frequency spreading
 
 		# Outer and middle ear filtering
-		self.Xw2[0,:] = self.W2 * X2[0,0:self.NF/2+1]
-		self.Xw2[1,:] = self.W2 * X2[1,0:self.NF/2+1]
+		self.Xw2[0,:] = self.W2 * X2[0,0:int(self.NF/2)+1]
+		self.Xw2[1,:] = self.W2 * X2[1,0:int(self.NF/2)+1]
 
 		# Form the difference magnitude signal
 		self.XwN2 = self.Xw2[0,:] - 2*np.sqrt(self.Xw2[0,:]*self.Xw2[1,:]) + self.Xw2[1,:]
@@ -139,7 +139,7 @@ class PQEval(object):
 		# Calculate energy-dependent terms
 		aL = 10**(2.7*self.dz)
 
-		for l in xrange(self.Nc):
+		for l in range(self.Nc):
 			aUC = 10**((-2.4 - 23/self.fc[l])*self.dz)
 			aUCE = aUC * (E[l]**(0.2*self.dz))
 			gIL = (1 - aL**(-1*(l+1))) / (1 - aL**(-1))
@@ -151,20 +151,20 @@ class PQEval(object):
 		# Lower spreading
 		Es[self.Nc-1] = Ene[self.Nc-1]
 		aLe = aL**(-1*e)
-		for i in xrange((self.Nc-2),-1,-1):
+		for i in range((self.Nc-2),-1,-1):
 			Es[i] = aLe*Es[i+1] + Ene[i]
 		
 		
 		# Upper spreading (i > m)
-		for i in xrange(0,(self.Nc-1)):
+		for i in range(0,(self.Nc-1)):
 			r = Ene[i]
 			a = aUCEe[i]
-			for l in xrange((i+1),self.Nc):
+			for l in range((i+1),self.Nc):
 				r = r*a
 				Es[l] = Es[l] + r
 				
 		# Normalize the values by the normalization factor
-		for i in xrange(0,self.Nc):
+		for i in range(0,self.Nc):
 			Es[i] = (Es[i]**(1/e)) / Bs[i]
 			
 		return Es
@@ -181,7 +181,7 @@ class PQEval(object):
 		Ehs = np.zeros(self.Nc)
 		
 		# Time domain smoothing
-		for i in xrange(self.Nc):
+		for i in range(self.Nc):
 			Ef[i] = alpha[i]*Ef[i] + (1-alpha[i])*Es[i]
 			Ehs[i] = max(Ef[i],Es[i])
 		   
@@ -235,8 +235,8 @@ class PQEval(object):
 
 		if (ifn > 0):
 			X = np.fft.fft (x, N)
-			XR = np.real(X[0:N/2+1])
-			XI = np.imag(X[1:N/2-1+1])
+			XR = np.real(X[0:int(N/2)+1])
+			XI = np.imag(X[1:int(N/2)-1+1])
 			X = np.concatenate([XR, XI])
 			return X
 		else:
@@ -246,13 +246,13 @@ class PQEval(object):
 		# Calculate the magnitude squared frequency response from the
 		# DFT values corresponding to a real signal (assumes N is even)
 
-		X2 = np.zeros(N/2+1)
+		X2 = np.zeros(int(N/2)+1)
 
 		X2[0] = X[0]**2
-		for k in range(N/2-1):
-			X2[k+1] = X[k+1]**2 + X[N/2+k+1]**2
+		for k in range(int(N/2)-1):
+			X2[k+1] = X[k+1]**2 + X[int(N/2)+k+1]**2
 
-		X2[N/2] = X[N/2]**2
+		X2[int(N/2)] = X[int(N/2)]**2
 		return X2
 
 	def PQ_GL(self, NF=2048, Amax=1, fcN=1019.5/48000., Lp=92.):

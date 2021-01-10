@@ -10,6 +10,7 @@ from vendor.peaq import PEAQ
 from essentia.standard import MonoLoader
 import soundfile
 import cdpam
+import tempfile
 
 # this needs to be fixed to 48000 for visqol
 FIXED_SAMPLE_RATE = 48000
@@ -26,9 +27,6 @@ def parse_args():
     parser.add_argument(
         "separated_dir", type=str, default="./separated", help="directory containing separated files"
     )
-    parser.add_argument(
-        "visqol_path", type=str, help="path to visqol binary (https://github.com/google/visqol)"
-    )
     return parser.parse_args()
 
 
@@ -39,7 +37,6 @@ def main():
 
     testcases = defaultdict(list)
     separations = defaultdict(list)
-    results = defaultdict(dict)
 
     for dirname, _, wav_files in os.walk(data_dir):
         wav_files = [f for f in wav_files if f.endswith('.wav')]
@@ -58,9 +55,11 @@ def main():
 
     # try batch_size=1
     # as per https://github.com/pranaymanocha/PerceptualAudio/issues/18#issuecomment-757365731
-    loss_fn = cdpam.CDPAM(batch_size=1)
+    loss_fn = cdpam.CDPAM()
 
-    for k in testcases:
+    results = {k: defaultdict(dict) for k in testcases.keys()}
+
+    for k in testcases.keys():
         harmonic_orig = os.path.join(data_dir, [f for f in testcases[k] if 'harmonic' in f][0])
         percussive_orig = os.path.join(data_dir, [f for f in testcases[k] if 'percussive' in f][0])
 
@@ -88,29 +87,72 @@ def main():
         )()
 
         # PEAQ metric
-        peaq.process(harm_ref, harm_test)
-        peaq.process(perc_ref, perc_test)
+        #peaq.process(harm_ref, harm_test)
+        #peaq.process(perc_ref, perc_test)
 
-        results[result_type][k]['peaq'] = {
+        # how to get the outputs?
+
+        results[k][result_type]['peaq'] = {
             'harmonic': 0.0,
             'percussive': 0.0,
         }
 
         # cdpam metric
         harm_ref = cdpam.load_audio(harmonic_orig)
-        harm_out = cdpam.load_audio(harmonic_sep)
-        harm_dist = loss_fn.forward(harm_ref, harm_out)
+        harm_test = cdpam.load_audio(harmonic_sep)
+        harm_dist = loss_fn.forward(harm_ref, harm_test, batch_size=32, no_grad=True, )
 
         perc_ref = cdpam.load_audio(percussive_orig)
-        perc_out = cdpam.load_audio(percussive_sep)
-        perc_dist = loss_fn.forward(perc_ref, perc_out)
+        perc_test = cdpam.load_audio(percussive_sep)
+        perc_dist = loss_fn.forward(perc_ref, perc_test, batch_size=32, no_grad=True, )
 
-        results[result_type][k]['cdpam'] {
+        results[k][result_type]['cdpam'] = {
             'harmonic': harm_dist,
             'percussive': perc_dist,
         }
 
         # use subprocess for visqol
+        # write tmp files for resampling
+        with tempfile.TemporaryDirectory() as tmpdir:
+            pref = os.path.join(tmpdir, "perc_ref.wav")
+            ptest = os.path.join(tmpdir, "perc_test.wav")
+
+            soundfile.write(
+                pref,
+                perc_ref,
+                FIXED_SAMPLE_RATE,
+            )
+            soundfile.write(
+                ptest,
+                perc_test,
+                FIXED_SAMPLE_RATE,
+            )
+
+            visqol_out_perc = subprocess.check_output(
+                'visqol --reference_file {0} --degraded_file {1}'.format(
+                    pref, ptest, shell=True)
+            )
+            print(visqol_out_perc)
+
+            href = os.path.join(tmpdir, "harm_ref.wav")
+            htest = os.path.join(tmpdir, "harm_test.wav")
+
+            soundfile.write(
+                href,
+                harm_ref,
+                FIXED_SAMPLE_RATE,
+            )
+            soundfile.write(
+                htest,
+                harm_test,
+                FIXED_SAMPLE_RATE,
+            )
+
+            visqol_out_harm = subprocess.check_output(
+                'visqol --reference_file {0} --degraded_file {1}'.format(href, htest, shell=True)
+            )
+            print(visqol_out_harm)
+
 
     print(results)
 
