@@ -1,0 +1,8 @@
+PEASS toolkit - software example
+http://bass-db.gforge.inria.fr/peass/
+
+This is a joint work by Valentin Emiya (INRIA, France), Emmanuel Vincent (INRIA, France), Niklas Harlander (University of Oldenburg, France), Volker Hohmann (University of Oldenburg, France).
+
+All audio files are modified versions of audio files from SiSEC 2008 (http://sisec2008.wiki.irisa.fr/).
+
+All audio files in this folder are made available under the terms of the Creative Commons Attribution-NonCommercial-ShareAlike 2.0 license (http://creativecommons.org/licenses/by-nc-sa/2.0/). The authors are Hendrik Kayser and Jorn Anemuller part of the original dataset; Glen Phillips, Mark Engelberg, Psycho Voyager, Nine Inch Nails and Ali Farka Toure for music source signals; Maximo Cobos, Zaher Elchami, Michael Mandel and Ron Weiss for the source estimates; Shoko Araki and Emmanuel Vincent for mixture signals; Valentin Emiya for the modifications of each file. Part of the original dataset was supported by the European Commission under IP DIRAC.

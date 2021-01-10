@@ -76,8 +76,15 @@ xp = istft(P, "Window", win, "OverlapLength", overlapLen,...
 
 [~,fname,~] = fileparts(p.Results.filename);
 
-xhOut = sprintf("%s/%s_%s_harm_sep.wav", p.Results.outDir, p.Results.outPrefix, fname);
-xpOut = sprintf("%s/%s_%s_perc_sep.wav", p.Results.outDir, p.Results.outPrefix, fname);
+xhOut = sprintf("%s/%s_%s_harm_sep.wav", p.Results.outDir,...
+  p.Results.outPrefix, fname);
+xpOut = sprintf("%s/%s_%s_perc_sep.wav", p.Results.outDir,...
+  p.Results.outPrefix, fname);
+
+if size(xh, 1) < size(x, 1)
+    xh = [xh; x(size(xh, 1)+1:size(x, 1))];
+    xp = [xp; x(size(xp, 1)+1:size(x, 1))];
+end
 
 audiowrite(xhOut, xh, fs);
 audiowrite(xpOut, xp, fs);
