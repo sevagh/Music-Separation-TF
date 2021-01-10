@@ -6,11 +6,14 @@ import os
 import numpy
 import subprocess
 from collections import defaultdict
-from vendor.peaq import PEAQ
 from essentia.standard import MonoLoader
 import soundfile
-import cdpam
 import tempfile
+import torch
+
+# disable GPU to avoid torch oom in cdpam
+os.environ["CUDA_VISIBLE_DEVICES"] = " "
+import cdpam
 
 # this needs to be fixed to 48000 for visqol
 FIXED_SAMPLE_RATE = 48000
@@ -51,9 +54,6 @@ def main():
                 if k in w:
                     separations[k].append(w)
 
-    peaq = PEAQ(Fs=FIXED_SAMPLE_RATE)
-
-    # try batch_size=1
     # as per https://github.com/pranaymanocha/PerceptualAudio/issues/18#issuecomment-757365731
     loss_fn = cdpam.CDPAM()
 
@@ -86,25 +86,16 @@ def main():
             filename=percussive_sep, sampleRate=FIXED_SAMPLE_RATE
         )()
 
-        # PEAQ metric
-        #peaq.process(harm_ref, harm_test)
-        #peaq.process(perc_ref, perc_test)
-
-        # how to get the outputs?
-
-        results[k][result_type]['peaq'] = {
-            'harmonic': 0.0,
-            'percussive': 0.0,
-        }
-
         # cdpam metric
         harm_ref = cdpam.load_audio(harmonic_orig)
         harm_test = cdpam.load_audio(harmonic_sep)
-        harm_dist = loss_fn.forward(harm_ref, harm_test, batch_size=32, no_grad=True, )
 
         perc_ref = cdpam.load_audio(percussive_orig)
         perc_test = cdpam.load_audio(percussive_sep)
-        perc_dist = loss_fn.forward(perc_ref, perc_test, batch_size=32, no_grad=True, )
+
+        with torch.no_grad():
+            harm_dist = loss_fn.forward(harm_ref, harm_test)
+            perc_dist = loss_fn.forward(perc_ref, perc_test)
 
         results[k][result_type]['cdpam'] = {
             'harmonic': harm_dist,
