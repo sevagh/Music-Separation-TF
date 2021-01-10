@@ -11,11 +11,9 @@ defaultPower = 2;
 defaultLHarm = 0.2; % 200 ms
 defaultLPerc = 500; % 500 Hz
 defaultOutDir = 'separated';
-defaultOutPrefix = 'tmp';
 
 addRequired(p, 'filename', @ischar);
 addOptional(p, 'outDir', defaultOutDir, @ischar);
-addOptional(p, 'outPrefix', defaultOutPrefix, @ischar);
 addParameter(p, 'mask', defaultMask, checkMask);
 addParameter(p, 'windowSize', defaultWindowSize, @isnumeric);
 addParameter(p, 'beta', defaultBeta, @isnumeric);
@@ -76,10 +74,8 @@ xp = istft(P, "Window", win, "OverlapLength", overlapLen,...
 
 [~,fname,~] = fileparts(p.Results.filename);
 
-xhOut = sprintf("%s/%s_%s_harm_sep.wav", p.Results.outDir,...
-  p.Results.outPrefix, fname);
-xpOut = sprintf("%s/%s_%s_perc_sep.wav", p.Results.outDir,...
-  p.Results.outPrefix, fname);
+xhOut = sprintf("%s/%s_harm_sep.wav", p.Results.outDir,fname);
+xpOut = sprintf("%s/%s_perc_sep.wav", p.Results.outDir,fname);
 
 if size(xh, 1) < size(x, 1)
     xh = [xh; x(size(xh, 1)+1:size(x, 1))];

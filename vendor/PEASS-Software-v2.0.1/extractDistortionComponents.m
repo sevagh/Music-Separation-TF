@@ -268,6 +268,8 @@ return
 
 %%%%%%%%%%%%%%%%%
 function aux_segmentAndDecompose(srcFiles,estFile,options)
+originalCutFiles = {};
+estimateCutFiles = {};
 try
     % RLB
     %[siz fs] = wavread(srcFiles{1},'size');
@@ -345,6 +347,7 @@ function aux_mergeWav(cutFilenames,estFile,Istart,options)
 %[siz0 fs] = wavread(estFile,'size');
 infos_est = audioinfo(estFile);
 siz0 = infos_est.TotalSamples;
+display(siz0)
 fs = infos_est.SampleRate;
 
 components = {'true','eArtif','eTarget','eInterf'};

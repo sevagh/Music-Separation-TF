@@ -54,6 +54,7 @@
 
 #include "adapt.h"
 #define _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
 #include <math.h>
 #include "mex.h"
 
