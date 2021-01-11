@@ -73,9 +73,11 @@ xp = istft(P, "Window", win, "OverlapLength", overlapLen,...
   "FFTLength", fftLen, "ConjugateSymmetric", true);
 
 [~,fname,~] = fileparts(p.Results.filename);
+splt = split(fname,"_");
+prefix = splt{1};
 
-xhOut = sprintf("%s/%s_harm_sep.wav", p.Results.outDir,fname);
-xpOut = sprintf("%s/%s_perc_sep.wav", p.Results.outDir,fname);
+xhOut = sprintf("%s/%s_harmonic.wav", p.Results.outDir,prefix);
+xpOut = sprintf("%s/%s_percussive.wav", p.Results.outDir,prefix);
 
 if size(xh, 1) < size(x, 1)
     xh = [xh; x(size(xh, 1)+1:size(x, 1))];
