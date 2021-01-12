@@ -1,19 +1,15 @@
 % include vendored PEASS code
 addpath(genpath('vendor/PEASS-Software-v2.0.1'));
 
-files = dir('data_chunked/*.wav');
+files = dir('data/*.wav');
 resultSize = floor(size(files, 1)/3);
-
-% results are stored indexed as follows
-% 1 = Overall Perceptual Score
-% 2 = Target-related Perceptual Score
-% 3 = Interference-related Perceptual Score
-% 4 = Artifact-related Perceptual Score
 
 resultsFH = zeros(resultSize, 4);
 resultsFP = zeros(resultSize, 4);
 resultsDH = zeros(resultSize, 4);
 resultsDP = zeros(resultSize, 4);
+resultsIDH = zeros(resultSize, 4);
+resultsIDP = zeros(resultSize, 4);
 
 options.destDir = '/tmp/';
 options.segmentationFactor = 1;
@@ -26,6 +22,7 @@ for file = files'
     if contains(fname, "mix")
         HPSS(fname, 'fitzgerald', 'mask', 'soft');
         HPSS(fname, 'driedger', 'mask', 'hard');
+        IHPSS(fname, 'iterative_driedger');
     
         % then evaluate it
         splt = split(file.name,"_");
@@ -39,22 +36,32 @@ for file = files'
             sprintf('%s/%s_percussive.wav', file.folder, prefix);...
             sprintf('%s/%s_harmonic.wav', file.folder, prefix)};
 
+        % 1 pass fitzgerald
         fHarmEstimateFile = sprintf('fitzgerald/%s_harmonic.wav', prefix);
-        dHarmEstimateFile = sprintf('driedger/%s_harmonic.wav', prefix);
         fPercEstimateFile = sprintf('fitzgerald/%s_percussive.wav', prefix);
+        
+        % 1 pass driedger
+        dHarmEstimateFile = sprintf('driedger/%s_harmonic.wav', prefix);
         dPercEstimateFile = sprintf('driedger/%s_percussive.wav', prefix);
+        
+         % 2 pass driedger
+        idHarmEstimateFile = sprintf('iterative_driedger/%s_harmonic.wav', prefix);
+        idPercEstimateFile = sprintf('iterative_driedger/%s_percussive.wav', prefix);
         
         resFH = PEASS_ObjectiveMeasure(harmOriginalFiles,...
             fHarmEstimateFile,options);
-    
-        resDH = PEASS_ObjectiveMeasure(harmOriginalFiles,...
-            dHarmEstimateFile,options);
-
         resFP = PEASS_ObjectiveMeasure(percOriginalFiles,...
             fPercEstimateFile,options);
-
+        
+        resDH = PEASS_ObjectiveMeasure(harmOriginalFiles,...
+            dHarmEstimateFile,options);
         resDP = PEASS_ObjectiveMeasure(percOriginalFiles,...
             dPercEstimateFile,options);
+        
+        resIDH = PEASS_ObjectiveMeasure(harmOriginalFiles,...
+            idHarmEstimateFile,options);
+        resIDP = PEASS_ObjectiveMeasure(percOriginalFiles,...
+            idPercEstimateFile,options);
         
         resultsFH(findex, 1) = resFH.OPS;
         resultsFH(findex, 2) = resFH.TPS;
@@ -76,22 +83,63 @@ for file = files'
         resultsDP(findex, 3) = resDP.IPS;
         resultsDP(findex, 4) = resDP.APS;
         
+        resultsIDH(findex, 1) = resIDH.OPS;
+        resultsIDH(findex, 2) = resIDH.TPS;
+        resultsIDH(findex, 3) = resIDH.IPS;
+        resultsIDH(findex, 4) = resIDH.APS;
+        
+        resultsIDP(findex, 1) = resIDP.OPS;
+        resultsIDP(findex, 2) = resIDP.TPS;
+        resultsIDP(findex, 3) = resIDP.IPS;
+        resultsIDP(findex, 4) = resIDP.APS;
+        
         findex = findex + 1;
     end
 end
 
+% results are stored indexed as follows
+% 1 = Overall Perceptual Score
+% 2 = Target-related Perceptual Score
+% 3 = Interference-related Perceptual Score
+% 4 = Artifact-related Perceptual Score
+
+% median scores
 fprintf('*************************\n');
 fprintf('****  FINAL RESULTS  ****\n');
 fprintf('*************************\n');
     
-fprintf('Fitzgerald (soft mask), harmonic\n');
-fprintf("%s\n", mat2str(resultsFH));
+fprintf('Fitzgerald (soft mask), harmonic\n')
+fprintf('\tOPS: %03f\n', median(resultsFH(:, 1)));
+fprintf('\tTPS: %03f\n', median(resultsFH(:, 2)));
+fprintf('\tIPS: %03f\n', median(resultsFH(:, 3)));
+fprintf('\tAPS: %03f\n', median(resultsFH(:, 4)));
 
-fprintf('Fitzgerald (soft mask), percussive\n');
-fprintf("%s\n", mat2str(resultsFP));
+fprintf('Fitzgerald (soft mask), percussive, median score\n');
+fprintf('\tOPS: %03f\n', median(resultsFP(:, 1)));
+fprintf('\tTPS: %03f\n', median(resultsFP(:, 2)));
+fprintf('\tIPS: %03f\n', median(resultsFP(:, 3)));
+fprintf('\tAPS: %03f\n', median(resultsFP(:, 4)));
 
-fprintf('Driedger (hard mask), harmonic\n');
-fprintf("%s\n", mat2str(resultsDH));
+fprintf('Driedger (hard mask), harmonic, median score\n');
+fprintf('\tOPS: %03f\n', median(resultsDH(:, 1)));
+fprintf('\tTPS: %03f\n', median(resultsDH(:, 2)));
+fprintf('\tIPS: %03f\n', median(resultsDH(:, 3)));
+fprintf('\tAPS: %03f\n', median(resultsDH(:, 4)));
 
-fprintf('Driedger (hard mask), percussive\n');
-fprintf("%s\n", mat2str(resultsDP));
+fprintf('Driedger (hard mask), percussive, median score\n');
+fprintf('\tOPS: %03f\n', median(resultsDP(:, 1)));
+fprintf('\tTPS: %03f\n', median(resultsDP(:, 2)));
+fprintf('\tIPS: %03f\n', median(resultsDP(:, 3)));
+fprintf('\tAPS: %03f\n', median(resultsDP(:, 4)));
+
+fprintf('Iterative Driedger (hard mask), harmonic, median score\n');
+fprintf('\tOPS: %03f\n', median(resultsIDH(:, 1)));
+fprintf('\tTPS: %03f\n', median(resultsIDH(:, 2)));
+fprintf('\tIPS: %03f\n', median(resultsIDH(:, 3)));
+fprintf('\tAPS: %03f\n', median(resultsIDH(:, 4)));
+
+fprintf('Iterative Driedger (hard mask), percussive, median score\n');
+fprintf('\tOPS: %03f\n', median(resultsIDP(:, 1)));
+fprintf('\tTPS: %03f\n', median(resultsIDP(:, 2)));
+fprintf('\tIPS: %03f\n', median(resultsIDP(:, 3)));
+fprintf('\tAPS: %03f\n', median(resultsIDP(:, 4)));

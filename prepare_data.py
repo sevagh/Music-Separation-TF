@@ -30,7 +30,13 @@ def parse_args():
         "--vocals", action="store_true", help="include vocals in the mix"
     )
     parser.add_argument(
-        "--limit", type=int, default=-1, help="limit to n tracks"
+        "--track-limit", type=int, default=-1, help="limit to n tracks"
+    )
+    parser.add_argument(
+        "--segment-limit", type=int, default=sys.maxsize, help="limit to n segments per track"
+    )
+    parser.add_argument(
+        "--segment-size", type=float, default=30.0, help="segment size in seconds"
     )
     return parser.parse_args()
 
@@ -75,29 +81,35 @@ def main():
                     else:
                         harmonic_mix = sum([l for i, l in enumerate(loaded_wavs) if i not in [drum_track_index, vocal_track_index]])
 
-                    seqstr = "%03d" % seq
-
-                    harm_path = os.path.join(data_dir, "{0}_harmonic.wav".format(seqstr))
-                    mix_path = os.path.join(data_dir, "{0}_mix.wav".format(seqstr))
-                    perc_path = os.path.join(data_dir, "{0}_percussive.wav".format(seqstr))
-
-                    soundfile.write(harm_path, harmonic_mix, args.sample_rate)
-
                     full_mix = harmonic_mix + loaded_wavs[drum_track_index]
 
-                    soundfile.write(mix_path, full_mix, args.sample_rate)
+                    total_segs = int(numpy.floor(float(args.sample_rate)/args.segment_size))
+                    seg_samples = int(numpy.floor(args.segment_size*args.sample_rate))
 
-                    # write the drum track
-                    soundfile.write(
-                        perc_path,
-                        loaded_wavs[drum_track_index],
-                        args.sample_rate,
-                    )
+                    for seg in range(min(total_segs-1, args.segment_limit)):
+                        seqstr = "%03d%03d" % (seq, seg)
+
+                        left = seg*seg_samples
+                        right = (seg+1)*seg_samples
+
+                        harm_path = os.path.join(data_dir, "{0}_harmonic.wav".format(seqstr))
+                        mix_path = os.path.join(data_dir, "{0}_mix.wav".format(seqstr))
+                        perc_path = os.path.join(data_dir, "{0}_percussive.wav".format(seqstr))
+
+                        soundfile.write(harm_path, harmonic_mix[left:right], args.sample_rate)
+                        soundfile.write(mix_path, full_mix[left:right], args.sample_rate)
+
+                        # write the drum track
+                        soundfile.write(
+                            perc_path,
+                            loaded_wavs[drum_track_index][left:right],
+                            args.sample_rate,
+                        )
 
                     seq += 1
 
-                    if args.limit > -1:
-                        if seq == args.limit:
+                    if args.track_limit > -1:
+                        if seq == args.track_limit:
                             return 0
 
     return 0
