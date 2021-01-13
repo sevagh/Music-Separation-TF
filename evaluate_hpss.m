@@ -10,6 +10,8 @@ resultsDH = zeros(resultSize, 4);
 resultsDP = zeros(resultSize, 4);
 resultsIDH = zeros(resultSize, 4);
 resultsIDP = zeros(resultSize, 4);
+resultsCQTH = zeros(resultSize, 4);
+resultsCQTP = zeros(resultSize, 4);
 
 options.destDir = '/tmp/';
 options.segmentationFactor = 1;
@@ -23,6 +25,7 @@ for file = files'
         HPSS(fname, 'fitzgerald', 'mask', 'soft');
         HPSS(fname, 'driedger', 'mask', 'hard');
         IHPSS(fname, 'iterative_driedger');
+        HPSS_CQT(fname, 'cqt');
     
         % then evaluate it
         splt = split(file.name,"_");
@@ -48,6 +51,10 @@ for file = files'
         idHarmEstimateFile = sprintf('iterative_driedger/%s_harmonic.wav', prefix);
         idPercEstimateFile = sprintf('iterative_driedger/%s_percussive.wav', prefix);
         
+        % cqt
+        cqtHarmEstimateFile = sprintf('cqt/%s_harmonic.wav', prefix);
+        cqtPercEstimateFile = sprintf('cqt/%s_percussive.wav', prefix);
+        
         resFH = PEASS_ObjectiveMeasure(harmOriginalFiles,...
             fHarmEstimateFile,options);
         resFP = PEASS_ObjectiveMeasure(percOriginalFiles,...
@@ -62,6 +69,11 @@ for file = files'
             idHarmEstimateFile,options);
         resIDP = PEASS_ObjectiveMeasure(percOriginalFiles,...
             idPercEstimateFile,options);
+        
+        resCQTH = PEASS_ObjectiveMeasure(harmOriginalFiles,...
+            cqtHarmEstimateFile,options);
+        resCQTP = PEASS_ObjectiveMeasure(percOriginalFiles,...
+            cqtPercEstimateFile,options);
         
         resultsFH(findex, 1) = resFH.OPS;
         resultsFH(findex, 2) = resFH.TPS;
@@ -92,6 +104,16 @@ for file = files'
         resultsIDP(findex, 2) = resIDP.TPS;
         resultsIDP(findex, 3) = resIDP.IPS;
         resultsIDP(findex, 4) = resIDP.APS;
+        
+        resultsCQTH(findex, 1) = resCQTH.OPS;
+        resultsCQTH(findex, 2) = resCQTH.TPS;
+        resultsCQTH(findex, 3) = resCQTH.IPS;
+        resultsCQTH(findex, 4) = resCQTH.APS;
+        
+        resultsCQTP(findex, 1) = resCQTP.OPS;
+        resultsCQTP(findex, 2) = resCQTP.TPS;
+        resultsCQTP(findex, 3) = resCQTP.IPS;
+        resultsCQTP(findex, 4) = resCQTP.APS;
         
         findex = findex + 1;
     end
@@ -143,3 +165,15 @@ fprintf('\tOPS: %03f\n', median(resultsIDP(:, 1)));
 fprintf('\tTPS: %03f\n', median(resultsIDP(:, 2)));
 fprintf('\tIPS: %03f\n', median(resultsIDP(:, 3)));
 fprintf('\tAPS: %03f\n', median(resultsIDP(:, 4)));
+
+fprintf('CQT, harmonic, median score\n');
+fprintf('\tOPS: %03f\n', median(resultsCQTH(:, 1)));
+fprintf('\tTPS: %03f\n', median(resultsCQTH(:, 2)));
+fprintf('\tIPS: %03f\n', median(resultsCQTH(:, 3)));
+fprintf('\tAPS: %03f\n', median(resultsCQTH(:, 4)));
+
+fprintf('CQT, percussive, median score\n');
+fprintf('\tOPS: %03f\n', median(resultsCQTP(:, 1)));
+fprintf('\tTPS: %03f\n', median(resultsCQTP(:, 2)));
+fprintf('\tIPS: %03f\n', median(resultsCQTP(:, 3)));
+fprintf('\tAPS: %03f\n', median(resultsCQTP(:, 4)));
