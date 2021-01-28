@@ -1,17 +1,17 @@
 % include vendored PEASS code
 addpath(genpath('vendor/PEASS-Software-v2.0.1'));
 
-files = dir('data/*.wav');
-resultSize = floor(size(files, 1)/3);
+files = dir('data-hpv/*.wav');
+resultSize = floor(size(files, 1)/4);
 
-resultsFH = zeros(resultSize, 4);
-resultsFP = zeros(resultSize, 4);
-resultsDH = zeros(resultSize, 4);
-resultsDP = zeros(resultSize, 4);
-resultsIDH = zeros(resultSize, 4);
-resultsIDP = zeros(resultSize, 4);
-resultsCQTH = zeros(resultSize, 4);
-resultsCQTP = zeros(resultSize, 4);
+resultsMFH = zeros(resultSize, 4);
+resultsMF_WSTFTH = zeros(resultSize, 4);
+
+resultsMFP = zeros(resultSize, 4);
+resultsMF_WSTFTP = zeros(resultSize, 4);
+
+resultsMFV = zeros(resultSize, 4);
+resultsMF_WSTFTV = zeros(resultSize, 4);
 
 options.destDir = '/tmp/';
 options.segmentationFactor = 1;
@@ -22,10 +22,9 @@ for file = files'
     fname = sprintf('%s/%s', file.folder, file.name);
     
     if contains(fname, "mix")
-        HPSS(fname, 'fitzgerald', 'mask', 'soft');
-        HPSS(fname, 'driedger', 'mask', 'hard');
-        HPSS_Iterative_Driedger(fname, 'iterative_driedger');
-        HPSS_CQT(fname, 'cqt');
+        display(fname)
+        HPVSS_Multipass_Fitzgerald(fname, 'results/mh');
+        HPVSS_Multipass_Fitzgerald(fname, 'results/mh-wstft');
     
         % then evaluate it
         splt = split(file.name,"_");
@@ -33,87 +32,71 @@ for file = files'
         
         harmOriginalFiles = {...
             sprintf('%s/%s_harmonic.wav', file.folder, prefix);...
-            sprintf('%s/%s_percussive.wav', file.folder, prefix)};
-
+            sprintf('%s/%s_percussive.wav', file.folder, prefix);...
+            sprintf('%s/%s_vocal.wav', file.folder, prefix)};
+        
         percOriginalFiles = {...
+            sprintf('%s/%s_percussive.wav', file.folder, prefix);...
+            sprintf('%s/%s_harmonic.wav', file.folder, prefix);...
+            sprintf('%s/%s_vocal.wav', file.folder, prefix)};
+
+        vocalOriginalFiles = {...
+            sprintf('%s/%s_vocal.wav', file.folder, prefix);...
             sprintf('%s/%s_percussive.wav', file.folder, prefix);...
             sprintf('%s/%s_harmonic.wav', file.folder, prefix)};
 
-        % 1 pass fitzgerald
-        fHarmEstimateFile = sprintf('fitzgerald/%s_harmonic.wav', prefix);
-        fPercEstimateFile = sprintf('fitzgerald/%s_percussive.wav', prefix);
+        % 2 pass fitzgerald + variant
+        mfHarmEstimateFile = sprintf('results/mf/%s_harmonic.wav', prefix);
+        mfPercEstimateFile = sprintf('results/mf/%s_percussive.wav', prefix);
+        mfVocalEstimateFile = sprintf('results/mf/%s_vocal.wav', prefix);
         
-        % 1 pass driedger
-        dHarmEstimateFile = sprintf('driedger/%s_harmonic.wav', prefix);
-        dPercEstimateFile = sprintf('driedger/%s_percussive.wav', prefix);
+        mf_wstftHarmEstimateFile = sprintf('results/mf-wstft/%s_harmonic.wav', prefix);
+        mf_wstftPercEstimateFile = sprintf('results/mf-wstft/%s_percussive.wav', prefix);
+        mf_wstftVocalEstimateFile = sprintf('results/mf-wsftf/%s_vocal.wav', prefix);
         
-         % 2 pass driedger
-        idHarmEstimateFile = sprintf('iterative_driedger/%s_harmonic.wav', prefix);
-        idPercEstimateFile = sprintf('iterative_driedger/%s_percussive.wav', prefix);
+        resMFH = PEASS_ObjectiveMeasure(harmOriginalFiles,...
+            mfHarmEstimateFile, options);
+        resMFP = PEASS_ObjectiveMeasure(percOriginalFiles,...
+            mfPercEstimateFile,options);
+        resMFV = PEASS_ObjectiveMeasure(vocalOriginalFiles,...
+            mfVocalEstimateFile, options);
         
-        % cqt
-        cqtHarmEstimateFile = sprintf('cqt/%s_harmonic.wav', prefix);
-        cqtPercEstimateFile = sprintf('cqt/%s_percussive.wav', prefix);
+        resMF_WSTFTH = PEASS_ObjectiveMeasure(harmOriginalFiles,...
+            mf_wstftHarmEstimateFile, options);
+        resMF_WSTFTP = PEASS_ObjectiveMeasure(percOriginalFiles,...
+            mf_wstftPercEstimateFile,options);
+        resMF_WSTFTV = PEASS_ObjectiveMeasure(vocalOriginalFiles,...
+            mf_wstftVocalEstimateFile, options);
         
-        resFH = PEASS_ObjectiveMeasure(harmOriginalFiles,...
-            fHarmEstimateFile,options);
-        resFP = PEASS_ObjectiveMeasure(percOriginalFiles,...
-            fPercEstimateFile,options);
+        resultsMFH(findex, 1) = resMFH.OPS;
+        resultsMFH(findex, 2) = resMFH.TPS;
+        resultsMFH(findex, 3) = resMFH.IPS;
+        resultsMFH(findex, 4) = resMFH.APS;
         
-        resDH = PEASS_ObjectiveMeasure(harmOriginalFiles,...
-            dHarmEstimateFile,options);
-        resDP = PEASS_ObjectiveMeasure(percOriginalFiles,...
-            dPercEstimateFile,options);
+        resultsMFP(findex, 1) = resMFP.OPS;
+        resultsMFP(findex, 2) = resMFP.TPS;
+        resultsMFP(findex, 3) = resMFP.IPS;
+        resultsMFP(findex, 4) = resMFP.APS;
         
-        resIDH = PEASS_ObjectiveMeasure(harmOriginalFiles,...
-            idHarmEstimateFile,options);
-        resIDP = PEASS_ObjectiveMeasure(percOriginalFiles,...
-            idPercEstimateFile,options);
+        resultsMFV(findex, 1) = resMFV.OPS;
+        resultsMFV(findex, 2) = resMFV.TPS;
+        resultsMFV(findex, 3) = resMFV.IPS;
+        resultsMFV(findex, 4) = resMFV.APS;
         
-        resCQTH = PEASS_ObjectiveMeasure(harmOriginalFiles,...
-            cqtHarmEstimateFile,options);
-        resCQTP = PEASS_ObjectiveMeasure(percOriginalFiles,...
-            cqtPercEstimateFile,options);
+        resultsMF_WSTFTH(findex, 1) = resMF_WSTFTH.OPS;
+        resultsMF_WSTFTH(findex, 2) = resMF_WSTFTH.TPS;
+        resultsMF_WSTFTH(findex, 3) = resMF_WSTFTH.IPS;
+        resultsMF_WSTFTH(findex, 4) = resMF_WSTFTH.APS;
         
-        resultsFH(findex, 1) = resFH.OPS;
-        resultsFH(findex, 2) = resFH.TPS;
-        resultsFH(findex, 3) = resFH.IPS;
-        resultsFH(findex, 4) = resFH.APS;
+        resultsMF_WSTFTP(findex, 1) = resMF_WSTFTP.OPS;
+        resultsMF_WSTFTP(findex, 2) = resMF_WSTFTP.TPS;
+        resultsMF_WSTFTP(findex, 3) = resMF_WSTFTP.IPS;
+        resultsMF_WSTFTP(findex, 4) = resMF_WSTFTP.APS;
         
-        resultsFP(findex, 1) = resFP.OPS;
-        resultsFP(findex, 2) = resFP.TPS;
-        resultsFP(findex, 3) = resFP.IPS;
-        resultsFP(findex, 4) = resFP.APS;
-        
-        resultsDH(findex, 1) = resDH.OPS;
-        resultsDH(findex, 2) = resDH.TPS;
-        resultsDH(findex, 3) = resDH.IPS;
-        resultsDH(findex, 4) = resDH.APS;
-        
-        resultsDP(findex, 1) = resDP.OPS;
-        resultsDP(findex, 2) = resDP.TPS;
-        resultsDP(findex, 3) = resDP.IPS;
-        resultsDP(findex, 4) = resDP.APS;
-        
-        resultsIDH(findex, 1) = resIDH.OPS;
-        resultsIDH(findex, 2) = resIDH.TPS;
-        resultsIDH(findex, 3) = resIDH.IPS;
-        resultsIDH(findex, 4) = resIDH.APS;
-        
-        resultsIDP(findex, 1) = resIDP.OPS;
-        resultsIDP(findex, 2) = resIDP.TPS;
-        resultsIDP(findex, 3) = resIDP.IPS;
-        resultsIDP(findex, 4) = resIDP.APS;
-        
-        resultsCQTH(findex, 1) = resCQTH.OPS;
-        resultsCQTH(findex, 2) = resCQTH.TPS;
-        resultsCQTH(findex, 3) = resCQTH.IPS;
-        resultsCQTH(findex, 4) = resCQTH.APS;
-        
-        resultsCQTP(findex, 1) = resCQTP.OPS;
-        resultsCQTP(findex, 2) = resCQTP.TPS;
-        resultsCQTP(findex, 3) = resCQTP.IPS;
-        resultsCQTP(findex, 4) = resCQTP.APS;
+        resultsMF_WSTFTV(findex, 1) = resMF_WSTFTV.OPS;
+        resultsMF_WSTFTV(findex, 2) = resMF_WSTFTV.TPS;
+        resultsMF_WSTFTV(findex, 3) = resMF_WSTFTV.IPS;
+        resultsMF_WSTFTV(findex, 4) = resMF_WSTFTV.APS;
         
         findex = findex + 1;
     end
@@ -130,50 +113,38 @@ fprintf('*************************\n');
 fprintf('****  FINAL RESULTS  ****\n');
 fprintf('*************************\n');
     
-fprintf('Fitzgerald (soft mask), harmonic\n')
-fprintf('\tOPS: %03f\n', median(resultsFH(:, 1)));
-fprintf('\tTPS: %03f\n', median(resultsFH(:, 2)));
-fprintf('\tIPS: %03f\n', median(resultsFH(:, 3)));
-fprintf('\tAPS: %03f\n', median(resultsFH(:, 4)));
+fprintf('Multipass Fitzgerald, harmonic median score\n')
+fprintf('\tOPS: %03f\n', median(resultsMFH(:, 1)));
+fprintf('\tTPS: %03f\n', median(resultsMFH(:, 2)));
+fprintf('\tIPS: %03f\n', median(resultsMFH(:, 3)));
+fprintf('\tAPS: %03f\n', median(resultsMFH(:, 4)));
 
-fprintf('Fitzgerald (soft mask), percussive, median score\n');
-fprintf('\tOPS: %03f\n', median(resultsFP(:, 1)));
-fprintf('\tTPS: %03f\n', median(resultsFP(:, 2)));
-fprintf('\tIPS: %03f\n', median(resultsFP(:, 3)));
-fprintf('\tAPS: %03f\n', median(resultsFP(:, 4)));
+fprintf('Multipass Fitzgerald, percussive median score\n');
+fprintf('\tOPS: %03f\n', median(resultsMFP(:, 1)));
+fprintf('\tTPS: %03f\n', median(resultsMFP(:, 2)));
+fprintf('\tIPS: %03f\n', median(resultsMFP(:, 3)));
+fprintf('\tAPS: %03f\n', median(resultsMFP(:, 4)));
 
-fprintf('Driedger (hard mask), harmonic, median score\n');
-fprintf('\tOPS: %03f\n', median(resultsDH(:, 1)));
-fprintf('\tTPS: %03f\n', median(resultsDH(:, 2)));
-fprintf('\tIPS: %03f\n', median(resultsDH(:, 3)));
-fprintf('\tAPS: %03f\n', median(resultsDH(:, 4)));
+fprintf('Multipass Fitzgerald, vocal median score\n');
+fprintf('\tOPS: %03f\n', median(resultsMFV(:, 1)));
+fprintf('\tTPS: %03f\n', median(resultsMFV(:, 2)));
+fprintf('\tIPS: %03f\n', median(resultsMFV(:, 3)));
+fprintf('\tAPS: %03f\n', median(resultsMFV(:, 4)));
 
-fprintf('Driedger (hard mask), percussive, median score\n');
-fprintf('\tOPS: %03f\n', median(resultsDP(:, 1)));
-fprintf('\tTPS: %03f\n', median(resultsDP(:, 2)));
-fprintf('\tIPS: %03f\n', median(resultsDP(:, 3)));
-fprintf('\tAPS: %03f\n', median(resultsDP(:, 4)));
+fprintf('Multipass Fitzgerald + WSTFT, harmonic median score\n')
+fprintf('\tOPS: %03f\n', median(resultsMF_WSTFTH(:, 1)));
+fprintf('\tTPS: %03f\n', median(resultsMF_WSTFTH(:, 2)));
+fprintf('\tIPS: %03f\n', median(resultsMF_WSTFTH(:, 3)));
+fprintf('\tAPS: %03f\n', median(resultsMF_WSTFTH(:, 4)));
 
-fprintf('Iterative Driedger (hard mask), harmonic, median score\n');
-fprintf('\tOPS: %03f\n', median(resultsIDH(:, 1)));
-fprintf('\tTPS: %03f\n', median(resultsIDH(:, 2)));
-fprintf('\tIPS: %03f\n', median(resultsIDH(:, 3)));
-fprintf('\tAPS: %03f\n', median(resultsIDH(:, 4)));
+fprintf('Multipass Fitzgerald + WSTFT, percussive median score\n');
+fprintf('\tOPS: %03f\n', median(resultsMF_WSTFTP(:, 1)));
+fprintf('\tTPS: %03f\n', median(resultsMF_WSTFTP(:, 2)));
+fprintf('\tIPS: %03f\n', median(resultsMF_WSTFTP(:, 3)));
+fprintf('\tAPS: %03f\n', median(resultsMF_WSTFTP(:, 4)));
 
-fprintf('Iterative Driedger (hard mask), percussive, median score\n');
-fprintf('\tOPS: %03f\n', median(resultsIDP(:, 1)));
-fprintf('\tTPS: %03f\n', median(resultsIDP(:, 2)));
-fprintf('\tIPS: %03f\n', median(resultsIDP(:, 3)));
-fprintf('\tAPS: %03f\n', median(resultsIDP(:, 4)));
-
-fprintf('CQT, harmonic, median score\n');
-fprintf('\tOPS: %03f\n', median(resultsCQTH(:, 1)));
-fprintf('\tTPS: %03f\n', median(resultsCQTH(:, 2)));
-fprintf('\tIPS: %03f\n', median(resultsCQTH(:, 3)));
-fprintf('\tAPS: %03f\n', median(resultsCQTH(:, 4)));
-
-fprintf('CQT, percussive, median score\n');
-fprintf('\tOPS: %03f\n', median(resultsCQTP(:, 1)));
-fprintf('\tTPS: %03f\n', median(resultsCQTP(:, 2)));
-fprintf('\tIPS: %03f\n', median(resultsCQTP(:, 3)));
-fprintf('\tAPS: %03f\n', median(resultsCQTP(:, 4)));
+fprintf('Multipass Fitzgerald + WSTFT, vocal median score\n');
+fprintf('\tOPS: %03f\n', median(resultsMF_WSTFTV(:, 1)));
+fprintf('\tTPS: %03f\n', median(resultsMF_WSTFTV(:, 2)));
+fprintf('\tIPS: %03f\n', median(resultsMF_WSTFTV(:, 3)));
+fprintf('\tAPS: %03f\n', median(resultsMF_WSTFTV(:, 4)));
