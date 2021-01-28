@@ -1,4 +1,4 @@
-function [xh1, p] = IHPSS(filename, varargin)
+function [xh1, p] = HPSS_Iterative_Driedger(filename, varargin)
 p = inputParser;
 
 defaultWindowSizeH = 4096;
