@@ -1,29 +1,31 @@
 function [xh1, p] = HPSS_Iterative_Driedger(filename, varargin)
 p = inputParser;
 
-defaultWindowSizeH = 4096;
-defaultWindowSizeP = 256;
-defaultBetaH = 2;
-defaultBetaP = 2;
-defaultLHarm = 0.2; % 200 ms
-defaultLPerc = 500; % 500 Hz
+defaultLowResSTFT = 'linear';
+validLowResSTFT = {'linear', 'cqt', 'warped'};
+checkLowResSTFT = @(x) any(validatestring(x, validLowResSTFT));
+
+WindowSizeH = 4096;
+WindowSizeP = 256;
+BetaH = 2;
+BetaP = 2;
+LHarmSTFT = 0.2; % 200 ms
+LPercSTFT = 500; % 500 Hz
+LHarmCQT = 17;
+LPercCQT = 7;
+
 defaultOutDir = 'separated';
 
 addRequired(p, 'filename', @ischar);
 addOptional(p, 'outDir', defaultOutDir, @ischar);
-addParameter(p, 'windowSizeH', defaultWindowSizeH, @isnumeric);
-addParameter(p, 'windowSizeP', defaultWindowSizeP, @isnumeric);
-addParameter(p, 'betaH', defaultBetaH, @isnumeric);
-addParameter(p, 'betaP', defaultBetaP, @isnumeric);
-addParameter(p, 'harmFilter', defaultLHarm, @isnumeric);
-addParameter(p, 'percFilter', defaultLPerc, @isnumeric);
+addParameter(p, 'LowResSTFT', defaultLowResSTFT, checkLowResSTFT);
 
 parse(p, filename, varargin{:});
 
 [x, fs] = audioread(p.Results.filename);
 
 % STFT parameters
-winLen1 = p.Results.windowSizeH;
+winLen1 = WindowSizeH;
 fftLen1 = winLen1 * 2;
 overlapLen1 = winLen1 / 2;
 win1 = sqrt(hann(winLen1, "periodic"));
@@ -37,15 +39,15 @@ Shalf1 = S1(halfIdx1, :);
 Smag1 = abs(Shalf1); % use the magnitude STFT for creating masks
 
 % median filters
-lHarm1 = p.Results.harmFilter / ((fftLen1 - overlapLen1) / fs); % 200ms in samples
-lPerc1 = p.Results.percFilter / (fs / fftLen1); % 500Hz in samples
+lHarm1 = LHarmSTFT / ((fftLen1 - overlapLen1) / fs); % 200ms in samples
+lPerc1 = LPercSTFT / (fs / fftLen1); % 500Hz in samples
 
 H1 = movmedian(Smag1, lHarm1, 2);
 P1 = movmedian(Smag1, lPerc1, 1);
 
 % binary masks with separation factor, Driedger et al. 2014
-Mh1 = (H1 ./ (P1 + eps)) > p.Results.betaH;
-Mp1 = (P1 ./ (H1 + eps)) >= p.Results.betaH;
+Mh1 = (H1 ./ (P1 + eps)) > BetaH;
+Mp1 = (P1 ./ (H1 + eps)) >= BetaH;
 
 % recover the complex STFT H and P from S using the masks
 H1 = Mh1 .* Shalf1;
@@ -71,39 +73,59 @@ xr1 = istft(R1, "Window", win1, "OverlapLength", overlapLen1,...
 
 xim2 = xp1 + xr1;
 
-% STFT parameters
-winLen2 = p.Results.windowSizeP;
-fftLen2 = winLen2 * 2;
-overlapLen2 = winLen2 / 2;
-win2 = sqrt(hann(winLen2, "periodic"));
+if strcmp(p.Results.LowResSTFT, "linear")
+    % STFT parameters
+    winLen2 = WindowSizeP;
+    fftLen2 = winLen2 * 2;
+    overlapLen2 = winLen2 / 2;
+    win2 = sqrt(hann(winLen2, "periodic"));
 
-% STFT of original signal
-S2 = stft(xim2, "Window", win2, "OverlapLength", overlapLen2, ...
-  "FFTLength", fftLen2, "Centered", true);
+    % STFT of original signal
+    S2 = stft(xim2, "Window", win2, "OverlapLength", overlapLen2, ...
+      "FFTLength", fftLen2, "Centered", true);
 
-halfIdx2 = 1:ceil(size(S2, 1) / 2); % only half the STFT matters
-Shalf2 = S2(halfIdx2, :);
-Smag2 = abs(Shalf2); % use the magnitude STFT for creating masks
+    halfIdx2 = 1:ceil(size(S2, 1) / 2); % only half the STFT matters
+    Shalf2 = S2(halfIdx2, :);
+    Smag2 = abs(Shalf2); % use the magnitude STFT for creating masks
 
-% median filters
-lHarm2 = p.Results.harmFilter / ((fftLen2 - overlapLen2) / fs); % 200ms in samples
-lPerc2 = p.Results.percFilter / (fs / fftLen2); % 500Hz in samples
+    % median filters
+    lHarm2 = LHarmSTFT / ((fftLen2 - overlapLen2) / fs); % 200ms in samples
+    lPerc2 = LPercSTFT / (fs / fftLen2); % 500Hz in samples
 
-H2 = movmedian(Smag2, lHarm2, 2);
-P2 = movmedian(Smag2, lPerc2, 1);
+    H2 = movmedian(Smag2, lHarm2, 2);
+    P2 = movmedian(Smag2, lPerc2, 1);
 
-% binary masks with separation factor, Driedger et al. 2014
-Mp2 = (P2 ./ (H2 + eps)) >= p.Results.betaP;
+    % binary masks with separation factor, Driedger et al. 2014
+    Mp2 = (P2 ./ (H2 + eps)) >= BetaP;
 
-% recover the complex STFT H and P from S using the masks
-P2 = Mp2 .* Shalf2;
+    % recover the complex STFT H and P from S using the masks
+    P2 = Mp2 .* Shalf2;
 
-% we previously dropped the redundant second half of the fft
-P2 = cat(1, P2, flipud(conj(P2)));
+    % we previously dropped the redundant second half of the fft
+    P2 = cat(1, P2, flipud(conj(P2)));
 
-% finally istft to convert back to audio
-xp2 = istft(P2, "Window", win2, "OverlapLength", overlapLen2,...
-  "FFTLength", fftLen2, "ConjugateSymmetric", true);
+    % finally istft to convert back to audio
+    xp2 = istft(P2, "Window", win2, "OverlapLength", overlapLen2,...
+      "FFTLength", fftLen2, "ConjugateSymmetric", true);
+elseif strcmp(p.Results.LowResSTFT, "cqt")
+    % CQT of original signal
+    [cfs,~,g,fshifts] = cqt(xim2, 'SamplingFrequency', fs, 'BinsPerOctave', 24);
+    
+    cmag = abs(cfs); % use the magnitude CQT for creating masks
+
+    H2 = movmedian(cmag, LHarmCQT, 2);
+    P2 = movmedian(cmag, LPercCQT, 1);
+    
+    Mp2 = (P2 ./ (H2 + eps)) >= BetaP;
+    
+    % recover the complex STFT H and P from S using the masks
+    %H = Mh .* cfs;
+    P2 = Mp2 .* cfs;
+
+    % finally istft to convert back to audio
+    %xh = icqt(H, g, fshifts);
+    xp2 = icqt(P2, g, fshifts);
+end
 
 [~,fname,~] = fileparts(p.Results.filename);
 splt = split(fname,"_");
