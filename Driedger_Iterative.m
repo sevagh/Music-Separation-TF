@@ -113,7 +113,7 @@ elseif strcmp(p.Results.LowResSTFT, "cqt")
     H2 = movmedian(cmag, LHarmCQT, 2);
     P2 = movmedian(cmag, LPercCQT, 1);
     
-    Mp2 = (P2 ./ (H2 + eps)) >= BetaP;
+    Mp2 = (P2 ./ (H2 + eps)) >= Beta;
     
     % recover the complex STFT H and P from S using the masks
     %H = Mh .* cfs;
@@ -125,7 +125,7 @@ elseif strcmp(p.Results.LowResSTFT, "cqt")
 end
 
 [~,fname,~] = fileparts(p.Results.filename);
-splt = split(fname,"_");
+splt = split(fname, "_");
 prefix = splt{1};
 
 xhOut = sprintf("%s/%s_harmonic.wav", p.Results.outDir, prefix);

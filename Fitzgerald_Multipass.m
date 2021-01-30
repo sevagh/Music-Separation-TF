@@ -139,7 +139,7 @@ elseif strcmp(p.Results.LowResSTFT, "cqt")
 end
   
 [~,fname,~] = fileparts(p.Results.filename);
-splt = split(fname,"_");
+splt = split(fname, "_");
 prefix = splt{1};
 
 xhOut = sprintf("%s/%s_harmonic.wav", p.Results.outDir, prefix);
