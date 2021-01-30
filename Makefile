@@ -1,6 +1,6 @@
 clean_data:
-	-rm data-hp/*.wav
-	-rm data-hpv/*.wav
+	-rm data-hpss/*.wav
+	-rm data-vocal/*.wav
 
 clean_results:
 	-rm results/id/*.wav

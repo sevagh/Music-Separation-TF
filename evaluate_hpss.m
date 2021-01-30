@@ -1,7 +1,7 @@
 % include vendored PEASS code
 addpath(genpath('vendor/PEASS-Software-v2.0.1'));
 
-files = dir('data-hp/*.wav');
+files = dir('data-hpss/*.wav');
 resultSize = floor(size(files, 1)/3);
 
 resultsIDH = zeros(resultSize, 4);
@@ -20,9 +20,9 @@ for file = files'
     
     if contains(fname, "mix")
         display(fname)
-        HPSS_Iterative_Driedger(fname, 'results/id', "LowResSTFT","linear");
-        HPSS_Iterative_Driedger(fname, 'results/id-cqt', "LowResSTFT","cqt");
-        HPSS_Iterative_Driedger(fname, 'results/id-wstft', "LowResSTFT","linear");
+        Driedger_Iterative(fname, 'results/id', "LowResSTFT","linear");
+        Driedger_Iterative(fname, 'results/id-cqt', "LowResSTFT","cqt");
+        Driedger_Iterative(fname, 'results/id-wstft', "LowResSTFT","linear");
     
         % then evaluate it
         splt = split(file.name,"_");

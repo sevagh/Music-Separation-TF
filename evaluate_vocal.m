@@ -1,7 +1,7 @@
 % include vendored PEASS code
 addpath(genpath('vendor/PEASS-Software-v2.0.1'));
 
-files = dir('data-hpv/*.wav');
+files = dir('data-vocal/*.wav');
 resultSize = floor(size(files, 1)/4);
 
 resultsMFH = zeros(resultSize, 4);
@@ -25,9 +25,9 @@ for file = files'
     
     if contains(fname, "mix")
         display(fname)
-        HPVSS_Multipass_Fitzgerald(fname, 'results/mf', "LowResSTFT", "linear");
-        HPVSS_Multipass_Fitzgerald(fname, 'results/mf-cqt', "LowResSTFT", "cqt");
-        HPVSS_Multipass_Fitzgerald(fname, 'results/mf-wstft', "LowResSTFT", "linear");
+        Fitzgerald_Multipass(fname, 'results/mf', "LowResSTFT", "linear");
+        Fitzgerald_Multipass(fname, 'results/mf-cqt', "LowResSTFT", "cqt");
+        Fitzgerald_Multipass(fname, 'results/mf-wstft', "LowResSTFT", "linear");
     
         % then evaluate it
         splt = split(file.name,"_");
@@ -57,7 +57,7 @@ for file = files'
         mf_cqtVocalEstimateFile = sprintf('results/mf-cqt/%s_vocal.wav', prefix);
         
         mf_wstftPercEstimateFile = sprintf('results/mf-wstft/%s_percussive.wav', prefix);
-        mf_wstftVocalEstimateFile = sprintf('results/mf-wsftf/%s_vocal.wav', prefix);
+        mf_wstftVocalEstimateFile = sprintf('results/mf-wstft/%s_vocal.wav', prefix);
         
         resMFH = PEASS_ObjectiveMeasure(harmOriginalFiles,...
             mfHarmEstimateFile, options);
@@ -91,7 +91,7 @@ for file = files'
         resultsMFV(findex, 3) = resMFV.IPS;
         resultsMFV(findex, 4) = resMFV.APS;
         
-        resultsMF_CQTP(findex, 1) = resMF_CQTTP.OPS;
+        resultsMF_CQTP(findex, 1) = resMF_CQTP.OPS;
         resultsMF_CQTP(findex, 2) = resMF_CQTP.TPS;
         resultsMF_CQTP(findex, 3) = resMF_CQTP.IPS;
         resultsMF_CQTP(findex, 4) = resMF_CQTP.APS;

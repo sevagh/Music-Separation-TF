@@ -8,8 +8,8 @@ import subprocess
 from essentia.standard import MonoLoader
 import soundfile
 
-vocal_dir = 'data-hpv'
-novocal_dir = 'data-hp'
+vocal_dir = 'data-vocal'
+novocal_dir = 'data-hpss'
 
 def parse_args():
     parser = argparse.ArgumentParser(
