@@ -5,12 +5,14 @@ files = dir('data-hpv/*.wav');
 resultSize = floor(size(files, 1)/4);
 
 resultsMFH = zeros(resultSize, 4);
-resultsMF_WSTFTH = zeros(resultSize, 4);
 
 resultsMFP = zeros(resultSize, 4);
-resultsMF_WSTFTP = zeros(resultSize, 4);
-
 resultsMFV = zeros(resultSize, 4);
+
+resultsMF_CQTP = zeros(resultSize, 4);
+resultsMF_CQTV = zeros(resultSize, 4);
+
+resultsMF_WSTFTP = zeros(resultSize, 4);
 resultsMF_WSTFTV = zeros(resultSize, 4);
 
 options.destDir = '/tmp/';
@@ -23,8 +25,9 @@ for file = files'
     
     if contains(fname, "mix")
         display(fname)
-        HPVSS_Multipass_Fitzgerald(fname, 'results/mh');
-        HPVSS_Multipass_Fitzgerald(fname, 'results/mh-wstft');
+        HPVSS_Multipass_Fitzgerald(fname, 'results/mf', "LowResSTFT", "linear");
+        HPVSS_Multipass_Fitzgerald(fname, 'results/mf-cqt', "LowResSTFT", "cqt");
+        HPVSS_Multipass_Fitzgerald(fname, 'results/mf-wstft', "LowResSTFT", "linear");
     
         % then evaluate it
         splt = split(file.name,"_");
@@ -50,7 +53,9 @@ for file = files'
         mfPercEstimateFile = sprintf('results/mf/%s_percussive.wav', prefix);
         mfVocalEstimateFile = sprintf('results/mf/%s_vocal.wav', prefix);
         
-        mf_wstftHarmEstimateFile = sprintf('results/mf-wstft/%s_harmonic.wav', prefix);
+        mf_cqtPercEstimateFile = sprintf('results/mf-cqt/%s_percussive.wav', prefix);
+        mf_cqtVocalEstimateFile = sprintf('results/mf-cqt/%s_vocal.wav', prefix);
+        
         mf_wstftPercEstimateFile = sprintf('results/mf-wstft/%s_percussive.wav', prefix);
         mf_wstftVocalEstimateFile = sprintf('results/mf-wsftf/%s_vocal.wav', prefix);
         
@@ -61,8 +66,11 @@ for file = files'
         resMFV = PEASS_ObjectiveMeasure(vocalOriginalFiles,...
             mfVocalEstimateFile, options);
         
-        resMF_WSTFTH = PEASS_ObjectiveMeasure(harmOriginalFiles,...
-            mf_wstftHarmEstimateFile, options);
+        resMF_CQTP = PEASS_ObjectiveMeasure(percOriginalFiles,...
+            mf_cqtPercEstimateFile,options);
+        resMF_CQTV = PEASS_ObjectiveMeasure(vocalOriginalFiles,...
+            mf_cqtVocalEstimateFile, options);
+        
         resMF_WSTFTP = PEASS_ObjectiveMeasure(percOriginalFiles,...
             mf_wstftPercEstimateFile,options);
         resMF_WSTFTV = PEASS_ObjectiveMeasure(vocalOriginalFiles,...
@@ -83,10 +91,15 @@ for file = files'
         resultsMFV(findex, 3) = resMFV.IPS;
         resultsMFV(findex, 4) = resMFV.APS;
         
-        resultsMF_WSTFTH(findex, 1) = resMF_WSTFTH.OPS;
-        resultsMF_WSTFTH(findex, 2) = resMF_WSTFTH.TPS;
-        resultsMF_WSTFTH(findex, 3) = resMF_WSTFTH.IPS;
-        resultsMF_WSTFTH(findex, 4) = resMF_WSTFTH.APS;
+        resultsMF_CQTP(findex, 1) = resMF_CQTTP.OPS;
+        resultsMF_CQTP(findex, 2) = resMF_CQTP.TPS;
+        resultsMF_CQTP(findex, 3) = resMF_CQTP.IPS;
+        resultsMF_CQTP(findex, 4) = resMF_CQTP.APS;
+        
+        resultsMF_CQTV(findex, 1) = resMF_CQTV.OPS;
+        resultsMF_CQTV(findex, 2) = resMF_CQTV.TPS;
+        resultsMF_CQTV(findex, 3) = resMF_CQTV.IPS;
+        resultsMF_CQTV(findex, 4) = resMF_CQTV.APS;
         
         resultsMF_WSTFTP(findex, 1) = resMF_WSTFTP.OPS;
         resultsMF_WSTFTP(findex, 2) = resMF_WSTFTP.TPS;
@@ -125,23 +138,29 @@ fprintf('\tTPS: %03f\n', median(resultsMFP(:, 2)));
 fprintf('\tIPS: %03f\n', median(resultsMFP(:, 3)));
 fprintf('\tAPS: %03f\n', median(resultsMFP(:, 4)));
 
-fprintf('Multipass Fitzgerald, vocal median score\n');
-fprintf('\tOPS: %03f\n', median(resultsMFV(:, 1)));
-fprintf('\tTPS: %03f\n', median(resultsMFV(:, 2)));
-fprintf('\tIPS: %03f\n', median(resultsMFV(:, 3)));
-fprintf('\tAPS: %03f\n', median(resultsMFV(:, 4)));
-
-fprintf('Multipass Fitzgerald + WSTFT, harmonic median score\n')
-fprintf('\tOPS: %03f\n', median(resultsMF_WSTFTH(:, 1)));
-fprintf('\tTPS: %03f\n', median(resultsMF_WSTFTH(:, 2)));
-fprintf('\tIPS: %03f\n', median(resultsMF_WSTFTH(:, 3)));
-fprintf('\tAPS: %03f\n', median(resultsMF_WSTFTH(:, 4)));
+fprintf('Multipass Fitzgerald + CQT, percussive median score\n');
+fprintf('\tOPS: %03f\n', median(resultsMF_CQTP(:, 1)));
+fprintf('\tTPS: %03f\n', median(resultsMF_CQTP(:, 2)));
+fprintf('\tIPS: %03f\n', median(resultsMF_CQTP(:, 3)));
+fprintf('\tAPS: %03f\n', median(resultsMF_CQTP(:, 4)));
 
 fprintf('Multipass Fitzgerald + WSTFT, percussive median score\n');
 fprintf('\tOPS: %03f\n', median(resultsMF_WSTFTP(:, 1)));
 fprintf('\tTPS: %03f\n', median(resultsMF_WSTFTP(:, 2)));
 fprintf('\tIPS: %03f\n', median(resultsMF_WSTFTP(:, 3)));
 fprintf('\tAPS: %03f\n', median(resultsMF_WSTFTP(:, 4)));
+
+fprintf('Multipass Fitzgerald, vocal median score\n');
+fprintf('\tOPS: %03f\n', median(resultsMFV(:, 1)));
+fprintf('\tTPS: %03f\n', median(resultsMFV(:, 2)));
+fprintf('\tIPS: %03f\n', median(resultsMFV(:, 3)));
+fprintf('\tAPS: %03f\n', median(resultsMFV(:, 4)));
+
+fprintf('Multipass Fitzgerald + CQT, vocal median score\n');
+fprintf('\tOPS: %03f\n', median(resultsMF_CQTV(:, 1)));
+fprintf('\tTPS: %03f\n', median(resultsMF_CQTV(:, 2)));
+fprintf('\tIPS: %03f\n', median(resultsMF_CQTV(:, 3)));
+fprintf('\tAPS: %03f\n', median(resultsMF_CQTV(:, 4)));
 
 fprintf('Multipass Fitzgerald + WSTFT, vocal median score\n');
 fprintf('\tOPS: %03f\n', median(resultsMF_WSTFTV(:, 1)));

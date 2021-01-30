@@ -1,4 +1,4 @@
-function [xh1, p] = HPSS_Iterative_Driedger(filename, varargin)
+function HPSS_Iterative_Driedger(filename, varargin)
 p = inputParser;
 
 defaultLowResSTFT = 'linear';
@@ -7,10 +7,9 @@ checkLowResSTFT = @(x) any(validatestring(x, validLowResSTFT));
 
 WindowSizeH = 4096;
 WindowSizeP = 256;
-BetaH = 2;
-BetaP = 2;
-LHarmSTFT = 0.2; % 200 ms
-LPercSTFT = 500; % 500 Hz
+Beta = 2;
+LHarmSTFT = 17;
+LPercSTFT = 17;
 LHarmCQT = 17;
 LPercCQT = 7;
 
@@ -23,6 +22,10 @@ addParameter(p, 'LowResSTFT', defaultLowResSTFT, checkLowResSTFT);
 parse(p, filename, varargin{:});
 
 [x, fs] = audioread(p.Results.filename);
+
+%%%%%%%%%%%%%%%%%%%
+% FIRST ITERATION %
+%%%%%%%%%%%%%%%%%%%
 
 % STFT parameters
 winLen1 = WindowSizeH;
@@ -39,15 +42,12 @@ Shalf1 = S1(halfIdx1, :);
 Smag1 = abs(Shalf1); % use the magnitude STFT for creating masks
 
 % median filters
-lHarm1 = LHarmSTFT / ((fftLen1 - overlapLen1) / fs); % 200ms in samples
-lPerc1 = LPercSTFT / (fs / fftLen1); % 500Hz in samples
-
-H1 = movmedian(Smag1, lHarm1, 2);
-P1 = movmedian(Smag1, lPerc1, 1);
+H1 = movmedian(Smag1, LHarmSTFT, 2);
+P1 = movmedian(Smag1, LPercSTFT, 1);
 
 % binary masks with separation factor, Driedger et al. 2014
-Mh1 = (H1 ./ (P1 + eps)) > BetaH;
-Mp1 = (P1 ./ (H1 + eps)) >= BetaH;
+Mh1 = (H1 ./ (P1 + eps)) > Beta;
+Mp1 = (P1 ./ (H1 + eps)) >= Beta;
 
 % recover the complex STFT H and P from S using the masks
 H1 = Mh1 .* Shalf1;
@@ -89,14 +89,11 @@ if strcmp(p.Results.LowResSTFT, "linear")
     Smag2 = abs(Shalf2); % use the magnitude STFT for creating masks
 
     % median filters
-    lHarm2 = LHarmSTFT / ((fftLen2 - overlapLen2) / fs); % 200ms in samples
-    lPerc2 = LPercSTFT / (fs / fftLen2); % 500Hz in samples
-
-    H2 = movmedian(Smag2, lHarm2, 2);
-    P2 = movmedian(Smag2, lPerc2, 1);
+    H2 = movmedian(Smag2, LHarmSTFT, 2);
+    P2 = movmedian(Smag2, LPercSTFT, 1);
 
     % binary masks with separation factor, Driedger et al. 2014
-    Mp2 = (P2 ./ (H2 + eps)) >= BetaP;
+    Mp2 = (P2 ./ (H2 + eps)) >= Beta;
 
     % recover the complex STFT H and P from S using the masks
     P2 = Mp2 .* Shalf2;
@@ -131,8 +128,8 @@ end
 splt = split(fname,"_");
 prefix = splt{1};
 
-xhOut = sprintf("%s/%s_harmonic.wav", p.Results.outDir,prefix);
-xpOut = sprintf("%s/%s_percussive.wav", p.Results.outDir,prefix);
+xhOut = sprintf("%s/%s_harmonic.wav", p.Results.outDir, prefix);
+xpOut = sprintf("%s/%s_percussive.wav", p.Results.outDir, prefix);
 
 if size(xh1, 1) < size(x, 1)
     xh1 = [xh1; x(size(xh1, 1)+1:size(x, 1))];
