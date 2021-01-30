@@ -1,4 +1,8 @@
 function Driedger_Iterative(filename, varargin)
+
+% include vendored WarpTB code
+addpath(genpath('vendor/WarpTB/'));
+
 p = inputParser;
 
 defaultLowResSTFT = 'linear';
@@ -8,8 +12,10 @@ checkLowResSTFT = @(x) any(validatestring(x, validLowResSTFT));
 WindowSizeH = 4096;
 WindowSizeP = 256;
 Beta = 2;
+
 LHarmSTFT = 17;
 LPercSTFT = 17;
+
 LHarmCQT = 17;
 LPercCQT = 7;
 
@@ -122,6 +128,45 @@ elseif strcmp(p.Results.LowResSTFT, "cqt")
     % finally istft to convert back to audio
     %xh = icqt(H, g, fshifts);
     xp2 = icqt(P2, g, fshifts);
+elseif strcmp(p.Results.LowResSTFT, "warped")
+    lambda = -barkwarp(fs);
+    
+    xim2Warped = longchain(xim2, size(xim2, 1), lambda);
+    display(size(xim2Warped));
+
+    % STFT parameters
+    winLen2 = WindowSizeP;
+    fftLen2 = winLen2 * 2;
+    overlapLen2 = winLen2 / 2;
+    win2 = sqrt(hann(winLen2, "periodic"));
+    
+    % STFT of original signal, on a warped frequency scale
+    SW2 = stft(xim2Warped, "Window", win2, "OverlapLength", overlapLen2, ...
+      "FFTLength", fftLen2, "Centered", true);
+
+    halfIdx2 = 1:ceil(size(SW2, 1) / 2); % only half the STFT matters
+    Shalf2 = SW2(halfIdx2, :);
+    Smag2 = abs(Shalf2); % use the magnitude STFT for creating masks
+
+    % median filters
+    H2 = movmedian(Smag2, LHarmCQT, 2);
+    P2 = movmedian(Smag2, LPercCQT, 1);
+
+    % binary masks with separation factor, Driedger et al. 2014
+    Mp2 = (P2 ./ (H2 + eps)) >= Beta;
+
+    % recover the complex STFT H and P from S using the masks
+    P2 = Mp2 .* Shalf2;
+
+    % we previously dropped the redundant second half of the fft
+    P2 = cat(1, P2, flipud(conj(P2)));
+
+    % finally istft to convert back to audio
+    % but this is still warped. last thing to do is unwarp it
+    xp2Warped = istft(P2, "Window", win2, "OverlapLength", overlapLen2,...
+      "FFTLength", fftLen2, "ConjugateSymmetric", true);
+  
+    xp2 = longchain(xp2Warped, 1024, -lambda);
 end
 
 [~,fname,~] = fileparts(p.Results.filename);

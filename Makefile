@@ -3,9 +3,7 @@ clean_data:
 	-rm data-vocal/*.wav
 
 clean_results:
-	-rm results/id/*.wav
-	-rm results/id-cqt/*.wav
-	-rm results/id-wstft/*.wav
+	-rm results/*/*.wav
 
 prep_data: clean_data
 	./prepare_data.py --vocals --track-limit 1 --segment-limit 4 ~/TRAINING-MUSIC/periphery-stems/Juggernaut_Alpha/

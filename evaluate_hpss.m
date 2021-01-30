@@ -22,7 +22,7 @@ for file = files'
         display(fname)
         Driedger_Iterative(fname, 'results/id', "LowResSTFT","linear");
         Driedger_Iterative(fname, 'results/id-cqt', "LowResSTFT","cqt");
-        Driedger_Iterative(fname, 'results/id-wstft', "LowResSTFT","linear");
+        Driedger_Iterative(fname, 'results/id-wstft', "LowResSTFT","warped");
     
         % then evaluate it
         splt = split(file.name,"_");
