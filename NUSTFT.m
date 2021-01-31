@@ -1,15 +1,28 @@
-function [S] = NUSTFT()
+function [S] = NUSTFT(x, nwin, nhop, nfft)
+
+addpath(genpath('vendor/finufft/matlab'));
 
 win = sqrt(hann(nwin, "periodic"));
 
-S = zeros(nfft, ceil(lHarm/2));  % preallocate the sliding stft
+xlen = size(x, 1);
+nhops = floor(xlen/nhop);
 
-while eof == 0 % loop over real audio signal
-    % take slices in hops, no need to vertcat
-    x = vertcat(x(hop+1:nwin), nextHop); % append latest hop samples
+xlen = nhops*nhop;
+
+x = x(1:xlen);
+S = zeros(nfft, nhops);
+
+for i = 1:nhops
+    start = 1+(i-1)*nhop;
+    display(start);
     
-    X = fft(x.*win, nfft); % replace with nufft
-    Xhalf = X(1:(nfft/2));
+    xwin = x(start:start+nwin-1).*win;
+    display(start+nwin);
+    
+    f = 1:nfft;
+    
+    X = chebfun.nufft(xwin);
+    X2 = fft(xwin);
 
-    S(:, size(S, 2)+1) = X; % append latest frame
+    S(:, i) = X;
 end
