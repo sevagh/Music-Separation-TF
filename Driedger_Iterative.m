@@ -20,7 +20,7 @@ LPercCQT = 7;
 defaultOutDir = 'separated';
 
 addRequired(p, 'filename', @ischar);
-addOptional(p, 'outDir', defaultOutDir, @ischar);
+addOptional(p, 'OutDir', defaultOutDir, @ischar);
 addParameter(p, 'LoResSTFT', defaultLoResSTFT, checkSTFT);
 addParameter(p, 'HiResSTFT', defaultHiResSTFT, checkSTFT);
 
@@ -84,7 +84,7 @@ elseif strcmp(p.Results.HiResSTFT, "cqt")
     
     Mh1 = (H1 ./ (P1 + eps)) > Beta;
     Mp1 = (P1 ./ (H1 + eps)) >= Beta;
-    Mr1 = 1 - (H1 + P1);
+    Mr1 = 1 - (Mh1 + Mp1);
     
     % recover the complex STFT H and P from S using the masks
     H1 = Mh1 .* cfs1;
@@ -123,15 +123,25 @@ if strcmp(p.Results.LoResSTFT, "linear")
     P2 = movmedian(Smag2, LPercSTFT, 1);
 
     % binary masks with separation factor, Driedger et al. 2014
+    Mh2 = (H2 ./ (P2 + eps)) > Beta;
     Mp2 = (P2 ./ (H2 + eps)) >= Beta;
+    Mr2 = 1 - (Mh2 + Mp2);
 
     % recover the complex STFT H and P from S using the masks
+    H2 = Mh2 .* Shalf2;
     P2 = Mp2 .* Shalf2;
+    R2 = Mr2 .* Shalf2;
 
     % we previously dropped the redundant second half of the fft
+    H2 = cat(1, H2, flipud(conj(H2)));
     P2 = cat(1, P2, flipud(conj(P2)));
+    R2 = cat(1, R2, flipud(conj(R2)));
 
     % finally istft to convert back to audio
+    xh2 = istft(H2, "Window", win2, "OverlapLength", overlapLen2,...
+      "FFTLength", fftLen2, "ConjugateSymmetric", true);
+    xr2 = istft(R2, "Window", win2, "OverlapLength", overlapLen2,...
+      "FFTLength", fftLen2, "ConjugateSymmetric", true);
     xp2 = istft(P2, "Window", win2, "OverlapLength", overlapLen2,...
       "FFTLength", fftLen2, "ConjugateSymmetric", true);
 elseif strcmp(p.Results.LoResSTFT, "cqt")
@@ -143,21 +153,28 @@ elseif strcmp(p.Results.LoResSTFT, "cqt")
     H2 = movmedian(cmag2, LHarmCQT, 2);
     P2 = movmedian(cmag2, LPercCQT, 1);
     
+    Mh2 = (H2 ./ (P2 + eps)) > Beta;
     Mp2 = (P2 ./ (H2 + eps)) >= Beta;
+    Mr2 = 1 - (Mh2 + Mp2);
     
     % recover the complex STFT H and P from S using the masks
+    H2 = Mh2 .* cfs2;
+    R2 = Mr2 .* cfs2;
     P2 = Mp2 .* cfs2;
 
     % finally istft to convert back to audio
     xp2 = icqt(P2, g2, fshifts2);
+    xr2 = icqt(R2, g2, fshifts2);
+    xh2 = icqt(H2, g2, fshifts2);
 end
 
 [~,fname,~] = fileparts(p.Results.filename);
 splt = split(fname, "_");
 prefix = splt{1};
 
-xhOut = sprintf("%s/%s_harmonic.wav", p.Results.outDir, prefix);
-xpOut = sprintf("%s/%s_percussive.wav", p.Results.outDir, prefix);
+xhOut = sprintf("%s/%s_harmonic.wav", p.Results.OutDir, prefix);
+xpOut = sprintf("%s/%s_percussive.wav", p.Results.OutDir, prefix);
+xrOut = sprintf("%s/%s_residual.wav", p.Results.OutDir, prefix);
 
 if size(xh1, 1) < size(x, 1)
     xh1 = [xh1; x(size(xh1, 1)+1:size(x, 1))];
@@ -167,6 +184,12 @@ if size(xp2, 1) < size(x, 1)
     xp2 = [xp2; x(size(xp2, 1)+1:size(x, 1))];
 end
 
+if size(xr2, 1) < size(x, 1)
+    xr2 = [xr2; x(size(xr2, 1)+1:size(x, 1))];
+    xh2 = [xh2; x(size(xh2, 1)+1:size(x, 1))];
+end
+
 audiowrite(xhOut, xh1, fs);
 audiowrite(xpOut, xp2, fs);
+audiowrite(xrOut, xr2+xh2, fs);
 end

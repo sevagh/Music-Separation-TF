@@ -2,47 +2,48 @@
 addpath(genpath('vendor/PEASS-Software-v2.0.1'));
 
 files = dir('data-hpss/*.wav');
+resultsDir = 'results-hpss';
 
 resultSize = floor(size(files, 1)/3);
 results = zeros(16, resultSize, 8); % 16 test cases
 
-testNames = [
-    'id';
-    'id-cqt1';
-    'id-cqt2';
-    'id-cqt3';
-    '1pass-hpss-d-256';
-    '1pass-hpss-d-1024';
-    '1pass-hpss-d-4096';
-    '1pass-hpss-f-256';
-    '1pass-hpss-f-1024';
-    '1pass-hpss-f-4096';
-    '1pass-hpss-d-cqt-24';
-    '1pass-hpss-d-cqt-48';
-    '1pass-hpss-d-cqt-96';
-    '1pass-hpss-f-cqt-24';
-    '1pass-hpss-f-cqt-48';
-    '1pass-hpss-f-cqt-96';
-];
+testNames = {...
+    '1pass-hpss-d-256'...
+    '1pass-hpss-d-1024'...
+    '1pass-hpss-d-4096'...
+    '1pass-hpss-f-256'...
+    '1pass-hpss-f-1024'...
+    '1pass-hpss-f-4096'...
+    '1pass-hpss-d-cqt-24'...
+    '1pass-hpss-d-cqt-48'...
+    '1pass-hpss-d-cqt-96'...
+    '1pass-hpss-f-cqt-24'...
+    '1pass-hpss-f-cqt-48'...
+    '1pass-hpss-f-cqt-96'...
+    'id'...
+    'id-cqt1'...
+    'id-cqt2'...
+    'id-cqt3'...
+};
 
-testFuncs = [
-    @(fname, dest) Driedger_Iterative(fname, dest);
-    @(fname, dest) Driedger_Iterative(fname, dest, "HiResSTFT", "cqt");
-    @(fname, dest) Driedger_Iterative(fname, dest, "LoResSTFT", "cqt");
-    @(fname, dest) Driedger_Iterative(fname, dest, "HiResSTFT", "cqt", "LoResSTFT", "cqt");
-    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFTWindowSize", 256);
-    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFTWindowSize", 1024);
-    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFTWindowSize", 4096);
-    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "soft", "STFTWindowSize", 256);
-    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "soft", "STFTWindowSize", 1024);
-    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "soft", "STFTWindowSize", 4096);
-    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFT", "cqt", "CQTBinsPerOctave", 24);
-    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFT", "cqt", "CQTBinsPerOctave", 48);
-    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFT", "cqt", "CQTBinsPerOctave", 96);
-    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "soft", "STFT", "cqt", "CQTBinsPerOctave", 24);
-    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "soft", "STFT", "cqt", "CQTBinsPerOctave", 48);
-    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "soft", "STFT", "cqt", "CQTBinsPerOctave", 96);
-];
+testFuncs = {...
+    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFTWindowSize", 256)...
+    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFTWindowSize", 1024)...
+    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFTWindowSize", 4096)...
+    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "soft", "STFTWindowSize", 256)...
+    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "soft", "STFTWindowSize", 1024)...
+    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "soft", "STFTWindowSize", 4096)...
+    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFT", "cqt", "CQTBinsPerOctave", 24)...
+    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFT", "cqt", "CQTBinsPerOctave", 48)...
+    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFT", "cqt", "CQTBinsPerOctave", 96)...
+    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "soft", "STFT", "cqt", "CQTBinsPerOctave", 24)...
+    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "soft", "STFT", "cqt", "CQTBinsPerOctave", 48)...
+    @(fname, dest) HPSS_1pass(fname, dest, "Mask", "soft", "STFT", "cqt", "CQTBinsPerOctave", 96)...
+    @(fname, dest) Driedger_Iterative(fname, dest)...
+    @(fname, dest) Driedger_Iterative(fname, dest, "HiResSTFT", "cqt")...
+    @(fname, dest) Driedger_Iterative(fname, dest, "LoResSTFT", "cqt")...
+    @(fname, dest) Driedger_Iterative(fname, dest, "HiResSTFT", "cqt", "LoResSTFT", "cqt")...
+};
 
 options.destDir = '/tmp/';
 options.segmentationFactor = 1;
@@ -67,12 +68,12 @@ for file = files'
             sprintf('%s/%s_percussive.wav', file.folder, prefix);...
             sprintf('%s/%s_harmonic.wav', file.folder, prefix)};
         for testcase = 1:16
-            tname = testNames(testcase);
-            tfunc = testFuncs(testcase);
+            tname = testNames{testcase};
+            tfunc = testFuncs{testcase};
             
-            destloc = sprintf('results/%s', tname); 
+            destloc = sprintf('%s/%s', resultsDir, tname); 
             fprintf('Executing %s\n', tname);
-            tfunc(fname, dest); % execute the test case
+            tfunc(fname, destloc); % execute the test case
 
             fprintf('Evaluating %s\n', tname);
 
@@ -94,23 +95,14 @@ for file = files'
     end
 end
 
-toPrint = 1; % print OPS
-
-% results are stored indexed as follows
-% 1 = Overall Perceptual Score
-% 2 = Target-related Perceptual Score
-% 3 = Interference-related Perceptual Score
-% 4 = Artifact-related Perceptual Score
-
 fprintf('*************************\n');
 fprintf('****  FINAL RESULTS  ****\n');
 fprintf('*************************\n');
 
 for testcase = 1:16
-    tname = testNames(testcase);
-    res = results(testcase, :, :);
+    tname = testNames{testcase};
     
     fprintf('%s, median scores\n', tname)
-    fprintf('\tHarm OPS: %03f\n', median(results(:, toPrint)));
-    fprintf('\tPerc OPS: %03f\n', median(results(:, toPrint+4)));
+    fprintf('\tHarm OPS: %03f\n', median(results(testcase, :, 1)));
+    fprintf('\tPerc OPS: %03f\n', median(results(testcase, :, 5)));
 end
