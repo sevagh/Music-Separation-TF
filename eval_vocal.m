@@ -12,6 +12,12 @@ testCases = {...
     {'hybrid', @(fname, dest) HarmonicPercussiveVocal(fname, dest)}...
 };
 
+display(size(testCases))
+if size(testCases, 2) < size(testCases, 1)
+    testCases = testCases';
+end
+display(size(testCases))
+
 resultSize = floor(size(files, 1)/4);
 results = zeros(size(testCases, 2), resultSize, 36);
 
