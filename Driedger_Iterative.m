@@ -17,7 +17,7 @@ LPercSTFT = 17;
 LHarmCQT = 17;
 LPercCQT = 7;
 
-defaultOutDir = 'separated';
+defaultOutDir = '.';
 
 addRequired(p, 'filename', @ischar);
 addOptional(p, 'OutDir', defaultOutDir, @ischar);

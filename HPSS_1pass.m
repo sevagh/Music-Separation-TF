@@ -12,7 +12,7 @@ defaultMask = 'hard';
 validMasks = {'soft', 'hard'};
 checkMask = @(x) any(validatestring(x, validMasks));
 
-defaultOutDir = 'separated';
+defaultOutDir = '.';
 
 Beta = 2;
 Power = 2;
@@ -65,19 +65,25 @@ if strcmp(p.Results.STFT, "linear")
         Mh = Hp ./ total;
         Mp = Pp ./ total;
     end
+    
+    Mr = 1 - (Mh + Mp);
 
     % recover the complex STFT H and P from S using the masks
     H = Mh .* Shalf;
     P = Mp .* Shalf;
+    R = Mr .* Shalf;
 
     % we previously dropped the redundant second half of the fft
     H = cat(1, H, flipud(conj(H)));
     P = cat(1, P, flipud(conj(P)));
+    R = cat(1, R, flipud(conj(R)));
 
     % finally istft to convert back to audio
     xh = istft(H, "Window", win, "OverlapLength", overlapLen, ...
       "FFTLength", fftLen, "ConjugateSymmetric", true);
     xp = istft(P, "Window", win, "OverlapLength", overlapLen,...
+      "FFTLength", fftLen, "ConjugateSymmetric", true);
+    xr = istft(R, "Window", win, "OverlapLength", overlapLen,...
       "FFTLength", fftLen, "ConjugateSymmetric", true);
 elseif strcmp(p.Results.STFT, "cqt")
     [cfs,~,g, fshifts] = cqt(x, 'SamplingFrequency', fs, 'BinsPerOctave', p.Results.CQTBinsPerOctave);
@@ -100,14 +106,17 @@ elseif strcmp(p.Results.STFT, "cqt")
         Mh = Hp ./ total;
         Mp = Pp ./ total;
     end
+    Mr = 1 - (Mh + Mp);
 
     % recover the complex STFT H and P from S using the masks
     H = Mh .* cfs;
     P = Mp .* cfs;
+    R = Mr .* cfs;
 
     % finally istft to convert back to audio
     xh = icqt(H, g, fshifts);
     xp = icqt(P, g, fshifts);
+    xr = icqt(R, g, fshifts);
 end
 
 [~,fname,~] = fileparts(p.Results.filename);
@@ -116,12 +125,15 @@ prefix = splt{1};
 
 xhOut = sprintf("%s/%s_harmonic.wav", p.Results.OutDir, prefix);
 xpOut = sprintf("%s/%s_percussive.wav", p.Results.OutDir, prefix);
+xrOut = sprintf("%s/%s_residual.wav", p.Results.OutDir, prefix);
 
 if size(xh, 1) < size(x, 1)
     xh = [xh; x(size(xh, 1)+1:size(x, 1))];
     xp = [xp; x(size(xp, 1)+1:size(x, 1))];
+    xr = [xr; x(size(xr, 1)+1:size(x, 1))];
 end
 
 audiowrite(xhOut, xh, fs);
 audiowrite(xpOut, xp, fs);
+audiowrite(xrOut, xr, fs);
 end

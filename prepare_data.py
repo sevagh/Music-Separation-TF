@@ -35,7 +35,7 @@ def parse_args():
         "--segment-limit", type=int, default=sys.maxsize, help="limit to n segments per track"
     )
     parser.add_argument(
-        "--segment-offset", type=int, default=3, help="offset of segment to start from (useful to skip intros)"
+        "--segment-offset", type=int, default=0, help="offset of segment to start from (useful to skip intros)"
     )
     parser.add_argument(
         "--segment-size", type=float, default=30.0, help="segment size in seconds"
