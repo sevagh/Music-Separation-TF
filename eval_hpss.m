@@ -21,16 +21,15 @@ testCases = {...
     ...{'1pass-hpss-f-cqt-24', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "soft", "STFT", "cqt", "CQTBinsPerOctave", 24)}...
     ...{'1pass-hpss-f-cqt-48', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "soft", "STFT", "cqt", "CQTBinsPerOctave", 48)}...
     ...{'1pass-hpss-f-cqt-96', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "soft", "STFT", "cqt", "CQTBinsPerOctave", 96)}...
-    ...{'id', @(fname, dest) Driedger_Iterative(fname, dest)}...
+    {'id', @(fname, dest) Driedger_Iterative(fname, dest)}...
     ...{'id-cqt1', @(fname, dest) Driedger_Iterative(fname, dest, "HiResSTFT", "cqt")}...
     ...{'id-cqt2', @(fname, dest) Driedger_Iterative(fname, dest, "LoResSTFT", "cqt")}...
     ...{'id-cqt3', @(fname, dest) Driedger_Iterative(fname, dest, "LoResSTFT", "cqt", "HiResSTFT", "cqt")}...
-    {'hybrid', @(fname, dest) HPSS_hybrid(fname, dest)}...
+    {'hybrid', @(fname, dest) HarmonicPercussive(fname, dest)}...
 };
 
 resultSize = floor(size(files, 1)/3);
-%results = zeros(size(testCases, 2), resultSize, 8);
-results = zeros(size(testCases, 2), 1, 8);
+results = zeros(size(testCases, 2), resultSize, 24);
 
 options.destDir = '/tmp/';
 options.segmentationFactor = 1;
@@ -73,17 +72,30 @@ for file = files'
             results(testcase, findex, 2) = resH.TPS;
             results(testcase, findex, 3) = resH.IPS;
             results(testcase, findex, 4) = resH.APS;
-            results(testcase, findex, 5) = resP.OPS;
-            results(testcase, findex, 6) = resP.TPS;
-            results(testcase, findex, 7) = resP.IPS;
-            results(testcase, findex, 8) = resP.APS;
+            results(testcase, findex, 5) = resH.ISR;
+            results(testcase, findex, 6) = resH.SIR;
+            results(testcase, findex, 7) = resH.SAR;
+            results(testcase, findex, 8) = resH.SDR;
+            results(testcase, findex, 9) = resH.qTarget;
+            results(testcase, findex, 10) = resH.qInterf;
+            results(testcase, findex, 11) = resH.qArtif;
+            results(testcase, findex, 12) = resH.qGlobal;
+            
+            results(testcase, findex, 13) = resP.OPS;
+            results(testcase, findex, 14) = resP.TPS;
+            results(testcase, findex, 15) = resP.IPS;
+            results(testcase, findex, 16) = resP.APS;
+            results(testcase, findex, 17) = resP.ISR;
+            results(testcase, findex, 18) = resP.SIR;
+            results(testcase, findex, 19) = resP.SAR;
+            results(testcase, findex, 20) = resP.SDR;
+            results(testcase, findex, 21) = resP.qTarget;
+            results(testcase, findex, 22) = resP.qInterf;
+            results(testcase, findex, 23) = resP.qArtif;
+            results(testcase, findex, 24) = resP.qGlobal;
+            
         end
         findex = findex + 1;
-        
-        % uncomment this block to limit testing to a single file
-        if findex >= 2
-            break
-        end
     end
 end
 
@@ -93,8 +105,16 @@ fprintf('*************************\n');
 
 for testcase = 1:size(testCases, 2)
     fprintf('%s, median scores\n', testCases{testcase}{1});
-    fprintf('\tOPS: %03f\t%03f\n', median(results(testcase, :, 1)), median(results(testcase, :, 5)));
-    fprintf('\tTPS: %03f\t%03f\n', median(results(testcase, :, 2)), median(results(testcase, :, 6)));
-    fprintf('\tIPS: %03f\t%03f\n', median(results(testcase, :, 3)), median(results(testcase, :, 7)));
-    fprintf('\tAPS: %03f\t%03f\n', median(results(testcase, :, 4)), median(results(testcase, :, 8)));  
+    fprintf('\tOPS: %03f\t%03f\n', median(results(testcase, :, 1)), median(results(testcase, :, 13)));
+    fprintf('\tTPS: %03f\t%03f\n', median(results(testcase, :, 2)), median(results(testcase, :, 14)));
+    fprintf('\tIPS: %03f\t%03f\n', median(results(testcase, :, 3)), median(results(testcase, :, 15)));
+    fprintf('\tAPS: %03f\t%03f\n', median(results(testcase, :, 4)), median(results(testcase, :, 16)));  
+    fprintf('\tISR: %03f\t%03f\n', median(results(testcase, :, 5)), median(results(testcase, :, 17)));
+    fprintf('\tSIR: %03f\t%03f\n', median(results(testcase, :, 6)), median(results(testcase, :, 18)));
+    fprintf('\tSAR: %03f\t%03f\n', median(results(testcase, :, 7)), median(results(testcase, :, 19)));
+    fprintf('\tSDR: %03f\t%03f\n', median(results(testcase, :, 8)), median(results(testcase, :, 20)));
+    fprintf('\tqTarget: %03f\t%03f\n', median(results(testcase, :, 9)), median(results(testcase, :, 21)));
+    fprintf('\tqInterf: %03f\t%03f\n', median(results(testcase, :, 10)), median(results(testcase, :, 22)));
+    fprintf('\tqArtif: %03f\t%03f\n', median(results(testcase, :, 11)), median(results(testcase, :, 23)));
+    fprintf('\tqGlobal: %03f\t%03f\n', median(results(testcase, :, 12)), median(results(testcase, :, 24))); 
 end

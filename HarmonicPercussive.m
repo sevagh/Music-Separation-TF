@@ -1,4 +1,4 @@
-function HPSS_hybrid(filename, varargin)
+function HarmonicPercussive(filename, varargin)
 p = inputParser;
 
 WindowSizeH = 16384;
