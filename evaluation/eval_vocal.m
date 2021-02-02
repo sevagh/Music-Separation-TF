@@ -1,16 +1,28 @@
-addpath(genpath('vendor/PEASS-Software-v2.0.1'));
+addpath(genpath('../vendor/PEASS-Software-v2.0.1'));
 addpath(genpath('../matlab-algorithms'));
 
 files = dir('../data/data-vocal/*.wav');
 resultsDir = '../evaluation/results-vocal';
 
 testCases = {...
-    ...{'mf', @(fname, dest) Fitzgerald_Multipass(fname, dest)}...
-    ...{'mf-cqt1', @(fname, dest) Fitzgerald_Multipass(fname, dest, "HiResSTFT", "cqt")}...
-    ...{'mf-cqt2', @(fname, dest) Fitzgerald_Multipass(fname, dest, "LoResSTFT", "cqt")}...
-    ...{'mf-cqt3', @(fname, dest) Fitzgerald_Multipass(fname, dest, "HiResSTFT", "cqt", "LoResSTFT", "cqt")}...
+    {'1pass-hpss-d-128', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFTWindowSize", 128)}...
+    {'1pass-hpss-d-256', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFTWindowSize", 256)}...
+    {'1pass-hpss-d-1024', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFTWindowSize", 1024)}...
+    {'1pass-hpss-d-4096', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFTWindowSize", 4096)}...
+    {'1pass-hpss-d-16384', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFTWindowSize", 16384)}...
+    {'1pass-hpss-d-cqt-12', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFT", "cqt", "CQTBinsPerOctave", 12)}...
+    {'1pass-hpss-d-cqt-24', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFT", "cqt", "CQTBinsPerOctave", 24)}...
+    {'1pass-hpss-d-cqt-48', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFT", "cqt", "CQTBinsPerOctave", 48)}...
+    {'1pass-hpss-d-cqt-96', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFT", "cqt", "CQTBinsPerOctave", 96)}...
     {'hybrid', @(fname, dest) HarmonicPercussiveVocal(fname, dest)}...
     {'id', @(fname, dest) Driedger_Iterative(fname, dest)}...
+    {'id-cqt1', @(fname, dest) Driedger_Iterative(fname, dest, "HiResSTFT", "cqt")}...
+    {'id-cqt2', @(fname, dest) Driedger_Iterative(fname, dest, "LoResSTFT", "cqt")}...
+    {'id-cqt3', @(fname, dest) Driedger_Iterative(fname, dest, "LoResSTFT", "cqt", "HiResSTFT", "cqt")}...
+    {'mf', @(fname, dest) Fitzgerald_Multipass(fname, dest)}...
+    {'mf-cqt1', @(fname, dest) Fitzgerald_Multipass(fname, dest, "HiResSTFT", "cqt")}...
+    {'mf-cqt2', @(fname, dest) Fitzgerald_Multipass(fname, dest, "LoResSTFT", "cqt")}...
+    {'mf-cqt3', @(fname, dest) Fitzgerald_Multipass(fname, dest, "HiResSTFT", "cqt", "LoResSTFT", "cqt")}...
 };
 
 display(size(testCases))
@@ -118,16 +130,64 @@ fprintf('*************************\n');
 
 for testcase = 1:size(testCases, 2)
     fprintf('%s, median scores\n', testCases{testcase}{1});
-    fprintf('\tOPS: %03f\t%03f\t%03f\n', median(results(testcase, :, 1)), median(results(testcase, :, 13)), median(results(testcase, :, 25)));
-    fprintf('\tTPS: %03f\t%03f\t%03f\n', median(results(testcase, :, 2)), median(results(testcase, :, 14)), median(results(testcase, :, 26)));
-    fprintf('\tIPS: %03f\t%03f\t%03f\n', median(results(testcase, :, 3)), median(results(testcase, :, 15)), median(results(testcase, :, 27)));
-    fprintf('\tAPS: %03f\t%03f\t%03f\n', median(results(testcase, :, 4)), median(results(testcase, :, 16)), median(results(testcase, :, 28))); 
-    fprintf('\tISR: %03f\t%03f\t%03f\n', median(results(testcase, :, 5)), median(results(testcase, :, 17)), median(results(testcase, :, 29)));
-    fprintf('\tSIR: %03f\t%03f\t%03f\n', median(results(testcase, :, 6)), median(results(testcase, :, 18)), median(results(testcase, :, 30)));
-    fprintf('\tSAR: %03f\t%03f\t%03f\n', median(results(testcase, :, 7)), median(results(testcase, :, 19)), median(results(testcase, :, 31)));
-    fprintf('\tSDR: %03f\t%03f\t%03f\n', median(results(testcase, :, 8)), median(results(testcase, :, 20)), median(results(testcase, :, 32)));
-    fprintf('\tqTarget: %03f\t%0f\t%03f\n', median(results(testcase, :, 9)), median(results(testcase, :, 21)), median(results(testcase, :, 33)));
-    fprintf('\tqInterf: %03f\t%03f\t%03f\n', median(results(testcase, :, 10)), median(results(testcase, :, 22)), median(results(testcase, :, 34)));
-    fprintf('\tqArtif: %03f\t%03f\t%03f\n', median(results(testcase, :, 11)), median(results(testcase, :, 23)), median(results(testcase, :, 35)));
-    fprintf('\tqGlobal: %03f\t%03f\t%03f\n', median(results(testcase, :, 12)), median(results(testcase, :, 24)), median(results(testcase, :, 36))); 
+    
+    fprintf('\tHARMONIC\n');
+    
+    fprintf('\tPEASS measures\n');
+    fprintf('\t\tOPS: %03f\n', median(results(testcase, :, 1)));
+    fprintf('\t\tTPS: %03f\n', median(results(testcase, :, 2)));
+    fprintf('\t\tIPS: %03f\n', median(results(testcase, :, 3)));
+    fprintf('\t\tAPS: %03f\n', median(results(testcase, :, 4)));
+    
+    fprintf('\tBSS measures\n');
+    fprintf('\t\tISR: %03f\n', median(results(testcase, :, 5)));
+    fprintf('\t\tSIR: %03f\n', median(results(testcase, :, 6)));
+    fprintf('\t\tSAR: %03f\n', median(results(testcase, :, 7)));
+    fprintf('\t\tSDR: %03f\n', median(results(testcase, :, 8)));
+    
+    fprintf('\tPEMO-Q measures\n');
+    fprintf('\t\tqTarget: %03f\n', median(results(testcase, :, 9)));
+    fprintf('\t\tqInterf: %03f\n', median(results(testcase, :, 10)));
+    fprintf('\t\tqArtif: %03f\n', median(results(testcase, :, 11)));
+    fprintf('\t\tqGlobal: %03f\n', median(results(testcase, :, 12)));
+    
+    fprintf('\tPERCUSSIVE\n');
+    
+    fprintf('\tPEASS measures\n');
+    fprintf('\t\tOPS: %03f\n', median(results(testcase, :, 13)));
+    fprintf('\t\tTPS: %03f\n', median(results(testcase, :, 14)));
+    fprintf('\t\tIPS: %03f\n', median(results(testcase, :, 15)));
+    fprintf('\t\tAPS: %03f\n', median(results(testcase, :, 16)));
+    
+    fprintf('\tBSS measures\n');
+    fprintf('\t\tISR: %03f\n', median(results(testcase, :, 17)));
+    fprintf('\t\tSIR: %03f\n', median(results(testcase, :, 18)));
+    fprintf('\t\tSAR: %03f\n', median(results(testcase, :, 19)));
+    fprintf('\t\tSDR: %03f\n', median(results(testcase, :, 20)));
+    
+    fprintf('\tPEMO-Q measures\n');
+    fprintf('\t\tqTarget: %03f\n', median(results(testcase, :, 21)));
+    fprintf('\t\tqInterf: %03f\n', median(results(testcase, :, 22)));
+    fprintf('\t\tqArtif: %03f\n', median(results(testcase, :, 23)));
+    fprintf('\t\tqGlobal: %03f\n', median(results(testcase, :, 24)));
+    
+    fprintf('\tVOCAL\n');
+    
+    fprintf('\tPEASS measures\n');
+    fprintf('\t\tOPS: %03f\n', median(results(testcase, :, 25)));
+    fprintf('\t\tTPS: %03f\n', median(results(testcase, :, 26)));
+    fprintf('\t\tIPS: %03f\n', median(results(testcase, :, 27)));
+    fprintf('\t\tAPS: %03f\n', median(results(testcase, :, 28)));
+    
+    fprintf('\tBSS measures\n');
+    fprintf('\t\tISR: %03f\n', median(results(testcase, :, 29)));
+    fprintf('\t\tSIR: %03f\n', median(results(testcase, :, 30)));
+    fprintf('\t\tSAR: %03f\n', median(results(testcase, :, 31)));
+    fprintf('\t\tSDR: %03f\n', median(results(testcase, :, 32)));
+    
+    fprintf('\tPEMO-Q measures\n');
+    fprintf('\t\tqTarget: %03f\n', median(results(testcase, :, 33)));
+    fprintf('\t\tqInterf: %03f\n', median(results(testcase, :, 34)));
+    fprintf('\t\tqArtif: %03f\n', median(results(testcase, :, 35)));
+    fprintf('\t\tqGlobal: %03f\n', median(results(testcase, :, 36)));
 end
