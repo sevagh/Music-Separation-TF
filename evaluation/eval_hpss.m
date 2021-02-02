@@ -1,8 +1,8 @@
-% include vendored PEASS code
-addpath(genpath('vendor/PEASS-Software-v2.0.1'));
+addpath(genpath('../vendor/PEASS-Software-v2.0.1'));
+addpath(genpath('../matlab-algorithms'));
 
-files = dir('data-hpss/*.wav');
-resultsDir = 'results-hpss';
+files = dir('../data/data-hpss/*.wav');
+resultsDir = '../evaluation/results-hpss';
 
 testCases = {...
     ...{'1pass-hpss-d-128', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFTWindowSize", 128)}...

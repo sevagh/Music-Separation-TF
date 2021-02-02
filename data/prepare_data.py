@@ -14,7 +14,7 @@ novocal_dir = 'data-hpss'
 def parse_args():
     parser = argparse.ArgumentParser(
         prog="prepare_data",
-        description="Prepare training datasets for HPSS from periphery instrument stems",
+        description="Prepare evaluation datasets for HPSS from instrument stems",
     )
     parser.add_argument(
         "--sample-rate",
@@ -23,7 +23,7 @@ def parse_args():
         help="sample rate (default: 44100 Hz)",
     )
     parser.add_argument(
-        "stem_dirs", nargs="+", help="directories containing periphery instrument stems"
+        "stem_dirs", nargs="+", help="directories containing instrument stems"
     )
     parser.add_argument(
         "--vocals", action="store_true", help="include vocals in the mix"
