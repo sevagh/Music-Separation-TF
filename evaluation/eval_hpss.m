@@ -123,7 +123,7 @@ for testcase = 1:size(testCases, 2)
     fprintf('\tHARMONIC\n');
     
     fprintf('\tPEASS measures\n');
-    fprintf('\t\tOPS: %03f\n', median(results(testcase, :, 1)));
+    %fprintf('\t\tOPS: %03f\n', median(results(testcase, :, 1)));
     fprintf('\t\tTPS: %03f\n', median(results(testcase, :, 2)));
     fprintf('\t\tIPS: %03f\n', median(results(testcase, :, 3)));
     fprintf('\t\tAPS: %03f\n', median(results(testcase, :, 4)));
@@ -132,18 +132,18 @@ for testcase = 1:size(testCases, 2)
     fprintf('\t\tISR: %03f\n', median(results(testcase, :, 5)));
     fprintf('\t\tSIR: %03f\n', median(results(testcase, :, 6)));
     fprintf('\t\tSAR: %03f\n', median(results(testcase, :, 7)));
-    fprintf('\t\tSDR: %03f\n', median(results(testcase, :, 8)));
+    %fprintf('\t\tSDR: %03f\n', median(results(testcase, :, 8)));
     
     fprintf('\tPEMO-Q measures\n');
     fprintf('\t\tqTarget: %03f\n', median(results(testcase, :, 9)));
     fprintf('\t\tqInterf: %03f\n', median(results(testcase, :, 10)));
     fprintf('\t\tqArtif: %03f\n', median(results(testcase, :, 11)));
-    fprintf('\t\tqGlobal: %03f\n', median(results(testcase, :, 12)));
+    %fprintf('\t\tqGlobal: %03f\n', median(results(testcase, :, 12)));
     
     fprintf('\tPERCUSSIVE\n');
     
     fprintf('\tPEASS measures\n');
-    fprintf('\t\tOPS: %03f\n', median(results(testcase, :, 13)));
+    %fprintf('\t\tOPS: %03f\n', median(results(testcase, :, 13)));
     fprintf('\t\tTPS: %03f\n', median(results(testcase, :, 14)));
     fprintf('\t\tIPS: %03f\n', median(results(testcase, :, 15)));
     fprintf('\t\tAPS: %03f\n', median(results(testcase, :, 16)));
@@ -152,11 +152,11 @@ for testcase = 1:size(testCases, 2)
     fprintf('\t\tISR: %03f\n', median(results(testcase, :, 17)));
     fprintf('\t\tSIR: %03f\n', median(results(testcase, :, 18)));
     fprintf('\t\tSAR: %03f\n', median(results(testcase, :, 19)));
-    fprintf('\t\tSDR: %03f\n', median(results(testcase, :, 20)));
+    %fprintf('\t\tSDR: %03f\n', median(results(testcase, :, 20)));
     
     fprintf('\tPEMO-Q measures\n');
     fprintf('\t\tqTarget: %03f\n', median(results(testcase, :, 21)));
     fprintf('\t\tqInterf: %03f\n', median(results(testcase, :, 22)));
     fprintf('\t\tqArtif: %03f\n', median(results(testcase, :, 23)));
-    fprintf('\t\tqGlobal: %03f\n', median(results(testcase, :, 24)));
+    %fprintf('\t\tqGlobal: %03f\n', median(results(testcase, :, 24)));
 end
