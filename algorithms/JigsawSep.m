@@ -31,7 +31,7 @@ prefix = splt{1};
 
 xhOut = sprintf("%s/%s_harmonic.wav", p.Results.OutDir, prefix);
 xpOut = sprintf("%s/%s_percussive.wav", p.Results.OutDir, prefix);
-xrOut = sprintf("%s/%s_vocal.wav", p.Results.OutDir, prefix);
+xrOut = sprintf("%s/%s_residual.wav", p.Results.OutDir, prefix);
 
 audiowrite(xhOut, seps(:, 1), fs);
 audiowrite(xpOut, seps(:, 2), fs);
