@@ -1,5 +1,5 @@
 addpath(genpath('../vendor/PEASS-Software-v2.0.1'));
-addpath(genpath('../matlab-algorithms'));
+addpath(genpath('../algorithms'));
 
 files = dir('../data/data-vocal/*.wav');
 resultsDir = '../evaluation/results-vocal';
