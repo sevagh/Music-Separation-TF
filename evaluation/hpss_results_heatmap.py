@@ -20,10 +20,6 @@ if __name__ == '__main__':
         harm_fig_peass = plt.figure()
         perc_fig_peass = plt.figure()
 
-        # 3 measures: artifact, interference, target
-        # 2 results: harmonic, percussive
-        # 6 subplots total
-
         ax_harm_peass = harm_fig_peass.add_subplot(111)
         ax_perc_peass = perc_fig_peass.add_subplot(111)
 
@@ -51,5 +47,5 @@ if __name__ == '__main__':
         plt.show()
     except Exception as e:
         print(e)
-        print('usage: {0} /path/to/saved/matlab/output.json'.format(sys.argv[0]), file=sys.stderr)
+        print('usage: {0} json-string'.format(sys.argv[0]), file=sys.stderr)
         sys.exit(1)
