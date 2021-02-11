@@ -12,7 +12,7 @@ fname = p.Results.filename;
 
 outdir = p.Results.OutDir;
 
-umx_python_cmd = sprintf('~/.conda/envs/umx-gpu/bin/python ./umx.py %s --outdir %s', fname, outdir);
+umx_python_cmd = sprintf('~/.conda/envs/umx-gpu/bin/python ../algorithms/umx.py %s --outdir %s', fname, outdir);
 
 [status, out] = system(umx_python_cmd);
 display(status)
