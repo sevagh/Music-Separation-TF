@@ -38,6 +38,16 @@ if __name__ == '__main__':
         sns.heatmap(pd.DataFrame(results['harmonic_peass']).transpose(), annot=True, cbar=False, cmap=cmap, fmt=".2f", ax=ax_harm_peass)
         sns.heatmap(pd.DataFrame(results['percussive_peass']).transpose(), annot=True, cbar=False, cmap=cmap, fmt=".2f", ax=ax_perc_peass)
 
+        # vocal eval
+        if results.get('vocal_peass', None) is not None:
+            vocal_fig_peass = plt.figure()
+            ax_vocal_peass = vocal_fig_peass.add_subplot(111)
+
+            ax_vocal_peass.set_title('Vocal PEASS scores')
+
+            sns.heatmap(pd.DataFrame(results['vocal_peass']).transpose(), annot=True, cbar=False, cmap=cmap, fmt=".2f", ax=ax_vocal_peass)
+
+
         plt.show()
     except Exception as e:
         print(e)
