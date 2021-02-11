@@ -18,12 +18,15 @@ LPercSTFT = 17;
 LHarmCQT = 17;
 LPercCQT = 7;
 
+defaultLoResCQTBinsPerOctave = 24;
+
 defaultOutDir = '.';
 
 addRequired(p, 'filename', @ischar);
 addOptional(p, 'outDir', defaultOutDir, @ischar);
 addParameter(p, 'LoResSTFT', defaultLoResSTFT, checkSTFT);
 addParameter(p, 'HiResSTFT', defaultHiResSTFT, checkSTFT);
+addParameter(p, 'LoResCQTBinsPerOctave', defaultLoResCQTBinsPerOctave, @isnumeric);
 
 parse(p, filename, varargin{:});
 
@@ -142,7 +145,7 @@ if strcmp(p.Results.LoResSTFT, "linear")
       "FFTLength", fftLen2, "ConjugateSymmetric", true);
 elseif strcmp(p.Results.LoResSTFT, "cqt")
     % CQT of original signal
-    [cfs2,~,g2,fshifts2] = cqt(xp1, 'SamplingFrequency', fs, 'BinsPerOctave', 24);
+    [cfs2,~,g2,fshifts2] = cqt(xp1, 'SamplingFrequency', fs, 'BinsPerOctave', p.Results.LoResCQTBinsPerOctave);
     
     cmag2 = abs(cfs2); % use the magnitude CQT for creating masks
 
