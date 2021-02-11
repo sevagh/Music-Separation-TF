@@ -1,4 +1,4 @@
-function [xh, p] = HPSS_1pass(filename, varargin)
+function HPSS_1pass(filename, varargin)
 p = inputParser;
 
 defaultSTFT = 'linear';
