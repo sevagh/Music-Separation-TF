@@ -1,31 +1,13 @@
+function eval_vocal(contender)
 addpath(genpath('../vendor/PEASS-Software-v2.0.1'));
 addpath(genpath('../algorithms'));
+addpath(genpath('./contenders'));
 
 files = dir('../data/data-vocal/*.wav');
 resultsDir = '../evaluation/results-vocal';
 
-testCases = {...
-    ...{'1pass-hpss-d-128', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFTWindowSize", 128)}...
-    ...{'1pass-hpss-d-256', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFTWindowSize", 256)}...
-    ...{'1pass-hpss-d-1024', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFTWindowSize", 1024)}...
-    ...{'1pass-hpss-d-4096', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFTWindowSize", 4096)}...
-    ...{'1pass-hpss-d-16384', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFTWindowSize", 16384)}...
-    ...{'1pass-hpss-d-cqt-12', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFT", "cqt", "CQTBinsPerOctave", 12)}...
-    ...{'1pass-hpss-d-cqt-24', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFT", "cqt", "CQTBinsPerOctave", 24)}...
-    ...{'1pass-hpss-d-cqt-48', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFT", "cqt", "CQTBinsPerOctave", 48)}...
-    ...{'1pass-hpss-d-cqt-96', @(fname, dest) HPSS_1pass(fname, dest, "Mask", "hard", "STFT", "cqt", "CQTBinsPerOctave", 96)}...
-    {'id', @(fname, dest) Driedger_Iterative(fname, dest)}...
-    ...{'id-cqt1', @(fname, dest) Driedger_Iterative(fname, dest, "HiResSTFT", "cqt")}...
-    ...{'id-cqt2', @(fname, dest) Driedger_Iterative(fname, dest, "LoResSTFT", "cqt")}...
-    ...{'id-cqt3', @(fname, dest) Driedger_Iterative(fname, dest, "LoResSTFT", "cqt", "HiResSTFT", "cqt")}...
-    {'mf', @(fname, dest) Fitzgerald_Multipass(fname, dest)}...
-    ...{'mf-cqt1', @(fname, dest) Fitzgerald_Multipass(fname, dest, "HiResSTFT", "cqt")}...
-    {'mf-cqt2', @(fname, dest) Fitzgerald_Multipass(fname, dest, "LoResSTFT", "cqt")}...
-    {'mf-cqt3', @(fname, dest) Fitzgerald_Multipass(fname, dest, "HiResSTFT", "cqt", "LoResSTFT", "cqt")}...
-    {'hybrid', @(fname, dest) HarmonicPercussiveVocal(fname, dest)}...
-    {'hybrid-v2', @(fname, dest) HarmonicPercussiveVocalv2(fname, dest)}...
-    {'umx', @(fname, dest) UMX_python_shim(fname, dest)}...
-};
+display(contender);
+run(contender); % load testCases from contender file
 
 display(size(testCases))
 if size(testCases, 2) < size(testCases, 1)
@@ -130,66 +112,48 @@ fprintf('*************************\n');
 fprintf('****  FINAL RESULTS  ****\n');
 fprintf('*************************\n');
 
+s = struct();
+
 for testcase = 1:size(testCases, 2)
-    fprintf('%s, median scores\n', testCases{testcase}{1});
+    tname = matlab.lang.makeValidName(testCases{testcase}{1});
     
-    fprintf('\tHARMONIC\n');
+    s.harmonic_peass.(tname).TPS = median(results(testcase, :, 2));
+    s.harmonic_peass.(tname).IPS = median(results(testcase, :, 3));
+    s.harmonic_peass.(tname).APS = median(results(testcase, :, 4));
     
-    fprintf('\tPEASS measures\n');
-    %fprintf('\t\tOPS: %03f\n', median(results(testcase, :, 1)));
-    fprintf('\t\tTPS: %03f\n', median(results(testcase, :, 2)));
-    fprintf('\t\tIPS: %03f\n', median(results(testcase, :, 3)));
-    fprintf('\t\tAPS: %03f\n', median(results(testcase, :, 4)));
+    s.harmonic_bss.(tname).ISR = median(results(testcase, :, 5));
+    s.harmonic_bss.(tname).SIR = median(results(testcase, :, 6));
+    s.harmonic_bss.(tname).SAR = median(results(testcase, :, 7));
     
-    fprintf('\tBSS measures\n');
-    fprintf('\t\tISR: %03f\n', median(results(testcase, :, 5)));
-    fprintf('\t\tSIR: %03f\n', median(results(testcase, :, 6)));
-    fprintf('\t\tSAR: %03f\n', median(results(testcase, :, 7)));
-    %fprintf('\t\tSDR: %03f\n', median(results(testcase, :, 8)));
+    s.harmonic_pemoq.(tname).qTarget = median(results(testcase, :, 9));
+    s.harmonic_pemoq.(tname).qInterf = median(results(testcase, :, 10));
+    s.harmonic_pemoq.(tname).qArtif = median(results(testcase, :, 11));
     
-    fprintf('\tPEMO-Q measures\n');
-    fprintf('\t\tqTarget: %03f\n', median(results(testcase, :, 9)));
-    fprintf('\t\tqInterf: %03f\n', median(results(testcase, :, 10)));
-    fprintf('\t\tqArtif: %03f\n', median(results(testcase, :, 11)));
-    %fprintf('\t\tqGlobal: %03f\n', median(results(testcase, :, 12)));
+    s.percussive_peass.(tname).TPS = median(results(testcase, :, 14));
+    s.percussive_peass.(tname).IPS = median(results(testcase, :, 15));
+    s.percussive_peass.(tname).APS = median(results(testcase, :, 16));
     
-    fprintf('\tPERCUSSIVE\n');
+    s.percussive_bss.(tname).ISR = median(results(testcase, :, 17));
+    s.percussive_bss.(tname).SIR = median(results(testcase, :, 18));
+    s.percussive_bss.(tname).SAR = median(results(testcase, :, 19));
     
-    fprintf('\tPEASS measures\n');
-    %fprintf('\t\tOPS: %03f\n', median(results(testcase, :, 13)));
-    fprintf('\t\tTPS: %03f\n', median(results(testcase, :, 14)));
-    fprintf('\t\tIPS: %03f\n', median(results(testcase, :, 15)));
-    fprintf('\t\tAPS: %03f\n', median(results(testcase, :, 16)));
+    s.percussive_pemoq.(tname).qTarget = median(results(testcase, :, 21));
+    s.percussive_pemoq.(tname).qInterf = median(results(testcase, :, 22));
+    s.percussive_pemoq.(tname).qArtif = median(results(testcase, :, 23));
     
-    fprintf('\tBSS measures\n');
-    fprintf('\t\tISR: %03f\n', median(results(testcase, :, 17)));
-    fprintf('\t\tSIR: %03f\n', median(results(testcase, :, 18)));
-    fprintf('\t\tSAR: %03f\n', median(results(testcase, :, 19)));
-    %fprintf('\t\tSDR: %03f\n', median(results(testcase, :, 20)));
+    s.vocal_peass.(tname).TPS = median(results(testcase, :, 26));
+    s.vocal_peass.(tname).IPS = median(results(testcase, :, 27));
+    s.vocal_peass.(tname).APS = median(results(testcase, :, 28));
     
-    fprintf('\tPEMO-Q measures\n');
-    fprintf('\t\tqTarget: %03f\n', median(results(testcase, :, 21)));
-    fprintf('\t\tqInterf: %03f\n', median(results(testcase, :, 22)));
-    fprintf('\t\tqArtif: %03f\n', median(results(testcase, :, 23)));
-    %fprintf('\t\tqGlobal: %03f\n', median(results(testcase, :, 24)));
+    s.vocal_bss.(tname).ISR = median(results(testcase, :, 29));
+    s.vocal_bss.(tname).SIR = median(results(testcase, :, 30));
+    s.vocal_bss.(tname).SAR = median(results(testcase, :, 31));
     
-    fprintf('\tVOCAL\n');
-    
-    fprintf('\tPEASS measures\n');
-    %fprintf('\t\tOPS: %03f\n', median(results(testcase, :, 25)));
-    fprintf('\t\tTPS: %03f\n', median(results(testcase, :, 26)));
-    fprintf('\t\tIPS: %03f\n', median(results(testcase, :, 27)));
-    fprintf('\t\tAPS: %03f\n', median(results(testcase, :, 28)));
-    
-    fprintf('\tBSS measures\n');
-    fprintf('\t\tISR: %03f\n', median(results(testcase, :, 29)));
-    fprintf('\t\tSIR: %03f\n', median(results(testcase, :, 30)));
-    fprintf('\t\tSAR: %03f\n', median(results(testcase, :, 31)));
-    %fprintf('\t\tSDR: %03f\n', median(results(testcase, :, 32)));
-    
-    fprintf('\tPEMO-Q measures\n');
-    fprintf('\t\tqTarget: %03f\n', median(results(testcase, :, 33)));
-    fprintf('\t\tqInterf: %03f\n', median(results(testcase, :, 34)));
-    fprintf('\t\tqArtif: %03f\n', median(results(testcase, :, 35)));
-    %fprintf('\t\tqGlobal: %03f\n', median(results(testcase, :, 36)));
+    s.vocal_pemoq.(tname).qTarget = median(results(testcase, :, 33));
+    s.vocal_pemoq.(tname).qInterf = median(results(testcase, :, 34));
+    s.vocal_pemoq.(tname).qArtif = median(results(testcase, :, 35));
+end
+
+fprintf("%s\n", jsonencode(s));
+
 end
