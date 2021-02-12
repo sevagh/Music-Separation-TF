@@ -21,27 +21,33 @@ if __name__ == '__main__':
 
         n_testcases = len(results)
 
-        fig = plt.figure()
-        fig.suptitle('Final evaluation - harmonic/percussive/vocal')
+        fig_peass = plt.figure()
+        fig_peass.suptitle('PEASS')
+
+        fig_bss = plt.figure()
+        fig_bss.suptitle('BSS')
+
+        fig_pemoq = plt.figure()
+        fig_pemoq.suptitle('PEMO-Q')
 
         if vocals_present:
-            ax_peass_harm = fig.add_subplot(331)
-            ax_peass_perc = fig.add_subplot(332)
+            ax_peass_harm = fig_peass.add_subplot(131)
+            ax_peass_perc = fig_peass.add_subplot(132)
 
-            ax_bss_harm = fig.add_subplot(334)
-            ax_bss_perc = fig.add_subplot(335)
+            ax_bss_harm = fig_bss.add_subplot(131)
+            ax_bss_perc = fig_bss.add_subplot(132)
 
-            ax_pemoq_harm = fig.add_subplot(337)
-            ax_pemoq_perc = fig.add_subplot(338)
+            ax_pemoq_harm = fig_pemoq.add_subplot(131)
+            ax_pemoq_perc = fig_pemoq.add_subplot(132)
         else:
-            ax_peass_harm = fig.add_subplot(321)
-            ax_peass_perc = fig.add_subplot(322)
+            ax_peass_harm = fig_peass.add_subplot(121)
+            ax_peass_perc = fig_peass.add_subplot(122)
 
-            ax_bss_harm = fig.add_subplot(323)
-            ax_bss_perc = fig.add_subplot(324)
+            ax_bss_harm = fig_bss.add_subplot(121)
+            ax_bss_perc = fig_bss.add_subplot(122)
 
-            ax_pemoq_harm = fig.add_subplot(325)
-            ax_pemoq_perc = fig.add_subplot(326)
+            ax_pemoq_harm = fig_pemoq.add_subplot(121)
+            ax_pemoq_perc = fig_pemoq.add_subplot(122)
 
         ax_peass_harm.set_title('Harmonic PEASS scores')
         ax_peass_perc.set_title('Percussive PEASS scores')
@@ -68,9 +74,9 @@ if __name__ == '__main__':
 
         # vocal eval
         if vocals_present:
-            ax_peass_vocal = fig.add_subplot(333)
-            ax_bss_vocal = fig.add_subplot(336)
-            ax_pemoq_vocal = fig.add_subplot(339)
+            ax_peass_vocal = fig_peass.add_subplot(133)
+            ax_bss_vocal = fig_bss.add_subplot(133)
+            ax_pemoq_vocal = fig_pemoq.add_subplot(133)
 
             ax_peass_vocal.set_title('Vocal PEASS scores')
             ax_bss_vocal.set_title('Vocal BSS scores')
