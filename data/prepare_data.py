@@ -8,8 +8,8 @@ import subprocess
 from essentia.standard import MonoLoader
 import soundfile
 
-vocal_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data-vocal')
-novocal_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data-hpss')
+vocal_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data-vocal")
+novocal_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data-hpss")
 
 
 def parse_args():
@@ -29,14 +29,18 @@ def parse_args():
     parser.add_argument(
         "--vocals", action="store_true", help="include vocals in the mix"
     )
+    parser.add_argument("--track-limit", type=int, default=-1, help="limit to n tracks")
     parser.add_argument(
-        "--track-limit", type=int, default=-1, help="limit to n tracks"
+        "--segment-limit",
+        type=int,
+        default=sys.maxsize,
+        help="limit to n segments per track",
     )
     parser.add_argument(
-        "--segment-limit", type=int, default=sys.maxsize, help="limit to n segments per track"
-    )
-    parser.add_argument(
-        "--segment-offset", type=int, default=0, help="offset of segment to start from (useful to skip intros)"
+        "--segment-offset",
+        type=int,
+        default=0,
+        help="offset of segment to start from (useful to skip intros)",
     )
     parser.add_argument(
         "--segment-size", type=float, default=30.0, help="segment size in seconds"
@@ -91,34 +95,59 @@ def main():
                     )
 
                     # first create the full mix
-                    harmonic_mix = sum([l for i, l in enumerate(loaded_wavs) if i not in [drum_track_index, vocal_track_index, mix_track_index]])
+                    harmonic_mix = sum(
+                        [
+                            l
+                            for i, l in enumerate(loaded_wavs)
+                            if i
+                            not in [
+                                drum_track_index,
+                                vocal_track_index,
+                                mix_track_index,
+                            ]
+                        ]
+                    )
 
                     full_mix = None
                     if args.vocals:
-                        full_mix = harmonic_mix + loaded_wavs[drum_track_index] + loaded_wavs[vocal_track_index]
+                        full_mix = (
+                            harmonic_mix
+                            + loaded_wavs[drum_track_index]
+                            + loaded_wavs[vocal_track_index]
+                        )
                     else:
                         full_mix = harmonic_mix + loaded_wavs[drum_track_index]
 
-                    seg_samples = int(numpy.floor(args.segment_size*args.sample_rate))
-                    total_segs = int(numpy.floor(track_len/seg_samples))
+                    seg_samples = int(numpy.floor(args.segment_size * args.sample_rate))
+                    total_segs = int(numpy.floor(track_len / seg_samples))
 
-                    seg_limit = min(total_segs-1, args.segment_limit)
+                    seg_limit = min(total_segs - 1, args.segment_limit)
 
                     for seg in range(seg_limit):
                         if seg < args.segment_offset:
                             continue
                         seqstr = "%03d%04d" % (seq, seg)
 
-                        left = seg*seg_samples
-                        right = (seg+1)*seg_samples
+                        left = seg * seg_samples
+                        right = (seg + 1) * seg_samples
 
-                        harm_path = os.path.join(data_dir, "{0}_harmonic.wav".format(seqstr))
+                        harm_path = os.path.join(
+                            data_dir, "{0}_harmonic.wav".format(seqstr)
+                        )
                         mix_path = os.path.join(data_dir, "{0}_mix.wav".format(seqstr))
-                        perc_path = os.path.join(data_dir, "{0}_percussive.wav".format(seqstr))
-                        vocal_path = os.path.join(data_dir, "{0}_vocal.wav".format(seqstr))
+                        perc_path = os.path.join(
+                            data_dir, "{0}_percussive.wav".format(seqstr)
+                        )
+                        vocal_path = os.path.join(
+                            data_dir, "{0}_vocal.wav".format(seqstr)
+                        )
 
-                        soundfile.write(harm_path, harmonic_mix[left:right], args.sample_rate)
-                        soundfile.write(mix_path, full_mix[left:right], args.sample_rate)
+                        soundfile.write(
+                            harm_path, harmonic_mix[left:right], args.sample_rate
+                        )
+                        soundfile.write(
+                            mix_path, full_mix[left:right], args.sample_rate
+                        )
 
                         # write the drum track
                         soundfile.write(

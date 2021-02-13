@@ -1,7 +1,4 @@
 function JigsawSep(filename, varargin)
-[mypath, ~, ~] = fileparts(matlab.desktop.editor.getActiveFilename);
-run(fullfile(mypath, '../../vendor/ltfat/ltfatstart'));
-
 p = inputParser;
 
 defaultV2 = false;

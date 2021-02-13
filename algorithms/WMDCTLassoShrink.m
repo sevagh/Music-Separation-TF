@@ -1,7 +1,4 @@
 function WMDCTLassoShrink(filename, varargin)
-[mypath, ~, ~] = fileparts(matlab.desktop.editor.getActiveFilename);
-run(fullfile(mypath, '../../vendor/ltfat/ltfatstart'));
-
 p = inputParser;
 
 defaultHarmonicWMDCT= 256;

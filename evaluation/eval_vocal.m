@@ -1,9 +1,5 @@
 function eval_vocal(contender)
 [mypath, ~, ~] = fileparts(matlab.desktop.editor.getActiveFilename);
-addpath(genpath(fullfile(mypath, '/../../vendor/PEASS-Software-v2.0.1')));
-addpath(fullfile(mypath, '../algorithms'));
-addpath(fullfile(mypath, './contenders'));
-
 files = dir(fullfile(mypath, '../data/data-vocal/*.wav'));
 resultsDir = fullfile(mypath, './results-vocal');
 
@@ -127,6 +123,7 @@ s = struct();
 for testcase = 1:size(testCases, 2)
     tname = matlab.lang.makeValidName(testCases{testcase}{1});
     
+    s.harmonic_peass.(tname).OPS = median(results(testcase, :, 1));
     s.harmonic_peass.(tname).TPS = median(results(testcase, :, 2));
     s.harmonic_peass.(tname).IPS = median(results(testcase, :, 3));
     s.harmonic_peass.(tname).APS = median(results(testcase, :, 4));
@@ -134,11 +131,14 @@ for testcase = 1:size(testCases, 2)
     s.harmonic_bss.(tname).ISR = median(results(testcase, :, 5));
     s.harmonic_bss.(tname).SIR = median(results(testcase, :, 6));
     s.harmonic_bss.(tname).SAR = median(results(testcase, :, 7));
+    s.harmonic_bss.(tname).SDR = median(results(testcase, :, 8));
     
     s.harmonic_pemoq.(tname).qTarget = median(results(testcase, :, 9));
     s.harmonic_pemoq.(tname).qInterf = median(results(testcase, :, 10));
     s.harmonic_pemoq.(tname).qArtif = median(results(testcase, :, 11));
+    s.harmonic_pemoq.(tname).qGlobal = median(results(testcase, :, 12));
     
+    s.percussive_peass.(tname).OPS = median(results(testcase, :, 13));
     s.percussive_peass.(tname).TPS = median(results(testcase, :, 14));
     s.percussive_peass.(tname).IPS = median(results(testcase, :, 15));
     s.percussive_peass.(tname).APS = median(results(testcase, :, 16));
@@ -146,11 +146,14 @@ for testcase = 1:size(testCases, 2)
     s.percussive_bss.(tname).ISR = median(results(testcase, :, 17));
     s.percussive_bss.(tname).SIR = median(results(testcase, :, 18));
     s.percussive_bss.(tname).SAR = median(results(testcase, :, 19));
-    
+    s.percussive_bss.(tname).SDR = median(results(testcase, :, 20));
+
     s.percussive_pemoq.(tname).qTarget = median(results(testcase, :, 21));
     s.percussive_pemoq.(tname).qInterf = median(results(testcase, :, 22));
     s.percussive_pemoq.(tname).qArtif = median(results(testcase, :, 23));
+    s.percussive_pemoq.(tname).qGlobal = median(results(testcase, :, 24));
     
+    s.vocal_peass.(tname).OPS = median(results(testcase, :, 25));
     s.vocal_peass.(tname).TPS = median(results(testcase, :, 26));
     s.vocal_peass.(tname).IPS = median(results(testcase, :, 27));
     s.vocal_peass.(tname).APS = median(results(testcase, :, 28));
@@ -158,10 +161,12 @@ for testcase = 1:size(testCases, 2)
     s.vocal_bss.(tname).ISR = median(results(testcase, :, 29));
     s.vocal_bss.(tname).SIR = median(results(testcase, :, 30));
     s.vocal_bss.(tname).SAR = median(results(testcase, :, 31));
-    
+    s.vocal_bss.(tname).SDR = median(results(testcase, :, 32));
+
     s.vocal_pemoq.(tname).qTarget = median(results(testcase, :, 33));
     s.vocal_pemoq.(tname).qInterf = median(results(testcase, :, 34));
     s.vocal_pemoq.(tname).qArtif = median(results(testcase, :, 35));
+    s.vocal_pemoq.(tname).qGlobal = median(results(testcase, :, 36));
 end
 
 fprintf("%s\n", jsonencode(s));
