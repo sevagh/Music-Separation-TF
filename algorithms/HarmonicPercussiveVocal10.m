@@ -28,6 +28,9 @@ parse(p, filename, varargin{:});
 % CQT of original signal
 [cfs1,~,g1,fshifts1] = cqt(x, 'SamplingFrequency', fs, 'BinsPerOctave', 96);
 
+display(size(cfs1))
+display(size(g1))
+
 cmag1 = abs(cfs1); % use the magnitude CQT for creating masks
 
 H1 = movmedian(cmag1, LHarmCQT, 2);
@@ -56,6 +59,10 @@ xim2 = xp1;
 
 % CQT of original signal
 [cfs2,~,g2,fshifts2] = cqt(xim2, 'SamplingFrequency', fs, 'BinsPerOctave', 24);
+
+display(size(cfs2))
+display(size(g2))
+
 
 cmag2 = abs(cfs2); % use the magnitude CQT for creating masks
 
@@ -144,6 +151,9 @@ x_percussive = xp2+xp3;
 [cfs4,~,g4,fshifts4] = cqt(x_harmonic, 'SamplingFrequency', fs, 'BinsPerOctave', 12);
 [cfs4_vocal,~,~,~] = cqt(x_vocal, 'SamplingFrequency', fs, 'BinsPerOctave', 12);
 [cfs4_percussive,~,~,~] = cqt(x_percussive, 'SamplingFrequency', fs, 'BinsPerOctave', 12);
+
+display(size(cfs4))
+display(size(g4))
 
 cmag4 = abs(cfs4); % use the magnitude CQT for creating masks
 cmag4_vocal = abs(cfs4_vocal);

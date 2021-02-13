@@ -4,6 +4,7 @@ all: help
 
 help:
 	@printf "targets:\n"
+	@printf "\tclean\n"
 	@printf "\tvocal-data-clean\n"
 	@printf "\tvocal-results-clean\n"
 	@printf "\tvocal-clean\n"
@@ -15,6 +16,9 @@ help:
 	@printf "\thpss-small-data\n"
 	@printf "\thpss-big-data\n"
 
+clean: vocal-clean
+clean: hpss-clean
+
 vocal-clean: vocal-data-clean
 vocal-clean: vocal-results-clean
 
@@ -22,16 +26,16 @@ hpss-clean: hpss-data-clean
 hpss-clean: hpss-results-clean
 
 vocal-data-clean:
-	-rm $(current_dir)/data/data-vocal/*.wav
+	-rm -rf $(current_dir)/data/data-vocal
 
 hpss-data-clean:
-	-rm $(current_dir)/data/data-hpss/*.wav
+	-rm -rf $(current_dir)/data/data-hpss
 
 vocal-results-clean:
-	-rm $(current_dir)/evaluation/results-vocal/*.wav
+	-rm -rf $(current_dir)/evaluation/results-vocal
 
 hpss-results-clean:
-	-rm $(current_dir)/evaluation/results-hpss/*.wav
+	-rm -rf $(current_dir)/evaluation/results-hpss
 
 vocal-small-data:
 	$(current_dir)/data/prepare_data.py --vocals --track-limit 2 --segment-limit 12 --segment-offset 8 --segment-size 10 ~/TRAINING-MUSIC/periphery-stems/Juggernaut_Alpha/
