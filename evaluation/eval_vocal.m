@@ -1,5 +1,6 @@
 function eval_vocal(contender)
-[mypath, ~, ~] = fileparts(matlab.desktop.editor.getActiveFilename);
+[mypath, ~, ~] = fileparts(mfilename('fullpath'));
+fprintf("MY PATH: %s\n", mypath);
 files = dir(fullfile(mypath, '../data/data-vocal/*.wav'));
 resultsDir = fullfile(mypath, './results-vocal');
 

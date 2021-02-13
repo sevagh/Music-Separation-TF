@@ -1,5 +1,5 @@
 function eval_hpss(contender)
-[mypath, ~, ~] = fileparts(matlab.desktop.editor.getActiveFilename);
+[mypath, ~, ~] = fileparts(mfilename('fullpath'));
 files = dir(fullfile(mypath, '../data/data-hpss/*.wav'));
 resultsDir = fullfile(mypath, './results-hpss');
 

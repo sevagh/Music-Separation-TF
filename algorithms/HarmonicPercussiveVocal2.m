@@ -1,7 +1,7 @@
 function HarmonicPercussiveVocal2(filename, varargin)
 p = inputParser;
 
-WindowSizeP = 512;
+WindowSizeP = 1024;
 HopSizeP = 256;
 
 Power = 2;
@@ -119,42 +119,14 @@ P3 = cat(1, P3, flipud(conj(P3)));
 % finally istft to convert back to audio
 xp3 = istft(P3, "Window", win3, "OverlapLength", overlapLen3,...
   "FFTLength", fftLen3, "ConjugateSymmetric", true);
-%xp3 = xp3;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% FOURTH ITERATION, REFINE HARMONIC %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% use 2nd iter vocal estimation to improve harmonic sep
-x_vocal = xh2;
-x_harmonic = xh1;
-
-% CQT of harmonic signal
-% use a high frequency resolution here as  well
-[cfs4,~,g4,fshifts4] = cqt(x_harmonic, 'SamplingFrequency', fs, 'BinsPerOctave', 96);
-[cfs4_vocal,~,~,~] = cqt(x_vocal, 'SamplingFrequency', fs, 'BinsPerOctave', 96);
-
-cmag4 = abs(cfs4); % use the magnitude CQT for creating masks
-cmag4_vocal = abs(cfs4_vocal);
-
-% soft masks, Fitzgerald 2010 - p is usually 1 or 2
-H4 = cmag4 .^ Power;
-V4 = cmag4_vocal .^ Power;
-total4 = H4 + V4;
-Mh4 = H4 ./ total4;
-
-H4 = Mh4 .* cfs4;
-
-% finally istft to convert back to audio
-xh4 = icqt(H4, g4, fshifts4);
 
 [~,fname,~] = fileparts(p.Results.filename);
 splt = split(fname, "_");
 prefix = splt{1};
 
 % fix up some lengths
-if size(xh4, 1) < size(x, 1)
-    xh4 = [xh4; x(size(xh4, 1)+1:size(x, 1))];
+if size(xh1, 1) < size(x, 1)
+    xh1 = [xh1; x(size(xh1, 1)+1:size(x, 1))];
 end
 
 if size(xp3, 1) < size(x, 1)
@@ -170,7 +142,7 @@ xhOut = sprintf("%s/%s_harmonic.wav", p.Results.OutDir, prefix);
 xpOut = sprintf("%s/%s_percussive.wav", p.Results.OutDir, prefix);
 xvOut = sprintf("%s/%s_vocal.wav", p.Results.OutDir, prefix);
 
-audiowrite(xhOut, xh4, fs);
+audiowrite(xhOut, xh1, fs);
 audiowrite(xpOut, xp3 + xp2, fs);
 audiowrite(xvOut, xh2, fs);
 end

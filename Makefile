@@ -40,20 +40,8 @@ vocal-results-clean:
 hpss-results-clean:
 	-rm -rf $(current_dir)/evaluation/results-hpss
 
-vocal-small-data-periphery:
-	$(current_dir)/data/prepare_data.py --vocals --track-limit 2 --segment-limit 12 --segment-offset 8 --segment-size 10 ~/TRAINING-MUSIC/periphery-stems/Juggernaut_Alpha/
-
-hpss-small-data-periphery:
-	$(current_dir)/data/prepare_data.py --track-limit 2 --segment-limit 8 --segment-offset 4 --segment-size 10 ~/TRAINING-MUSIC/periphery-stems/Juggernaut_Alpha/
-
-vocal-big-data-periphery:
-	$(current_dir)/data/prepare_data.py --vocals --track-limit 20 --segment-limit 9 --segment-offset 3 --segment-size 30 ~/TRAINING-MUSIC/periphery-stems/*
-
-hpss-big-data-periphery:
-	$(current_dir)/data/prepare_data.py --track-limit 20 --segment-limit 9 --segment-offset 3 --segment-size 30 ~/TRAINING-MUSIC/periphery-stems/*
-
-vocal-musdb-small:
-	$(current_dir)/data/prepare_data.py --vocals --track-limit 5 --segment-limit 5 --segment-offset 3 --segment-size 15 ~/TRAINING-MUSIC/MUSDB18-HQ/test/
+vocal-musdb-small: # 5 min of songs
+	$(current_dir)/data/prepare_data.py --vocals --track-limit 5 --segment-limit 6 --segment-offset 2 --segment-size 15 ~/TRAINING-MUSIC/MUSDB18-HQ/test/
 
 vocal-musdb-big:
 	$(current_dir)/data/prepare_data.py --vocals --track-limit 20 --segment-limit 12 --segment-offset 2 --segment-size 15 ~/TRAINING-MUSIC/MUSDB18-HQ/test/
