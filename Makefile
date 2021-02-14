@@ -8,13 +8,13 @@ help:
 	@printf "\tvocal-data-clean\n"
 	@printf "\tvocal-results-clean\n"
 	@printf "\tvocal-clean\n"
-	@printf "\tvocal-small-data\n"
-	@printf "\tvocal-big-data\n"
 	@printf "\thpss-data-clean\n"
 	@printf "\thpss-results-clean\n"
 	@printf "\thpss-clean\n"
-	@printf "\thpss-small-data\n"
-	@printf "\thpss-big-data\n"
+	@printf "\tvocal-musdb-short\n"
+	@printf "\tvocal-musdb-long\n"
+	@printf "\thpss-musdb-short\n"
+	@printf "\thpss-musdb-long\n"
 
 clean: vocal-clean
 clean: hpss-clean
@@ -40,11 +40,17 @@ vocal-results-clean:
 hpss-results-clean:
 	-rm -rf $(current_dir)/evaluation/results-hpss
 
-vocal-musdb-small: # 5 min of songs
+hpss-musdb-short: # 5 min of songs
+	$(current_dir)/data/prepare_data.py --track-limit 5 --segment-limit 6 --segment-offset 2 --segment-size 15 ~/TRAINING-MUSIC/MUSDB18-HQ/test/
+
+hpss-musdb-long: # 30 minutes of songs
+	$(current_dir)/data/prepare_data.py --track-limit 20 --segment-limit 12 --segment-offset 2 --segment-size 15 ~/TRAINING-MUSIC/MUSDB18-HQ/test/
+
+vocal-musdb-short: # 5 min of songs
 	$(current_dir)/data/prepare_data.py --vocals --track-limit 5 --segment-limit 6 --segment-offset 2 --segment-size 15 ~/TRAINING-MUSIC/MUSDB18-HQ/test/
 
-vocal-musdb-big:
+vocal-musdb-long: # 30 minutes of songs
 	$(current_dir)/data/prepare_data.py --vocals --track-limit 20 --segment-limit 12 --segment-offset 2 --segment-size 15 ~/TRAINING-MUSIC/MUSDB18-HQ/test/
 
 .PHONY:
-	vocal-clean vocal-data-clean vocal-results-clean hpss-clean hpss-data-clean hpss-results-clean hpss-small-data vocal-small-data hpss-big-data vocal-big-data
+	vocal-clean vocal-data-clean vocal-results-clean hpss-clean hpss-data-clean hpss-results-clean clean hpss-musdb-short hpss-musdb-long vocal-musdb-short vocal-musdb-long

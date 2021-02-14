@@ -94,10 +94,6 @@ for file = files'
     end
 end
 
-fprintf('*************************\n');
-fprintf('****  FINAL RESULTS  ****\n');
-fprintf('*************************\n');
-
 s = struct();
 
 for testcase = 1:size(testCases, 2)
