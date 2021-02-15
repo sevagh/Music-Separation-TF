@@ -40,17 +40,11 @@ vocal-results-clean:
 hpss-results-clean:
 	-rm -rf $(current_dir)/evaluation/results-hpss
 
-hpss-musdb-short: # 5 min of songs
+hpss-musdb: # 5 min of songs
 	$(current_dir)/data/prepare_data.py --track-limit 5 --segment-limit 6 --segment-offset 2 --segment-size 15 ~/TRAINING-MUSIC/MUSDB18-HQ/test/
 
-hpss-musdb-long: # 30 minutes of songs
-	$(current_dir)/data/prepare_data.py --track-limit 20 --segment-limit 12 --segment-offset 2 --segment-size 15 ~/TRAINING-MUSIC/MUSDB18-HQ/test/
-
-vocal-musdb-short: # 5 min of songs
+vocal-musdb: # 5 min of songs
 	$(current_dir)/data/prepare_data.py --vocals --track-limit 5 --segment-limit 6 --segment-offset 2 --segment-size 15 ~/TRAINING-MUSIC/MUSDB18-HQ/test/
 
-vocal-musdb-long: # 30 minutes of songs
-	$(current_dir)/data/prepare_data.py --vocals --track-limit 20 --segment-limit 12 --segment-offset 2 --segment-size 15 ~/TRAINING-MUSIC/MUSDB18-HQ/test/
-
 .PHONY:
-	vocal-clean vocal-data-clean vocal-results-clean hpss-clean hpss-data-clean hpss-results-clean clean hpss-musdb-short hpss-musdb-long vocal-musdb-short vocal-musdb-long
+	vocal-clean vocal-data-clean vocal-results-clean hpss-clean hpss-data-clean hpss-results-clean clean hpss-musdb-short hpss-musdb vocal-musdb
