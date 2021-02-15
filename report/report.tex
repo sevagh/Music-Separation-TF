@@ -1,0 +1,118 @@
+%
+
+% File final_report.tex
+%
+%% Based on the style files for ACL 2020, which were
+%% Based on the style files for ACL 2018, NAACL 2018/19, which were
+%% Based on the style files for ACL-2015, with some improvements
+%%  taken from the NAACL-2016 style
+%% Based on the style files for ACL-2014, which were, in turn,
+%% based on ACL-2013, ACL-2012, ACL-2011, ACL-2010, ACL-IJCNLP-2009,
+%% EACL-2009, IJCNLP-2008...
+%% Based on the style files for EACL 2006 by 
+%%e.agirre@ehu.es or Sergi.Balari@uab.es
+%% and that of ACL 08 by Joakim Nivre and Noah Smith
+
+\documentclass[12pt,letter]{article}
+\usepackage[hyperref]{acl2020}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{amsmath}
+\usepackage{fancyvrb}
+\usepackage{subcaption}
+\usepackage{makecell}
+\usepackage{placeins}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\graphicspath{ {./} }
+\renewcommand{\UrlFont}{\ttfamily\small}
+\usepackage[
+    %backend=biber, 
+    natbib=true,
+    style=numeric,
+    sorting=none
+]{biblatex}
+\addbibresource{citations.bib}
+
+% This is not strictly necessary, and may be commented out,
+% but it will improve the layout of the manuscript,
+% and will typically save some space.
+\usepackage{microtype}
+\usepackage[T1]{fontenc}
+
+\aclfinalcopy % Uncomment this line for the final submission
+%\def\aclpaperid{***} %  Enter the acl Paper ID here
+
+%\setlength\titlebox{5cm}
+% You can expand the titlebox if you need extra space
+% to show all the authors. Please do not make the titlebox
+% smaller than 5cm (the original size); we will check this
+% in the camera-ready version and ask you to change it back.
+
+\newcommand\BibTeX{B\textsc{ib}\TeX}
+
+\newenvironment{tight_enumerate}{
+\begin{enumerate}
+\setlength{\itemsep}{0pt}
+\setlength{\parskip}{0pt}
+}{\end{enumerate}}
+
+\newenvironment{tight_itemize}{
+\begin{itemize}
+\setlength{\itemsep}{0pt}
+\setlength{\parskip}{0pt}
+}{\end{itemize}}
+
+\title{Music Source Separation With Different Time-Frequency Representations}
+
+\author{Sevag Hanssian \\
+  McGill University \\
+ \texttt{sevag.hanssian@mail.mcgill.ca} \\
+ \texttt{sevagh@protonmail.com}}
+
+\date{}
+
+\begin{document}
+\maketitle
+%%%%%%%%%%%%%%
+% ABSTRACT			%
+%%%%%%%%%%%%%%
+\begin{abstract}
+	\citet{fitzgerald1} presented an algorithm for separating a musical mix into harmonic and percussive components with the short-time Fourier transform. \citet{fitzgerald2} introduced the constant-Q transform to also separate the vocal component. \citet{driedger} created an iterative variant using a large window for the harmonic separation and a small window for the percussive separation. The field of wavelets has produced similar algorithms for tonal/transient separation, such as \citet{tfjigsaw}'s Jigsaw Puzzle. A survey of different time-frequency representations used for harmonic/percussive/vocal source separation is proposed. They will be implemented and evaluated in MATLAB, and the best performers will be combined in a hybrid algorithm to compare against a state-of-the-art neural network.
+\end{abstract}
+
+%%%%%%%%%%%%%%
+% INTRODUCTION		%
+%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec:intro}
+
+Based on the insight that harmonic sounds exhibit spectral sparseness and temporal smoothness (narrowband and steady), and percussive sounds exhibit spectral smoothness and temporal sparseness (transient and broadband)
+
+In source separation, a mixed song is split into its constituent components, or sources. There are different forms
+
+
+%%%%%%%%%%%%%%
+% RELATED WORK		%
+%%%%%%%%%%%%%%
+\section{Related Work}
+\label{sec:related}
+
+wowowow
+
+\subsection{cool}
+
+wowowow
+
+\subsection{Code Availability}
+
+sup bruh
+
+\vfill
+\clearpage % force a page break before references
+
+\nocite{*}
+\printbibheading[title={References}]
+\printbibliography[heading=none]
+
+\end{document}
