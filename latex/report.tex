@@ -115,11 +115,11 @@ Harmonic (or steady-state, or tonal) sounds are narrowband (contain few well-def
 
 \begin{figure}[ht]
 	\centering
-	\vspace{-0.8em}
-	\subfloat[Mixed signal]{{\includegraphics[width=4cm]{./mixedspecgram.png} }}
+	\subfloat[Mixed signal]{{\includegraphics[width=6cm]{./mixedspecgram.png} }}
 	\\
-	\subfloat[Percussive separation]{{\includegraphics[width=4cm]{./perc_soft.png} }}
-	\subfloat[Harmonic separation]{{\includegraphics[width=4cm]{./harm_soft.png} }}
+	\subfloat[Percussive separation]{{\includegraphics[width=6cm]{./perc_soft.png} }}
+	\\
+	\subfloat[Harmonic separation]{{\includegraphics[width=6cm]{./harm_soft.png} }}
 	\caption{Example of median-filtering HPSS}
 	\label{fig:fitz1}
 \end{figure}
@@ -213,7 +213,26 @@ From these, we can move on to two-pass variants, by using the conclusions from t
 
 The final goal is to combine the best performers to create optimal ``hybrid'' algorithms for each task: HPSS and harmonic/percussive/vocal separation. At the last stage, the optimal hybrids will be compared to Open-Unmix (\cite{umx}). Open-Unmix is an deep-learning-based music source separation system which achieves near state-of-the-art results. It is fully open-source, and was intended to be a reference and benchmark in the field of signal separation.
 
-\subsection{Mixed Python/MATLAB testbench}
+\subsection{Python/MATLAB testbench}
+
+The implementation of the algorithms is best done in MATLAB, since it has access to LTFAT, a huge amount of signal processing tools (e.g. Signal Processing and Wavelet Toolbox), and is a natural choice for quickly prototyping vector and matrix-based math. Also, the PEASS Toolkit is only released for MATLAB.
+
+On the other hand, other tasks for the project are more easily accomplished with Python. One example is in the preparation of the datasets, which requires traversing directories of stem files to produce mix and reference harmonic/percussive/vocal files. Also, Python would be a good choice for data visualization and result aggregation, to be able to use numpy\cite{numpy}, pandas\cite{pandas}, matplotlib\cite{matplotlib}, and seaborn\cite{seaborn}.
+
+The solution is to use the file system and JSON as universal interchanges:
+\begin{tight_enumerate}
+\vspace{-0.5em}
+\item
+	The Python script for data preparation scans the stem directories of MUSDB18-HQ, creates test wav files with a prefix indicating a unique sequence number, and wav files for each of the mix, harmonic, percussive, and vocal components
+\item
+	The MATLAB PEASS evaluation script searches for all mix files, executes the separation algorithms being tested on each, and writes the separated component outputs to a directory with the algorithm name, e.g. ``1pass-hpss-f-cqt-24''. This way, the algorithm which produced the separation can be identified during subjective listening tests.
+\item
+	The MATLAB PEASS evaluation script outputs median scores and prints a JSON-encoded string containing the algorithm names and their scores.
+\item
+	The Python visualization script takes the previous JSON string as an input and produces heatmaps (that are used throughout the rest of the report).
+\end{tight_enumerate}
+
+One final issue is that Open-Unmix, the deep learning solution that will also be evaluated, is released only as a Python implementation with pytorch\cite{pytorch}. Every other algorithm implemented in MATLAB takes an output directory name and input mix file as arguments. The solution was to write a MATLAB shim script for Open-Unmix, which uses the `system' command in MATLAB to execute the Python Open-Unmix script using the operating system, passing the output directory and input mix file paths as arguments.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % ELIMINATION TOURNAMENT %
@@ -262,7 +281,6 @@ CQT-96 demonstrates good results for both harmonic and percussive separation, in
 
 \begin{figure*}
 	\centering
-	\vspace{-0.8em}
 	\makebox[\textwidth]{\includegraphics[width=20cm]{../evaluation/heatmaps/1pass_Fitzgerald_PEASS_abbrev.png}}
 	\vspace{-1.25em}
 	\caption{One-pass soft-masking PEASS results}
@@ -271,7 +289,6 @@ CQT-96 demonstrates good results for both harmonic and percussive separation, in
 
 \begin{figure*}
 	\centering
-	\vspace{-0.8em}
 	\makebox[\textwidth]{\includegraphics[width=20cm]{../evaluation/heatmaps/1pass_Driedger_PEASS_abbrev.png}}
 	\vspace{-1.25em}
 	\caption{One-pass hard-masking PEASS results}
@@ -326,12 +343,39 @@ The results in \ref{fig:round2hard} show that the CQT-96/STFT-2048 algorithm per
 
 \begin{figure*}
 	\centering
-	\vspace{-0.8em}
 	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/2pass_Driedger_PEASS_abbrev.png}}
 	\vspace{-1.25em}
 	\caption{Two-pass hard-masking PEASS results}
 	\label{fig:round2hard}
 \end{figure*}
+
+\begin{figure*}
+	\centering
+	\makebox[\textwidth]{\includegraphics[width=20cm]{../evaluation/heatmaps/2pass_Jigsaw_PEASS_abbrev.png}}
+	\vspace{-1.25em}
+	\caption{TFJigsaw PEASS results}
+	\label{fig:round2hard}
+\end{figure*}
+
+\begin{figure*}
+	\centering
+	\makebox[\textwidth]{\includegraphics[width=20cm]{../evaluation/heatmaps/2pass_WMDCT_PEASS_abbrev.png}}
+	\makebox[\textwidth]{\includegraphics[width=20cm]{../evaluation/heatmaps/2pass_WMDCT2_PEASS_abbrev.png}}
+	\vspace{-1.25em}
+	\caption{WMDCT PEASS results}
+	\label{fig:round2hard}
+\end{figure*}
+
+\begin{figure*}
+	\centering
+	\makebox[\textwidth]{\includegraphics[width=20cm]{../evaluation/heatmaps/2pass_Fitzgerald_PEASS_abbrev.png}}
+	\vspace{-1.25em}
+	\caption{Two-pass soft-masking PEASS results}
+	\label{fig:round2hard}
+\end{figure*}
+
+\vfill
+\clearpage % force a page break before references
 
 %%%%%%%%%%%%%%%%%%%%%
 % HYBRID ALGORITHMS %
