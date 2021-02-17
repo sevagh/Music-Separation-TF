@@ -129,6 +129,11 @@ if __name__ == "__main__":
                 ax=ax_peass_perc,
             )
             if vocals_present:
+                mask = (results["vocal_peass"] == -999.0)
+                foo = pd.DataFrame(results["vocal_peass"])
+                print(foo)
+                print(type(foo))
+                print(results["vocal_peass"])
                 ax_peass_vocal.set_title("Vocal")
                 sns.heatmap(
                     pd.DataFrame(results["vocal_peass"]).transpose(),
@@ -137,6 +142,7 @@ if __name__ == "__main__":
                     cmap=cmap,
                     fmt=".2f",
                     ax=ax_peass_vocal,
+                    mask=mask
                 )
 
         if not args.disable_bss:
@@ -178,6 +184,7 @@ if __name__ == "__main__":
                 ax=ax_bss_perc,
             )
             if vocals_present:
+                mask = (results["vocal_bss"] == -999.0)
                 ax_bss_vocal.set_title("Vocal")
                 sns.heatmap(
                     pd.DataFrame(results["vocal_bss"]).transpose(),
@@ -186,6 +193,7 @@ if __name__ == "__main__":
                     cmap=cmap,
                     fmt=".2f",
                     ax=ax_bss_vocal,
+                    mask=mask,
                 )
 
         if not args.disable_pemoq:
@@ -227,6 +235,7 @@ if __name__ == "__main__":
                 ax=ax_pemoq_perc,
             )
             if vocals_present:
+                mask = (results["vocal_pemoq"] == -999.0)
                 ax_pemoq_vocal.set_title("Vocal")
                 sns.heatmap(
                     pd.DataFrame(results["vocal_pemoq"]).transpose(),
@@ -235,6 +244,7 @@ if __name__ == "__main__":
                     cmap=cmap,
                     fmt=".2f",
                     ax=ax_pemoq_vocal,
+                    mask=mask,
                 )
 
         plt.show()

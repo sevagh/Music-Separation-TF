@@ -114,18 +114,18 @@ for file = files'
                 results(testcase, findex, 35) = resV.qArtif;
                 results(testcase, findex, 36) = resV.qGlobal;
             else
-                results(testcase, findex, 25) = -999;
-                results(testcase, findex, 26) = -999;
-                results(testcase, findex, 27) = -999;
-                results(testcase, findex, 28) = -999;
-                results(testcase, findex, 29) = -999;
-                results(testcase, findex, 30) = -999;
-                results(testcase, findex, 31) = -999;
-                results(testcase, findex, 32) = -999;
-                results(testcase, findex, 33) = -999;
-                results(testcase, findex, 34) = -999;
-                results(testcase, findex, 35) = -999;
-                results(testcase, findex, 36) = -999;
+                results(testcase, findex, 25) = NaN;
+                results(testcase, findex, 26) = NaN;
+                results(testcase, findex, 27) = NaN;
+                results(testcase, findex, 28) = NaN;
+                results(testcase, findex, 29) = NaN;
+                results(testcase, findex, 30) = NaN;
+                results(testcase, findex, 31) = NaN;
+                results(testcase, findex, 32) = NaN;
+                results(testcase, findex, 33) = NaN;
+                results(testcase, findex, 34) = NaN;
+                results(testcase, findex, 35) = NaN;
+                results(testcase, findex, 36) = NaN;
             end
         end
         findex = findex + 1;

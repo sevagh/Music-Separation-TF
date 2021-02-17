@@ -5,6 +5,7 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{wrapfig}
 \usepackage{verbatim}
 \usepackage{listings}
 \usepackage{minted}
@@ -90,7 +91,7 @@
 % ABSTRACT			%
 %%%%%%%%%%%%%%
 \begin{abstract}
-	\citet{fitzgerald1} presented an algorithm for separating a musical mix into harmonic and percussive components by masking the short-time Fourier transform (STFT). \citet{driedger} created an iterative variant using a large window size for the harmonic separation and a small window size for the percussive separation. \citet{fitzgerald2} replaced the STFT with the constant-Q transform (CQT) to separate vocals. \citet{tfjigsaw}'s Jigsaw Puzzle and \citet{wmdct}'s structured sparse multilayer decomposition use custom time-frequency analyses based on Gabor expansions and frame theory. This paper presents a survey and evaluation of these algorithms for harmonic/percussive/vocal source separation, from the perspective of the different time-frequency analyses used.
+	\citet{fitzgerald1} presented an algorithm for separating a musical mix into harmonic and percussive components by masking the short-time Fourier transform (STFT). \citet{driedger} created an iterative version, improving the separation by using two STFTs with different time-frequency resolution. \citet{fitzgerald2} replaced the STFT with the constant-Q transform (CQT) to separate vocals. \citet{tfjigsaw}'s Jigsaw Puzzle and \citet{wmdct}'s structured sparsity method both use custom time-frequency analyses based on Gabor expansions and frame theory. This paper presents a survey and evaluation of these different algorithms for harmonic/percussive/vocal source separation, from the perspective of the different time-frequency analyses used.
 \end{abstract}
 
 %%%%%%%%%%%%%%
@@ -112,9 +113,20 @@ In music source separation, a mixed song is split into its constituent component
 
 In music analysis (assuming contemporary Western music), important features are driven by the harmonic instruments (e.g., pitch, melody, key), while others (e.g., rhythm, beats, tempo) are influenced more strongly by the percussive instruments. The singing voice contains yet more information, such as the lyrics and song structure. As such, an algorithm for high-quality separation of mixed music into its harmonic, percussive, and vocal components would be generally useful for further analysis of each component.
 
-\subsection{Methods based on the STFT and CQT}
+\subsection{Median-filtering the STFT and CQT}
 
-Harmonic (or steady-state, or tonal) sounds are narrowband (contain few well-defined frequencies) and steady (maintain the same frequency components over long periods of time), while percussive sounds  are broadband (contain most of the frequency spectrum) and transient (fast decay). \citet{fitzgerald1} noted that harmonic and percussive sounds appear as horizontal and vertical lines respectively in the short-time Fourier transform, and applied a median filter in the vertical and horizontal directions to estimate the harmonic and percussive components to compute soft masks. The masks were then applied to the original STFT and inverted to create the harmonic and percussive signals. An example can be seen in figure \ref{fig:fitz1}.
+Harmonic (or steady-state, or tonal) sounds are narrowband (contain few well-defined frequencies) and steady (maintain the same frequency components over long periods of time), while percussive sounds  are broadband (contain most of the frequency spectrum) and transient (fast decay). \citet{fitzgerald1} noted that harmonic and percussive sounds appear as horizontal and vertical lines respectively in the short-time Fourier transform, and applied a median filter in the vertical and horizontal directions to estimate the harmonic and percussive components.
+
+Median filtering is a technique for image processing that is typically used to remove outliers from noisy images \cite{imagenoise}. By performing median filtering in the vertical and horizontal directions, we can emphasize horizontal and vertical lines respectively, as shown in figure \ref{fig:simplemedfilter}. The median filtering step results in an estimate of the harmonic and percussive magnitude spectrograms, from which soft masks can be computed. The masks were then applied to the original STFT and inverted to create the harmonic and percussive signals. An example can be seen in figure \ref{fig:fitz1}.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Simple image]{{\includegraphics[width=6cm]{./medfilter_basic_with_axes.png} }}
+	\subfloat[Median filter, axis 1]{{\includegraphics[width=6cm]{./medfilter_basic_axis1.png} }}
+	\subfloat[Median filter, axis 2]{{\includegraphics[width=6cm]{./medfilter_basic_axis2.png} }}
+	\caption{MATLAB movmedian applied along axis 1 and 2 on a simple image}%
+	\label{fig:simplemedfilter}
+\end{figure}
 
 \begin{figure}[ht]
 	\centering
@@ -125,15 +137,46 @@ Harmonic (or steady-state, or tonal) sounds are narrowband (contain few well-def
 	\label{fig:fitz1}
 \end{figure}
 
-\citet{driedger} replaced the soft mask with a binary/hard mask, and also introduced a two-pass variant. The STFT with a large window size in the first pass separates the harmonic components with higher frequency resolution, and the STFT with a small window size in the second pass separates the percussive component with higher time resolution. \citet{fitzgerald2} created a similar iterative variant, using soft masks, a large window STFT in the first pass for harmonic separation, and a small window STFT in the second pass for percussive separation. Additionally, they noted that when they replaced the small-window STFT with the constant-Q transform in the second pass, they obtained a separation of the human singing voice.
+\citet{driedger} replaced the soft mask with a binary/hard mask, and also introduced a two-pass variant. The first pass separates the harmonic component using an STFT with a large window size for high frequency resolution, followed by the second pass which separates the percussive component using an STFT with a small window size for high time resolution. \citet{fitzgerald2} created a similar iterative variant using soft masks. Additionally, they noted that when they replaced the small-window STFT with the constant-Q transform in the second pass, they obtained a separation of the human singing voice.
 
-In sum, from the above papers, we can consider two generalized frameworks for harmonic/percussive (and optionally vocal) source separation with masking and median filtering of either the STFT and CQT, considering the one-pass and two-pass variants separately. In each, we can substitute different window sizes of STFT (128--16384), and the CQT with different bins per octave (12--96) to test the effects.
+From these methods, we can consider two generalized frameworks for harmonic/percussive (and optionally vocal) source separation with masking and median filtering of either the STFT and CQT, considering the one-pass and two-pass variants separately. In both cases, we can substitute different window sizes of STFT, or the CQT with different bins per octave, to test the effects. The block diagram of the system under test is shown in figure \ref{fig:fitz2}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=12cm]{./medianfiltdiagram.png}
+	\caption{A general framework for median filtering music separation}
+	\label{fig:fitz2}
+\end{figure}
+
+\begin{wrapfigure}{r}{8cm}
+	\includegraphics[width=8cm]{./maskdemo.png}
+	\caption{Results of a soft and hard oracle mask applied for speech denoising}
+	\label{fig:masks}
+\end{wrapfigure}
+
+\citet{masking} provide a full description of different time-frequency masking strategies in audio source separation. In short, a time-frequency mask (or spectral mask, or masking filter), is a matrix of the same size as the complex STFT, which is multiplied with the STFT to mask, filter, or suppress specific time-frequency tiles. A soft mask has real values $\in [0, 1]$, and a binary or hard mask has logical values, i.e. only 0 and 1. Soft masks generally produce higher quality sound, as shown in figure \ref{fig:masks}. The so-called oracle mask is the \textit{ideal} mask for a given signal -- to compute it, the target signal must be known. For example, to compute an oracle mask to create a percussive separation of a mixed song, one must have access to the separate recording of the percussion. The soft mask used in \cite{fitzgerald1, fitzgerald2} is a Wiener filter, of the form:
+
+\[ M = \frac{\text{target}^{2}}{\text{target}^{2} + \text{interference}^{2}} \]
+
+The hard mask used in \cite{driedger} is of the form:
+
+\[ M = \frac{\text{target}}{\text{interference}+\epsilon} \le \beta \]
+
+, where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero.
 
 \subsection{TF Jigsaw}
 
-implemented in the Large Time-Frequency Analysis toolbox \cite{ltfat} etc.
+The next algorithm considered is the Time-Frequency Jigsaw Puzzle\cite{tfjigsaw}, which is implemented in the Large Time-Frequency Analysis toolbox \cite{ltfat, tfjigsaw2, tfjigsaw3}. Tonal/transient (or harmonic/percussive) separation is among one of the possible applications of TFJigsaw. The insight is similar to the multipass approach described previously -- in a TF representation with high frequency resolution, tonal sounds are well-represented, and in a TF representation with high time resolution, transient sounds are well-represented:
 
-\subsection{WMDCT }
+\begin{quote}
+	[...] the starting point is to define the tonal layer of the signal as the ``component'' which admits a sparse expansion with respect to a Gabor frame with high frequency resolution (i.e. with a wide window), and the transient layer as the ``component'' which admits a sparse expansion with respect to a Gabor frame with high time resolution (i.e. a narrow window).
+\end{quote}
+
+After creating two representations of the signal (one tonal with a large window Gabor frame, one transient with a small window Gabor frame), the next task is to separate the components. This is done with the use of ``super-tiles'' in the time-frequency plane, by superimposing the previous dual-window (tonal and transient) expansion. Then, within each super-tile, an entropy criterion chooses which tile (tonal or transient) is represented better and below a threshold, and subtracts these from the original signal. This is performed iteratively until the tonal and transient layers emerge.
+
+\subsection{Multilayer decomposition}
+
+The final algorithm considered is the multi
 
 %%%%%%%%%%%%%%
 % THEORY     %
@@ -143,11 +186,9 @@ implemented in the Large Time-Frequency Analysis toolbox \cite{ltfat} etc.
 
 \subsection{Gabor dictionaries}
 
-\subsection{STFT and CQT}
+\subsubsection{STFT and CQT}
 
 \subsubsection{Time-frequency resolution}
-
-\subsubsection{Median filtering}
 
 \subsection{TF Jigsaw}
 
@@ -186,7 +227,7 @@ The SigSep (\href{https://sigsep.github.io/}{https://sigsep.github.io/}) communi
 
 \subsection{Evaluated music}
 
-The most popular music stem dataset used by SISEC and SigSep s MUSDB18 dataset \cite{musdb18} (or the HQ, high-quality, equivalent \cite{musdb18-hq}). MUSDB18-HQ contains stems (.wav files per component, e.g., drum.wav, vocal.wav, bass.wav) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research. 
+The most popular music stem dataset used by SISEC and SigSep is the MUSDB18 dataset \cite{musdb18} (or the HQ, high-quality, equivalent \cite{musdb18-hq}). MUSDB18-HQ contains stems (.wav files per component/instrument, e.g., drum.wav, vocal.wav, bass.wav) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research. 
 
 A limited subset of MUSDB18-HQ was evaluated, or 5 total minutes of music, consisting of 4 segments of 15 seconds duration taken from 5 separate tracks. One data set was prepared for harmonic/percussive separation evaluation (vocals omitted from the mix), and one data set for harmonic/percussive/vocal evaluation (vocals are present). The evaluation was limited to 5 minutes of music since the PEASS measure is computationally expensive.
 
@@ -211,7 +252,7 @@ The final goal is to combine the best performers to create optimal ``hybrid'' al
 
 \subsection{Python/MATLAB testbench}
 
-The language chosen to implement the algorithms was MATLAB. It is an obvious choice since it has access to LTFAT, the PEASS Toolkit, many other signal processing tools (e.g., Wavelet Toolbox), and is in general a natural choice for prototyping digital signal processing algorithms. On the other hand, other tasks for the project are more easily accomplished with Python. One example is in the preparation of the datasets, which requires traversing directories of stem files to produce mix and reference harmonic/percussive/vocal files. Also, Python would be a good choice for data visualization and result aggregation, to be able to use numpy\cite{numpy}, pandas\cite{pandas}, matplotlib\cite{matplotlib}, and seaborn\cite{seaborn}. The solution is to employ both languages wherever appropriate, and use the file system and JSON as universal interchanges:
+The language chosen to implement the algorithms was MATLAB. It is an obvious choice since it has access to LTFAT, the PEASS Toolkit, many other signal processing tools (e.g., Wavelet Toolbox), and is in general a natural choice for prototyping digital signal processing algorithms. On the other hand, certain tasks for the project are more easily accomplished with Python. One example is in the preparation of the datasets, which requires traversing directories of stem files to produce mix and reference harmonic/percussive/vocal files. Also, Python would be a good choice for data visualization and result aggregation, to be able to use numpy\cite{numpy}, pandas\cite{pandas}, matplotlib\cite{matplotlib}, and seaborn\cite{seaborn}. The solution is to employ both languages wherever appropriate, and use the file system and JSON as universal interchanges:
 \begin{tight_enumerate}
 \item
 	The Python script for data preparation scans the stem directories of MUSDB18-HQ, creates test wav files with a prefix indicating a unique sequence number, and wav files for each of the mix, harmonic, percussive, and vocal components
