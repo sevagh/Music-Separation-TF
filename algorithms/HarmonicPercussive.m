@@ -11,11 +11,11 @@ parse(p, filename, varargin{:});
 [x, fs] = audioread(p.Results.filename);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% HARMONIC WITH TFJIGSAW-5 %
+% HARMONIC WITH TFJIGSAW-1 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % tfjigsaw-5
-[seps, ~] = tfjigsawsep(x, 0.85, 1.05, 2, 'v2', 'fs', fs);
+[seps, ~] = tfjigsawsep(x, 0.88, 1.05, 2, 'fs', fs);
 xh = seps(:, 1);
 
 if size(xh, 1) < size(x, 1)

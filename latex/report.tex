@@ -346,7 +346,7 @@ The results in \ref{fig:round2hard} show that the CQT-96/STFT-2048 algorithm per
 
 \begin{figure*}
 	\centering
-	\makebox[\textwidth]{\includegraphics[width=20cm]{../evaluation/heatmaps/Jigsaw_PEASS_abbrev.png}}
+	\makebox[\textwidth]{\includegraphics[width=20cm]{../evaluation/heatmaps/Jigsaw2_PEASS_abbrev.png}}
 	\vspace{-1.25em}
 	\caption{TFJigsaw PEASS results, batch 2}
 	\label{fig:jigsaw2}
@@ -380,7 +380,7 @@ The results in \ref{fig:round2hard} show that the CQT-96/STFT-2048 algorithm per
 
 An algorithm considered which uses a custom time-frequency analysis is the Time-Frequency Jigsaw Puzzle \cite{tfjigsaw}, which is implemented in LTFAT \cite{tfjigsaw2}. The implementation was adapted directly from the LTFAT demo \cite{tfjigsaw3}. Similar to the STFT or CQT algorithms above, the tfjigsawsep function in LTFAT allows for configuring the window size of the Gabor systems used for the tonal and transient components, which can be considered analogous to the two-pass methods seen above. The default settings are a Hann window of size 4096 for the tonal system and 256 for the transient system.
 
-The parameters of Jigsaw Sep are as follows: (describe them). From the tested configurations in figures \ref{fig:jigsaw1} and \ref{fig:jigsaw2}, we can see that in fact, the harmonic separation of configuration \Verb#tfjigsaw-5# achieves excellent results for target, interference, and artifacts. The settings of \Verb#tfjigsaw-5# are $r_{1} = 0.85, r_{2} = 1.05, p = 2$, using the default window sizes for the Gabor systems. On the other hand, good parameters could not be found for percussive separation scores for the TFJigsaw, which all suffered from a very low artifact score (i.e., suffered from a presence of artifacts). This doesn't necessarily mean that TFJigsaw  is bad at percussive separation -- further study might be required to explore why this is the case, and how the results can be improved.
+The parameters of Jigsaw Sep are as follows: (describe them). From the tested configurations in figures \ref{fig:jigsaw1} and \ref{fig:jigsaw2}, we can see that in fact, the harmonic separation of configuration \Verb#tfjigsaw-1#, using all defaults, achieves excellent results for target and artifacts -- it does not have the highest interference score, but this is usually a tradeoff, with better interference resulting from more aggressive removal, which results in more artifacts. In a subjective listening test, \Verb#tfjigsaw-1# sounds the best. On the other hand, good parameters could not be found for percussive separation scores for the TFJigsaw, which almost all suffered from a low artifact score (i.e., suffered from a presence of artifacts). This doesn't necessarily mean that TFJigsaw  is bad at percussive separation -- further study might be required to explore why this is the case, and how the results can be improved.
 
 \vfill
 \clearpage % force a page break before references

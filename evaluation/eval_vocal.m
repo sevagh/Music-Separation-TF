@@ -69,9 +69,7 @@ for file = files'
                 sprintf('%s/%s_harmonic.wav', destloc, prefix), options);
             resP = PEASS_ObjectiveMeasure(percOriginalFiles,...
                 sprintf('%s/%s_percussive.wav', destloc, prefix), options);
-            resV = PEASS_ObjectiveMeasure(vocalOriginalFiles,...
-                sprintf('%s/%s_vocal.wav', destloc, prefix), options);
-            
+
             results(testcase, findex, 1) = resH.OPS;
             results(testcase, findex, 2) = resH.TPS;
             results(testcase, findex, 3) = resH.IPS;
@@ -98,18 +96,37 @@ for file = files'
             results(testcase, findex, 23) = resP.qArtif;
             results(testcase, findex, 24) = resP.qGlobal;
             
-            results(testcase, findex, 25) = resV.OPS;
-            results(testcase, findex, 26) = resV.TPS;
-            results(testcase, findex, 27) = resV.IPS;
-            results(testcase, findex, 28) = resV.APS;
-            results(testcase, findex, 29) = resV.ISR;
-            results(testcase, findex, 30) = resV.SIR;
-            results(testcase, findex, 31) = resV.SAR;
-            results(testcase, findex, 32) = resV.SDR;
-            results(testcase, findex, 33) = resV.qTarget;
-            results(testcase, findex, 34) = resV.qInterf;
-            results(testcase, findex, 35) = resV.qArtif;
-            results(testcase, findex, 36) = resV.qGlobal;
+            vocalFile = sprintf('%s/%s_vocal.wav', destloc, prefix);
+            if isfile(vocalFile)
+                resV = PEASS_ObjectiveMeasure(vocalOriginalFiles,...
+                    vocalFile, options);
+
+                results(testcase, findex, 25) = resV.OPS;
+                results(testcase, findex, 26) = resV.TPS;
+                results(testcase, findex, 27) = resV.IPS;
+                results(testcase, findex, 28) = resV.APS;
+                results(testcase, findex, 29) = resV.ISR;
+                results(testcase, findex, 30) = resV.SIR;
+                results(testcase, findex, 31) = resV.SAR;
+                results(testcase, findex, 32) = resV.SDR;
+                results(testcase, findex, 33) = resV.qTarget;
+                results(testcase, findex, 34) = resV.qInterf;
+                results(testcase, findex, 35) = resV.qArtif;
+                results(testcase, findex, 36) = resV.qGlobal;
+            else
+                results(testcase, findex, 25) = -999;
+                results(testcase, findex, 26) = -999;
+                results(testcase, findex, 27) = -999;
+                results(testcase, findex, 28) = -999;
+                results(testcase, findex, 29) = -999;
+                results(testcase, findex, 30) = -999;
+                results(testcase, findex, 31) = -999;
+                results(testcase, findex, 32) = -999;
+                results(testcase, findex, 33) = -999;
+                results(testcase, findex, 34) = -999;
+                results(testcase, findex, 35) = -999;
+                results(testcase, findex, 36) = -999;
+            end
         end
         findex = findex + 1;
     end
