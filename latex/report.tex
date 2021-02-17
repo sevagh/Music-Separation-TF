@@ -1,5 +1,4 @@
 \documentclass[letter,12pt]{article}
-%\setlength{\parindent}{0pt}
 \usepackage[left=2cm, right=2cm, top=2cm, bottom=2cm]{geometry}
 \usepackage[shortlabels]{enumitem}
 \usepackage{graphicx}
@@ -11,7 +10,7 @@
 \usepackage{minted}
 \usepackage{subfig}
 \usepackage{titling}
-\usepackage{caption}
+\usepackage[compatibility=false]{caption}
 \usepackage[parfill]{parskip}
 \setlength{\droptitle}{1cm}
 \usepackage{hyperref}
@@ -52,7 +51,7 @@
 \newlength{\mintednumbersep}
 \AtBeginDocument{%
   \sbox0{\tiny00}%
-  \setlength\mintednumbersep{\parindent}%
+  \setlength\mintednumbersep{8pt}%
   \addtolength\mintednumbersep{-\wd0}%
 }
 
@@ -154,7 +153,7 @@ From these methods, we can consider two generalized frameworks for harmonic/perc
 	\label{fig:masks}
 \end{wrapfigure}
 
-\citet{masking} provide a full description of different time-frequency masking strategies in audio source separation. In short, a time-frequency mask (or spectral mask, or masking filter), is a matrix of the same size as the complex STFT, which is multiplied with the STFT to mask, filter, or suppress specific time-frequency tiles. A soft mask has real values $\in [0, 1]$, and a binary or hard mask has logical values, i.e. only 0 and 1. Soft masks generally produce higher quality sound, as shown in figure \ref{fig:masks}. The so-called oracle mask is the \textit{ideal} mask for a given signal -- to compute it, the target signal must be known. For example, to compute an oracle mask to create a percussive separation of a mixed song, one must have access to the separate recording of the percussion. The soft mask used in \cite{fitzgerald1, fitzgerald2} is a Wiener filter, of the form:
+\citet{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter), is a matrix of the same size as the complex STFT, by which the STFT is multiplied to mask/filter/suppress specific time-frequency tiles. A soft mask has real values $\in [0, 1]$, and a binary or hard mask has logical values, i.e. only 0 and 1. Soft masks generally produce higher quality sound, as shown in figure \ref{fig:masks}. The oracle mask is the ideal mask for a given signal -- to compute it, the target signal must be known. The soft mask used in \cite{fitzgerald1, fitzgerald2} is a Wiener filter, of the form:
 
 \[ M = \frac{\text{target}^{2}}{\text{target}^{2} + \text{interference}^{2}} \]
 
@@ -280,82 +279,70 @@ The first task is harmonic/percussive source separation. The mixtures are combin
 
 \subsubsection{One-pass algorithms with STFT/CQT masking}
 
-The first and original median-filtering HPSS algorithm with soft masks was introduced by \citet{fitzgerald1}. The modification introduced by \citet{driedger} uses hard masks (the same paper contains the two-pass variant, which will be discussed later). Pseudocode for both algorithms is shown in listing \ref{code:onepasspseudo}.
+The first and original median-filtering HPSS algorithm with soft masks was introduced by \citet{fitzgerald1}. The modification introduced by \citet{driedger} uses hard masks (the same paper contains the two-pass variant, which will be discussed later). Pseudocode for both algorithms is shown in listing \ref{code:pseudocodes}.
 
-\begin{listing}[h]
-\setlength\partopsep{-\topsep}
+\begin{figure}[h]
+  \centering
+ \begin{minipage}{0.48\textwidth}
+  \centering
 \begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
 |$s = \text{mixed audio}$|
 |$\hat{S} = \text{STFT}(s)\text{\textbf{ or CQT}}$|
 |$S = \text{abs}(\hat{S})$|
 |$H = \text{medianfilter}(S, l_{H}, \text{axis}=2)$|
 |$P = \text{medianfilter}(S, l_{P}, \text{axis}=1)$|
-|$ \text{\textbf{soft} } M_{H} = \frac{H^{p}}{H^{p} + P^{p}}$|
-|$ \text{\phantom{\textbf{soft}} } M_{P} = \frac{P^{p}}{H^{p} + P^{p}}$|
-|$ \text{\textbf{hard} } M_{H} = \frac{H}{P + \epsilon} \ge \beta $|
-|$ \text{\phantom{\textbf{hard}} } M_{P} = \frac{P}{H + \epsilon} > \beta$|
+|$\text{\textbf{soft} } M_{H} = \frac{H^{p}}{H^{p} + P^{p}}, M_{P} = \frac{P^{p}}{H^{p} + P^{p}}$|
+|$\text{\textbf{hard} } M_{H} = \frac{H}{P + \epsilon} \ge \beta, M_{P} = \frac{P}{H + \epsilon} > \beta$|
 |$\hat{H} = \hat{S} \cdot M_{H}$|
 |$\hat{P} = \hat{S} \cdot M_{P}$|
 |$h = \text{ISTFT}(\hat{H})\text{\textbf{ or ICQT}}$|
 |$p = \text{ISTFT}(\hat{P})\text{\textbf{  or ICQT}}$|
 \end{minted}
-\caption{Median-filtering HPSS pseudocode, soft and hard mask variants}
-\label{code:onepasspseudo}
-\end{listing}
+  \captionof{listing}{1-pass median-filtering HPSS algorithm}
+ \end{minipage}
+\hspace{0.02\textwidth}
+ \begin{minipage}{0.48\textwidth}
+  \centering
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
+|$s = \text{mixed audio}$|
+|$\hat{S1} = \text{STFT}(s, \text{window}=4096)\text{\textbf{ or CQT}}$|
+|$ \text{apply one-pass algorithm to get } \hat{H1}, \hat{P1} $|
+|$\text{\textbf{final harmonic} } h1 = \text{ISTFT}(\hat{H1})\text{\textbf{ or ICQT}}$|
+|$p1 = \text{ISTFT}(\hat{P1})\text{\textbf{ or ICQT}}$|
+|$\hat{S2} = \text{STFT}(p1, \text{window}=256)\text{\textbf{ or CQT}}$|
+|$ \text{apply one-pass algorithm to get } \hat{H2}, \hat{P2} $|
+|$h2 = \text{ISTFT}(\hat{H2})\text{\textbf{ or ICQT}}$|
+|$\text{\textbf{final percussive} } p1 = \text{ISTFT}(\hat{P2})\text{\textbf{ or ICQT}}$|
+\end{minted}
+  \captionof{listing}{2-pass median-filtering HPSS algorithm}
+ \end{minipage}
+  \label{code:pseudocodes}
+\end{figure}
 
 Some parameters are fixed in the evaluation, since they're not relevant to time-frequency resolution. Median filter lengths of $l_{H} = l_{P} = 17$ were used for the STFT, and $l_{H} = 17, l_{P} = 7$ for the CQT (as suggested in \cite{fitzgerald2}). The power for the soft masking was set to $p = 2$, and the separation factor for the hard masking was set to $\beta = 2$ (paper defaults). The results can be seen in figures \ref{fig:round1soft} and \ref{fig:round1hard}.
 
-With soft masking, using CQT-96 achieves the best score in both the harmonic and percussive separation's target, and is the best performer from all variants in percussive separation. In the harmonic separation, the evaluated STFT configurations showed better interference and worse artifacts compared to the CQT configurations. With hard masking, all of the evaluations showed poor target and artifact scores. This is consistent with the literature of soft versus hard time-frequency masking (CITEME!!!). CQT-96 outperforms all the STFTs for harmonic separation in the hard masking algorithm. The STFT-2048 performs the best at percussive separation.
+With soft masking, using CQT-96 achieves the best score in both the harmonic and percussive separation's target, and is the best performer from all variants in percussive separation. In the harmonic separation, the evaluated STFT configurations showed better interference and worse artifacts compared to the CQT configurations. With hard masking, all of the evaluations showed poor target and artifact scores. This is consistent with the quality of soft versus hard time-frequency masking mentioned in the masking overview \cite{masking} in the introduction. CQT-96 outperforms all the STFTs for harmonic separation in the hard masking algorithm. The STFT-2048 performs the best at percussive separation.
 
 CQT-96 demonstrates good results for both harmonic and percussive separation with soft masks, indicating it has both desired qualities: high frequency resolution, originally achieved with a large-window STFT, and high time resolution, originally achieved with a small-window STFT. This makes it a good choice for one-pass harmonic/percussive source separation.
 
-\begin{figure*}
+\begin{figure}[ht]
 	\centering
-	\makebox[\textwidth]{\includegraphics[width=20cm]{../evaluation/heatmaps/1pass_Fitzgerald_PEASS_abbrev.png}}
+	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/1pass_Fitzgerald_PEASS_abbrev.png}}
 	\caption{One-pass soft-masking PEASS results}
 	\label{fig:round1soft}
-\end{figure*}
+\end{figure}
 
-\begin{figure*}
+\begin{figure}[ht]
 	\centering
-	\makebox[\textwidth]{\includegraphics[width=20cm]{../evaluation/heatmaps/1pass_Driedger_PEASS_abbrev.png}}
+	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/1pass_Driedger_PEASS_abbrev.png}}
 	\vspace{-1.25em}
 	\caption{One-pass hard-masking PEASS results}
 	\label{fig:round1hard}
-\end{figure*}
+\end{figure}
 
 \subsubsection{Two-pass algorithms with STFT/CQT masking}
 
-\citet{driedger}'s iterative algorithm is presented for harmonic/percussive source separation. The pseudocode is shown in listing \ref{code:twopassdriedgerpseudo}.
-
-\begin{listing}[h]
-\setlength\partopsep{-\topsep}
-\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
-|$s = \text{mixed audio}$|
-|$\hat{S1} = \text{STFT}(s, \text{window\_size}=4096)\text{\textbf{ or CQT}}$|
-|$S1 = \text{abs}(\hat{S1})$|
-|$H1 = \text{medianfilter}(S1, l_{H}, \text{axis}=2)$|
-|$P1 = \text{medianfilter}(S1, l_{P}, \text{axis}=1)$|
-|$ M_{H1} = \frac{H1}{P1 + \epsilon} \ge \beta $|
-|$ M_{P1} = \frac{P1}{H1 + \epsilon} > \beta$|
-|$\hat{H1} = \hat{S1} \cdot M_{H1}$|
-|$\hat{P1} = \hat{S1} \cdot M_{P1}$|
-|$\text{\textbf{final harmonic} }h1 = \text{ISTFT}(\hat{H1})\text{\textbf{ or ICQT}}$|
-|$\text{\textbf{next input        } } p1 = \text{ISTFT}(\hat{P1})\text{\textbf{ or ICQT}}$|
-|$\hat{S2} = \text{STFT}(p1, \text{window\_size}=256)\text{\textbf{ or CQT}}$|
-|$S2 = \text{abs}(\hat{S2})$|
-|$H2 = \text{medianfilter}(S2, l_{H}, \text{axis}=2)$|
-|$P2 = \text{medianfilter}(S2, l_{P}, \text{axis}=1)$|
-|$ M_{H2} = \frac{H2}{P2 + \epsilon} \ge \beta $|
-|$ M_{P2} = \frac{P2}{H2 + \epsilon} > \beta$|
-|$\hat{H1} = \hat{S2} \cdot M_{H2}$|
-|$\hat{P1} = \hat{S2} \cdot M_{P2}$|
-|$h2 = \text{ISTFT}(\hat{H2})\text{\textbf{ or ICQT}}$|
-|$\text{\textbf{final percussive} } p2 = \text{ISTFT}(\hat{P2})\text{\textbf{  or ICQT}}$|
-\end{minted}
-\caption{Two-pass median-filtering HPSS pseudocode, hard mask}
-\label{code:twopassdriedgerpseudo}
-\end{listing}
+\citet{driedger}'s iterative algorithm is presented for harmonic/percussive source separation. The pseudocode is shown in listing \ref{code:pseudocodes}.
 
 The conclusions from the previous round of testing are used to prepare 3 variants of two-pass hard masking HPSS:
 \begin{tight_enumerate}
@@ -369,59 +356,65 @@ The conclusions from the previous round of testing are used to prepare 3 variant
 
 The results in \ref{fig:round2hard} show that the CQT-96/STFT-2048 algorithm performs the best. By the PEASS evaluation, the target and artifact scores for the CQT-96/STFT-2048 variant are better, at the expense of a slightly lower interference score.
 
-\begin{figure*}
+\begin{figure}[ht]
 	\centering
-	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/2pass_Driedger_PEASS_abbrev.png}}
+	\makebox[\textwidth]{\includegraphics[width=8cm]{../evaluation/heatmaps/2pass_Driedger_PEASS_abbrev.png}}
 	\vspace{-1.25em}
 	\caption{Two-pass hard-masking PEASS results}
 	\label{fig:round2hard}
-\end{figure*}
-
-\begin{figure*}
-	\centering
-	\makebox[\textwidth]{\includegraphics[width=20cm]{../evaluation/heatmaps/Jigsaw_PEASS_abbrev.png}}
-	\vspace{-1.25em}
-	\caption{TFJigsaw PEASS results, batch 1}
-	\label{fig:jigsaw1}
-\end{figure*}
-
-\begin{figure*}
-	\centering
-	\makebox[\textwidth]{\includegraphics[width=20cm]{../evaluation/heatmaps/Jigsaw2_PEASS_abbrev.png}}
-	\vspace{-1.25em}
-	\caption{TFJigsaw PEASS results, batch 2}
-	\label{fig:jigsaw2}
-\end{figure*}
-
-\begin{figure*}
-	\centering
-	\makebox[\textwidth]{\includegraphics[width=20cm]{../evaluation/heatmaps/WMDCT_PEASS_abbrev.png}}
-	\vspace{-1.25em}
-	\caption{WMDCT PEASS results, batch 1}
-	\label{fig:wmdct1}
-\end{figure*}
-
-\begin{figure*}
-	\centering
-	\makebox[\textwidth]{\includegraphics[width=20cm]{../evaluation/heatmaps/WMDCT2_PEASS_abbrev.png}}
-	\vspace{-1.25em}
-	\caption{WMDCT PEASS results, batch 2}
-	\label{fig:wmdct2}
-\end{figure*}
-
-\begin{figure*}
-	\centering
-	\makebox[\textwidth]{\includegraphics[width=20cm]{../evaluation/heatmaps/2pass_Fitzgerald_PEASS_abbrev.png}}
-	\vspace{-1.25em}
-	\caption{Two-pass soft-masking PEASS results}
-	\label{fig:vocalround1soft}
-\end{figure*}
+\end{figure}
 
 \subsubsection{TF Jigsaw}
 
 An algorithm considered which uses a custom time-frequency analysis is the Time-Frequency Jigsaw Puzzle \cite{tfjigsaw}, which is implemented in LTFAT \cite{tfjigsaw2}. The implementation was adapted directly from the LTFAT demo \cite{tfjigsaw3}. Similar to the STFT or CQT algorithms above, the tfjigsawsep function in LTFAT allows for configuring the window size of the Gabor systems used for the tonal and transient components, which can be considered analogous to the two-pass methods seen above. The default settings are a Hann window of size 4096 for the tonal system and 256 for the transient system.
 
 The parameters of Jigsaw Sep are as follows: (describe them). From the tested configurations in figures \ref{fig:jigsaw1} and \ref{fig:jigsaw2}, we can see that in fact, the harmonic separation of configuration \Verb#tfjigsaw-1#, using all defaults, achieves excellent results for target and artifacts -- it does not have the highest interference score, but this is usually a tradeoff, with better interference resulting from more aggressive removal, which results in more artifacts. In a subjective listening test, \Verb#tfjigsaw-1# sounds the best. On the other hand, good parameters could not be found for percussive separation scores for the TFJigsaw, which almost all suffered from a low artifact score (i.e., suffered from a presence of artifacts). This doesn't necessarily mean that TFJigsaw  is bad at percussive separation -- further study might be required to explore why this is the case, and how the results can be improved.
+
+\begin{figure}[ht]
+	\centering
+	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Jigsaw_PEASS_abbrev.png}}
+	\vspace{-1.25em}
+	\caption{TFJigsaw PEASS results, batch 1}
+	\label{fig:jigsaw1}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Jigsaw2_PEASS_abbrev.png}}
+	\vspace{-1.25em}
+	\caption{TFJigsaw PEASS results, batch 2}
+	\label{fig:jigsaw2}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/WMDCT_PEASS_abbrev.png}}
+	\vspace{-1.25em}
+	\caption{WMDCT PEASS results, batch 1}
+	\label{fig:wmdct1}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/WMDCT2_PEASS_abbrev.png}}
+	\vspace{-1.25em}
+	\caption{WMDCT PEASS results, batch 2}
+	\label{fig:wmdct2}
+\end{figure}
+
+
+\vfill
+\clearpage % force a page break before references
+
+\subsection{Harmonic/percussive/vocal source separation}
+
+\begin{figure}[ht]
+	\centering
+	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/2pass_Fitzgerald_PEASS_abbrev.png}}
+	\vspace{-1.25em}
+	\caption{Two-pass soft-masking PEASS results}
+	\label{fig:vocalround1soft}
+\end{figure}
 
 \vfill
 \clearpage % force a page break before references
@@ -431,6 +424,32 @@ The parameters of Jigsaw Sep are as follows: (describe them). From the tested co
 %%%%%%%%%%%%%%%%%%%%%
 \section{Hybrid algorithms}
 \label{sec:hybrids}
+
+\subsection{Harmonic/percussive hybrid -- TFJigsaw + median-filtering STFT}
+
+\subsection{Harmonic/percussive/vocal hybrid -- Iterative median-filtering CQT}
+
+\subsection{Harmonic/percussive separation results}
+
+\begin{figure}[ht]
+	\centering
+	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Final_HPSS_PEASS_abbrev.png}}
+	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Final_HPSS_BSS_abbrev.png}}
+	\vspace{-1.25em}
+	\caption{Final HPSS results, PEASS and BSS}
+	\label{fig:finalhpss}
+\end{figure}
+
+\subsection{Harmonic/percussive/vocal separation results}
+
+\begin{figure}[ht]
+	\centering
+	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Final_Vocal_PEASS_abbrev.png}}
+	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Final_Vocal_BSS_abbrev.png}}
+	\vspace{-1.25em}
+	\caption{Final HPSS results, PEASS and BSS}
+	\label{fig:finalhpss}
+\end{figure}
 
 \vfill
 \clearpage % force a page break before references
