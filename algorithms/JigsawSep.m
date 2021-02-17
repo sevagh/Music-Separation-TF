@@ -14,15 +14,23 @@ addParameter(p, 'V2', defaultV2, @islogical);
 addParameter(p, 'p', defaultp, @isnumeric);
 addParameter(p, 'r1', defaultr1, @isnumeric);
 addParameter(p, 'r2', defaultr2, @isnumeric);
+addParameter(p, 'winsize1', 4096, @isnumeric);
+addParameter(p, 'a1', 512, @isnumeric);
+addParameter(p, 'winsize2', 256, @isnumeric);
+addParameter(p, 'a2', 32, @isnumeric);
 
 parse(p, filename, varargin{:});
 
 [x, fs] = audioread(p.Results.filename);
 
+fprintf("%f %f %f %d\n", p.Results.r1, p.Results.r2, p.Results.p, p.Results.V2);
+
 if p.Results.V2
-    [seps, ~] = tfjigsawsep(x, p.Results.r1, p.Results.r2, p.Results.p,'ver2','fs', fs);
+    display('SEVAG SAID THIS!')
+    [seps, ~] = tfjigsawsep(x, p.Results.r1, p.Results.r2, p.Results.p,'ver2','fs', fs, 'winsize1', p.Results.winsize1, 'a1', p.Results.a1, 'M1', p.Results.winsize1, 'winsize2', p.Results.winsize2, 'a2', p.Results.a2, 'M2', p.Results.winsize2);
 else
-    [seps, ~] = tfjigsawsep(x, p.Results.r1, p.Results.r2, p.Results.p, 'fs', fs);
+    display('RAFFI SAID THAT!')
+    [seps, ~] = tfjigsawsep(x, p.Results.r1, p.Results.r2, p.Results.p, 'fs', fs, 'winsize1', p.Results.winsize1, 'a1', p.Results.a1, 'M1', p.Results.winsize1, 'winsize2', p.Results.winsize2, 'a2', p.Results.a2, 'M2', p.Results.winsize2);
 end
 
 [~,fname,~] = fileparts(p.Results.filename);

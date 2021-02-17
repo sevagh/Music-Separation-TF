@@ -1,4 +1,4 @@
-function HarmonicPercussiveVocal2(filename, varargin)
+function HarmonicPercussiveVocal(filename, varargin)
 p = inputParser;
 
 WindowSizeP = 1024;
