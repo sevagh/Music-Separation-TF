@@ -1,55 +1,52 @@
-%
-
-% File final_report.tex
-%
-%% Based on the style files for ACL 2020, which were
-%% Based on the style files for ACL 2018, NAACL 2018/19, which were
-%% Based on the style files for ACL-2015, with some improvements
-%%  taken from the NAACL-2016 style
-%% Based on the style files for ACL-2014, which were, in turn,
-%% based on ACL-2013, ACL-2012, ACL-2011, ACL-2010, ACL-IJCNLP-2009,
-%% EACL-2009, IJCNLP-2008...
-%% Based on the style files for EACL 2006 by 
-%%e.agirre@ehu.es or Sergi.Balari@uab.es
-%% and that of ACL 08 by Joakim Nivre and Noah Smith
-
-\documentclass[10pt,letter]{article}
-\usepackage[hyperref]{acl2020}
-\usepackage{times}
-\usepackage{latexsym}
+\documentclass[letter,12pt]{article}
+%\setlength{\parindent}{0pt}
+\usepackage[left=2cm, right=2cm, top=2cm, bottom=2cm]{geometry}
+\usepackage[shortlabels]{enumitem}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{verbatim}
 \usepackage{listings}
 \usepackage{minted}
-\usepackage{amsmath}
-\usepackage{fancyvrb}
-\usepackage{subcaption}
-\usepackage{makecell}
-\usepackage{placeins}
+\usepackage{subfig}
+\usepackage{titling}
+\usepackage{caption}
+\usepackage[parfill]{parskip}
+\setlength{\droptitle}{1cm}
 \usepackage{hyperref}
-\usepackage{graphicx}
-\graphicspath{ {./} }
-\renewcommand{\UrlFont}{\ttfamily\small}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+\usepackage{setspace}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
 \usepackage[
     %backend=biber, 
     natbib=true,
     style=numeric,
-    sorting=none
+    sorting=none,
 ]{biblatex}
 \addbibresource{citations.bib}
 
-% This is not strictly necessary, and may be commented out,
-% but it will improve the layout of the manuscript,
-% and will typically save some space.
-\usepackage{microtype}
-\usepackage[T1]{fontenc}
+\setcounter{biburllcpenalty}{7000}
+\setcounter{biburlucpenalty}{8000}
 
-\aclfinalcopy % Uncomment this line for the final submission
-%\def\aclpaperid{***} %  Enter the acl Paper ID here
+\newenvironment{tight_enumerate}{
+\begin{enumerate}
+  \setlength{\itemsep}{0pt}
+  \setlength{\parskip}{0pt}
+}{\end{enumerate}}
 
-%\setlength\titlebox{5cm}
-% You can expand the titlebox if you need extra space
-% to show all the authors. Please do not make the titlebox
-% smaller than 5cm (the original size); we will check this
-% in the camera-ready version and ask you to change it back.
+\newenvironment{tight_itemize}{
+\begin{itemize}
+  \setlength{\itemsep}{0pt}
+  \setlength{\parskip}{0pt}
+}{\end{itemize}}
 
 \newlength{\mintednumbersep}
 \AtBeginDocument{%
@@ -58,37 +55,42 @@
   \addtolength\mintednumbersep{-\wd0}%
 }
 
-\newcommand\BibTeX{B\textsc{ib}\TeX}
+\title{Time-Frequency Representations for Music Source Separation}
 
-\newenvironment{tight_enumerate}{
-\begin{enumerate}
-\setlength{\itemsep}{0pt}
-\setlength{\parskip}{0pt}
-}{\end{enumerate}}
-
-\newenvironment{tight_itemize}{
-\begin{itemize}
-\setlength{\itemsep}{0pt}
-\setlength{\parskip}{0pt}
-}{\end{itemize}}
-
-\title{Music Source Separation With Different Time-Frequency Representations}
-
-\author{Sevag Hanssian \\
+\author{\vspace{2em}\\Sevag Hanssian \\
   McGill University \\
  \texttt{sevag.hanssian@mail.mcgill.ca} \\
- \texttt{sevagh@protonmail.com}}
+ \texttt{sevagh@protonmail.com} \\\ \\\ \\
+ MUMT 622, Winter 2021 final project\thanks{Source code and materials for this paper are available at \url{https://gitlab.com/sevagh/Music-Separation-TF}}}
 
 \date{}
 
 \begin{document}
+
 \maketitle
+
+\vfill
+\clearpage %force a page break
+
+\tableofcontents
+
+\vfill
+\clearpage %force a page break
+
+\listoffigures
+
+\listoflistings
+
+\vfill
+\clearpage %force a page break
+
+
 
 %%%%%%%%%%%%%%
 % ABSTRACT			%
 %%%%%%%%%%%%%%
 \begin{abstract}
-	\citet{fitzgerald1} presented an algorithm for separating a musical mix into harmonic and percussive components by masking the short-time Fourier transform (STFT). \citet{driedger} created an iterative variant using a large window size for the harmonic separation and a small window size for the percussive separation. \citet{fitzgerald2} replaced the STFT with the constant-Q transform (CQT) to separate vocals. Other algorithms use custom time-frequency analyses based on Gabor expansions and frame theory, such as \citet{tfjigsaw}'s Jigsaw Puzzle and \citet{wmdct}'s structured sparse multilayer decomposition. This paper presents a survey and evaluation of algorithms for harmonic/percussive/vocal source separation based on different time-frequency analyses.
+	\citet{fitzgerald1} presented an algorithm for separating a musical mix into harmonic and percussive components by masking the short-time Fourier transform (STFT). \citet{driedger} created an iterative variant using a large window size for the harmonic separation and a small window size for the percussive separation. \citet{fitzgerald2} replaced the STFT with the constant-Q transform (CQT) to separate vocals. \citet{tfjigsaw}'s Jigsaw Puzzle and \citet{wmdct}'s structured sparse multilayer decomposition use custom time-frequency analyses based on Gabor expansions and frame theory. This paper presents a survey and evaluation of these algorithms for harmonic/percussive/vocal source separation, from the perspective of the different time-frequency analyses used.
 \end{abstract}
 
 %%%%%%%%%%%%%%
@@ -97,44 +99,41 @@
 \section{Introduction}
 \label{sec:intro}
 
+\subsection{Music source separation}
+
 In music source separation, a mixed song is split into its constituent components, or sources. There are different types of source separation; in this report, two cases will be considered:
 
 \begin{tight_enumerate}
-	\vspace{-0.5em}
 	\item
-		Harmonic/percussive source separation (HPSS) -- also called steady-state/transient separation (\cite{bayarres}), or tonal/transient separation (\cite{tfjigsaw}, \cite{wmdct})
+		Harmonic/percussive source separation (HPSS) -- also called steady-state/transient separation \cite{bayarres}, or tonal/transient separation \cite{tfjigsaw, wmdct}
 	\item
 		Harmonic/percussive/vocal source separation
 \end{tight_enumerate}
 
-Harmonic (or steady-state, or tonal) sounds are narrowband (contain few well-defined frequencies) and steady (maintain the same frequency components over long periods of time), while percussive sounds  are broadband (contain most of the frequency spectrum) and transient (fast decay).
-
-In music analysis (assuming contemporary Western music), important features are driven by the harmonic instruments (e.g., pitch, melody, key), while others (rhythm, beats, tempo, and other temporal features) are influenced more strongly by the percussive instruments. The singing voice contains yet more information, such as the lyrics and song structure. As such, an algorithm for high-quality separation of mixed music into its harmonic, percussive, and vocal components would be generally useful for further analysis of each component.
+In music analysis (assuming contemporary Western music), important features are driven by the harmonic instruments (e.g., pitch, melody, key), while others (e.g., rhythm, beats, tempo) are influenced more strongly by the percussive instruments. The singing voice contains yet more information, such as the lyrics and song structure. As such, an algorithm for high-quality separation of mixed music into its harmonic, percussive, and vocal components would be generally useful for further analysis of each component.
 
 \subsection{Methods based on the STFT and CQT}
 
-\citet{fitzgerald1} noted that harmonic and percussive sounds appear as horizontal and vertical lines respectively in the short-time Fourier transform, and applied a median filter in the vertical and horizontal directions to estimate the harmonic and percussive components to compute soft masks. The masks were then applied to the original STFT and inverted to create the harmonic and percussive signals. An example can be seen in figure \ref{fig:fitz1}.
+Harmonic (or steady-state, or tonal) sounds are narrowband (contain few well-defined frequencies) and steady (maintain the same frequency components over long periods of time), while percussive sounds  are broadband (contain most of the frequency spectrum) and transient (fast decay). \citet{fitzgerald1} noted that harmonic and percussive sounds appear as horizontal and vertical lines respectively in the short-time Fourier transform, and applied a median filter in the vertical and horizontal directions to estimate the harmonic and percussive components to compute soft masks. The masks were then applied to the original STFT and inverted to create the harmonic and percussive signals. An example can be seen in figure \ref{fig:fitz1}.
 
 \begin{figure}[ht]
 	\centering
 	\subfloat[Mixed signal]{{\includegraphics[width=6cm]{./mixedspecgram.png} }}
-	\\
 	\subfloat[Percussive separation]{{\includegraphics[width=6cm]{./perc_soft.png} }}
-	\\
 	\subfloat[Harmonic separation]{{\includegraphics[width=6cm]{./harm_soft.png} }}
 	\caption{Example of median-filtering HPSS}
 	\label{fig:fitz1}
 \end{figure}
 
-\citet{driedger} replaced the soft mask with a binary/hard mask, and also introduced a two-pass variant. The STFT with a large window size in the first pass separates the harmonic components with higher frequency resolution, and the STFT with a small window size in the second pass separates the percussive component with higher time resolution.
-
-\citet{fitzgerald2} created a similar iterative variant, using soft masks, a large window STFT in the first pass for harmonic separation, and a small window STFT in the second pass for percussive separation. Additionally, they noted that if they replaced the small-window STFT with the constant-Q transform in the second pass, they obtained a separation of the human singing voice.
+\citet{driedger} replaced the soft mask with a binary/hard mask, and also introduced a two-pass variant. The STFT with a large window size in the first pass separates the harmonic components with higher frequency resolution, and the STFT with a small window size in the second pass separates the percussive component with higher time resolution. \citet{fitzgerald2} created a similar iterative variant, using soft masks, a large window STFT in the first pass for harmonic separation, and a small window STFT in the second pass for percussive separation. Additionally, they noted that when they replaced the small-window STFT with the constant-Q transform in the second pass, they obtained a separation of the human singing voice.
 
 In sum, from the above papers, we can consider two generalized frameworks for harmonic/percussive (and optionally vocal) source separation with masking and median filtering of either the STFT and CQT, considering the one-pass and two-pass variants separately. In each, we can substitute different window sizes of STFT (128--16384), and the CQT with different bins per octave (12--96) to test the effects.
 
-\subsection{Other methods}
+\subsection{TF Jigsaw}
 
-Two algorithms will be considered from the wavelet domain, which are implemented in the Large Time-Frequency Analysis toolbox (\cite{ltfat}).
+implemented in the Large Time-Frequency Analysis toolbox \cite{ltfat} etc.
+
+\subsection{WMDCT }
 
 %%%%%%%%%%%%%%
 % THEORY     %
@@ -162,12 +161,9 @@ Two algorithms will be considered from the wavelet domain, which are implemented
 
 \subsection{Objective measures}
 
-The SigSep (\href{https://sigsep.github.io/}{https://sigsep.github.io/}) community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the MUSDB18 dataset \cite{musdb18} (or the HQ, high-quality, equivalent \cite{musdb18-hq}), and uses the BSS (Blind Source Separation) Eval (\cite{bss}) objective measure for separation quality.
-
-The authors of BSS released an improved version that matches better with subjective human evaluations, which they called the PEASS (Perceptual Evaluation methods for Audio Source Separation) Toolkit (\cite{peass}), based on PEMO-Q (\cite{pemoq}). The PEASS Toolkit for MATLAB (\cite{peassmatlab}) conveniently includes all 3 measures: PEASS, PEMO-Q, and BSS. Each of these consist of 4 metrics:
+The SigSep (\href{https://sigsep.github.io/}{https://sigsep.github.io/}) community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \cite{bss} objective measure for separation quality. The authors of BSS released an improved version that matches better with subjective human evaluations, which they called the PEASS (Perceptual Evaluation methods for Audio Source Separation) Toolkit \cite{peass}, based on PEMO-Q \cite{pemoq}. The PEASS Toolkit for MATLAB \cite{peassmatlab} conveniently includes all 3 measures: PEASS, PEMO-Q, and BSS. Each of these consist of 4 metrics:
 
 \begin{tight_itemize}
-\vspace{-0.5em}
 \item
 	\textbf{Target:} measure of desired sound in the separation. TPS (Target Perceptual Score) in PEASS, ISR (source Image to Spatial distortion Ratio) in BSS, qTarget in PEMO-Q.
 \item
@@ -180,7 +176,6 @@ The authors of BSS released an improved version that matches better with subject
 
 \citet{beassvpeass} make the recommendation to use PEASS for music separation evaluation, noting the importance of perception in music applications. They also recommend to evaluate algorithms based on their separate target, interference, and artifact scores, noting that the global measure of OPS (for PEASS) and SDR (for BSS) have an uncertain relation to the three constituent scores. The choice in this paper is to use the three individual metrics from the PEASS:
 \begin{tight_enumerate}
-	\vspace{-0.5em}
 	\item
 		\textbf{TPS} (Target Perceptual Score)
 	\item
@@ -191,18 +186,17 @@ The authors of BSS released an improved version that matches better with subject
 
 \subsection{Evaluated music}
 
+The most popular music stem dataset used by SISEC and SigSep s MUSDB18 dataset \cite{musdb18} (or the HQ, high-quality, equivalent \cite{musdb18-hq}). MUSDB18-HQ contains stems (.wav files per component, e.g., drum.wav, vocal.wav, bass.wav) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research. 
+
 A limited subset of MUSDB18-HQ was evaluated, or 5 total minutes of music, consisting of 4 segments of 15 seconds duration taken from 5 separate tracks. One data set was prepared for harmonic/percussive separation evaluation (vocals omitted from the mix), and one data set for harmonic/percussive/vocal evaluation (vocals are present). The evaluation was limited to 5 minutes of music since the PEASS measure is computationally expensive.
 
-MUSDB18-HQ contains stems (.wav files per component, e.g., drum.wav, vocal.wav, bass.wav) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research. The songs are split across train and test sets. Since the final comparison of this paper will consider a neural network model which was trained on MUSDB18, the evaluation data is taken from the test set -- if we took it from the training set, the neural network could overfit and overperform.
+The songs in the MUSDB18-HQ dataset are split into train and test sets. Since the final comparison of this paper will consider a neural network model which was trained on MUSDB18, the evaluation data is taken from the test set -- if we took it from the training set, the neural network could overfit and overperform.
 
 \subsection{Evaluation format}
 
-Due to the large number of algorithms and configurations that will be evaluated, introducing them all at the same time will be overwhelming, and will make it difficult to form conclusions.
-
-The proposed format will be like an ``elimination tournament,'' similar to sports tournaments. Starting from the simplest one-pass algorithm for harmonic/percussive source separation, we can perform evaluations to form intermediate conclusions:
+Due to the large number of algorithms and configurations that will be evaluated, introducing them all at the same time will be overwhelming, and will make it difficult to form conclusions. The proposed format will be like an ``elimination tournament,'' similar to sports tournaments. Starting from the simplest one-pass algorithm for harmonic/percussive source separation, we can perform evaluations to form intermediate conclusions:
 
 \begin{tight_itemize}
-\vspace{-0.5em}
 \item
 	Is the STFT or CQT better for harmonic/percussive source separation
 \item
@@ -211,19 +205,14 @@ The proposed format will be like an ``elimination tournament,'' similar to sport
 	Which of soft or hard masking performs best
 \end{tight_itemize} 
 
-From these, we can move on to two-pass variants, by using the conclusions from the previous evaluation. Next, we can evaluate the wavelet-based methods with different configurations. After the harmonic/percussive evaluations are done, we can introduce vocal separation, and repeat. The initial evaluations will be described in the following section, \ref{sec:elim}.
+From these, we can move on to two-pass variants, by using the conclusions from the previous evaluation. Next, we can evaluate the TF jigsaw and WMDCT group lasso methods with different configurations. After the harmonic/percussive evaluations are done, we can introduce vocal separation, and repeat. The initial evaluations will be described in the following section, \ref{sec:elim}.
 
-The final goal is to combine the best performers to create optimal ``hybrid'' algorithms for each task: HPSS and harmonic/percussive/vocal separation. The construction of the hybrid algorithms will be shown in detail in section \ref{sec:hybrids}. At the last stage, the optimal hybrids will be compared to Open-Unmix (\cite{umx}). Open-Unmix is a deep-learning-based music source separation system which achieves near state-of-the-art results. It is fully open-source, and was intended to be a reference and benchmark in the field of signal separation.
+The final goal is to combine the best performers to create optimal ``hybrid'' algorithms for each task: HPSS and harmonic/percussive/vocal separation. The construction of the hybrid algorithms will be shown in detail in section \ref{sec:hybrids}. At the last stage, the optimal hybrids will be compared to Open-Unmix \cite{umx}. Open-Unmix is a deep-learning-based music source separation system which achieves near state-of-the-art results. It is fully open-source, and was intended to be a reference and benchmark in the field of signal separation.
 
 \subsection{Python/MATLAB testbench}
 
-The language chosen to implement the algorithms was MATLAB. It is an obvious choice since it has access to LTFAT, the PEASS Toolkit, many other signal processing tools (e.g., Wavelet Toolbox), and is in general a natural choice for prototyping DSP algorithms.
-
-On the other hand, other tasks for the project are more easily accomplished with Python. One example is in the preparation of the datasets, which requires traversing directories of stem files to produce mix and reference harmonic/percussive/vocal files. Also, Python would be a good choice for data visualization and result aggregation, to be able to use numpy\cite{numpy}, pandas\cite{pandas}, matplotlib\cite{matplotlib}, and seaborn\cite{seaborn}.
-
-The solution is to employ both languages wherever appropriate, and use the file system and JSON as universal interchanges:
+The language chosen to implement the algorithms was MATLAB. It is an obvious choice since it has access to LTFAT, the PEASS Toolkit, many other signal processing tools (e.g., Wavelet Toolbox), and is in general a natural choice for prototyping digital signal processing algorithms. On the other hand, other tasks for the project are more easily accomplished with Python. One example is in the preparation of the datasets, which requires traversing directories of stem files to produce mix and reference harmonic/percussive/vocal files. Also, Python would be a good choice for data visualization and result aggregation, to be able to use numpy\cite{numpy}, pandas\cite{pandas}, matplotlib\cite{matplotlib}, and seaborn\cite{seaborn}. The solution is to employ both languages wherever appropriate, and use the file system and JSON as universal interchanges:
 \begin{tight_enumerate}
-\vspace{-0.5em}
 \item
 	The Python script for data preparation scans the stem directories of MUSDB18-HQ, creates test wav files with a prefix indicating a unique sequence number, and wav files for each of the mix, harmonic, percussive, and vocal components
 \item
@@ -275,16 +264,13 @@ The first and original median-filtering HPSS algorithm with soft masks was intro
 
 Some parameters are fixed in the evaluation, since they're not relevant to time-frequency resolution. Median filter lengths of $l_{H} = l_{P} = 17$ were used for the STFT, and $l_{H} = 17, l_{P} = 7$ for the CQT (as suggested in \cite{fitzgerald2}). The power for the soft masking was set to $p = 2$, and the separation factor for the hard masking was set to $\beta = 2$ (paper defaults). The results can be seen in figures \ref{fig:round1soft} and \ref{fig:round1hard}.
 
-With soft masking, using CQT-96 achieves the best score in both the harmonic and percussive separation's target, and is the best performer from all variants in percussive separation. In the harmonic separation, the evaluated STFT configurations showed better interference and worse artifacts compared to the CQT configurations.
-
-With hard masking, all of the evaluations showed poor target and artifact scores. This is consistent with the literature of soft versus hard time-frequency masking (CITEME!!!). CQT-96 outperforms all the STFTs for harmonic separation in the hard masking algorithm. The STFT-2048 performs the best at percussive separation.
+With soft masking, using CQT-96 achieves the best score in both the harmonic and percussive separation's target, and is the best performer from all variants in percussive separation. In the harmonic separation, the evaluated STFT configurations showed better interference and worse artifacts compared to the CQT configurations. With hard masking, all of the evaluations showed poor target and artifact scores. This is consistent with the literature of soft versus hard time-frequency masking (CITEME!!!). CQT-96 outperforms all the STFTs for harmonic separation in the hard masking algorithm. The STFT-2048 performs the best at percussive separation.
 
 CQT-96 demonstrates good results for both harmonic and percussive separation with soft masks, indicating it has both desired qualities: high frequency resolution, originally achieved with a large-window STFT, and high time resolution, originally achieved with a small-window STFT. This makes it a good choice for one-pass harmonic/percussive source separation.
 
 \begin{figure*}
 	\centering
 	\makebox[\textwidth]{\includegraphics[width=20cm]{../evaluation/heatmaps/1pass_Fitzgerald_PEASS_abbrev.png}}
-	\vspace{-1.25em}
 	\caption{One-pass soft-masking PEASS results}
 	\label{fig:round1soft}
 \end{figure*}
@@ -332,13 +318,12 @@ CQT-96 demonstrates good results for both harmonic and percussive separation wit
 
 The conclusions from the previous round of testing are used to prepare 3 variants of two-pass hard masking HPSS:
 \begin{tight_enumerate}
-	\vspace{-0.5em}
 	\item
 		The first variant uses STFT-16384 in the first pass, and STFT-2048 in the second pass (the best performing STFT configurations for harmonic and percussive separation, respectively).
 	\item
 		The second variant uses CQT-96 in the first pass for the harmonic separation (top harmonic performer), and STFT-2048 (top percussive performer) in the second pass.
 	\item
-		The third variant is the default with the exact settings (STFT-4096 for harmonic, STFT-256 for percussive) from the paper (\cite{driedger}).
+		The third variant is the default with the exact settings (STFT-4096 for harmonic, STFT-256 for percussive) from the paper \cite{driedger}.
 \end{tight_enumerate}
 
 The results in \ref{fig:round2hard} show that the CQT-96/STFT-2048 algorithm performs the best. By the PEASS evaluation, the target and artifact scores for the CQT-96/STFT-2048 variant are better, at the expense of a slightly lower interference score.
@@ -391,17 +376,11 @@ The results in \ref{fig:round2hard} show that the CQT-96/STFT-2048 algorithm per
 	\label{fig:vocalround1soft}
 \end{figure*}
 
-\subsubsection{Wavelet algorithms}
+\subsubsection{TF Jigsaw}
 
-The first wavelet algorithm considered is the Time-Frequency Jigsaw Puzzle (\cite{tfjigsaw}), which is implemented in LTFAT (\cite{tfjigsaw2}). The implementation was adapted directly from the LTFAT demo (\cite{tfjigsaw3}).
+An algorithm considered which uses a custom time-frequency analysis is the Time-Frequency Jigsaw Puzzle \cite{tfjigsaw}, which is implemented in LTFAT \cite{tfjigsaw2}. The implementation was adapted directly from the LTFAT demo \cite{tfjigsaw3}. Similar to the STFT or CQT algorithms above, the tfjigsawsep function in LTFAT allows for configuring the window size of the Gabor systems used for the tonal and transient components, which can be considered analogous to the two-pass methods seen above. The default settings are a Hann window of size 4096 for the tonal system and 256 for the transient system.
 
-Similar to the STFT or CQT algorithms above, the tfjigsawsep function in LTFAT allows for configuring the window size of the Gabor systems used for the tonal and transient components, which can be considered analogous to the two-pass methods seen above. The default settings are a Hann window of size 4096 for the tonal system and 256 for the transient system.
-
-The parameters of Jigsaw Sep are as follows: (describe them)
-
-From the tested configurations in figures \ref{fig:jigsaw1} and \ref{fig:jigsaw2}, we can see that in fact, the harmonic separation of configuration \Verb#tfjigsaw-5# achieves excellent results for target, interference, and artifacts. The settings of \Verb#tfjigsaw-5# are $r_{1} = 0.85, r_{2} = 1.05, p = 2$, using the default window sizes for the Gabor systems.
-
-On the other hand, good parameters could not be found for percussive separation scores for the TFJigsaw, which all suffered from a very low artifact score (i.e., suffered from a presence of artifacts). This doesn't necessarily mean that TFJigsaw  is bad at percussive separation -- further study might be required to explore why this is the case, and how the results can be improved.
+The parameters of Jigsaw Sep are as follows: (describe them). From the tested configurations in figures \ref{fig:jigsaw1} and \ref{fig:jigsaw2}, we can see that in fact, the harmonic separation of configuration \Verb#tfjigsaw-5# achieves excellent results for target, interference, and artifacts. The settings of \Verb#tfjigsaw-5# are $r_{1} = 0.85, r_{2} = 1.05, p = 2$, using the default window sizes for the Gabor systems. On the other hand, good parameters could not be found for percussive separation scores for the TFJigsaw, which all suffered from a very low artifact score (i.e., suffered from a presence of artifacts). This doesn't necessarily mean that TFJigsaw  is bad at percussive separation -- further study might be required to explore why this is the case, and how the results can be improved.
 
 \vfill
 \clearpage % force a page break before references
