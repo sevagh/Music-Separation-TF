@@ -116,16 +116,7 @@ In music analysis (assuming contemporary Western music), important features are 
 
 Harmonic (or steady-state, or tonal) sounds are narrowband (contain few well-defined frequencies) and steady (maintain the same frequency components over long periods of time), while percussive sounds  are broadband (contain most of the frequency spectrum) and transient (fast decay). \citet{fitzgerald1} noted that harmonic and percussive sounds appear as horizontal and vertical lines respectively in the short-time Fourier transform, and applied a median filter in the vertical and horizontal directions to estimate the harmonic and percussive components.
 
-Median filtering is a technique for image processing that is typically used to remove outliers from noisy images \cite{imagenoise}. By performing median filtering in the vertical and horizontal directions, we can emphasize horizontal and vertical lines respectively, as shown in figure \ref{fig:simplemedfilter}. The median filtering step results in an estimate of the harmonic and percussive magnitude spectrograms, from which soft masks can be computed. The masks were then applied to the original STFT and inverted to create the harmonic and percussive signals. An example can be seen in figure \ref{fig:fitz1}.
-
-\begin{figure}[ht]
-	\centering
-	\subfloat[Simple image]{{\includegraphics[width=6cm]{./medfilter_basic_with_axes.png} }}
-	\subfloat[Median filter, axis 1]{{\includegraphics[width=6cm]{./medfilter_basic_axis1.png} }}
-	\subfloat[Median filter, axis 2]{{\includegraphics[width=6cm]{./medfilter_basic_axis2.png} }}
-	\caption{MATLAB movmedian applied along axis 1 and 2 on a simple image}%
-	\label{fig:simplemedfilter}
-\end{figure}
+Median filtering is a technique for image processing where a pixel is replaced by the median value of its neighbors in a window, or filter, which slides across all pixels. By applying a median filter shaped like a horizontal rectangle, isolated vertical lines are set to 0 since their neighboring pixels are 0. Similarly, a median filter shaped like a vertical rectangle will set isolated horizontal lines to 0. This step results in an estimate of the harmonic and percussive magnitude spectrograms, from which soft masks can be computed. The masks are then applied to the original STFT and inverted to create the harmonic and percussive signals. An example can be seen in figure \ref{fig:fitz1}.
 
 \begin{figure}[ht]
 	\centering
@@ -172,6 +163,14 @@ The next algorithm considered is the Time-Frequency Jigsaw Puzzle\cite{tfjigsaw}
 \end{quote}
 
 After creating two representations of the signal (one tonal with a large window Gabor frame, one transient with a small window Gabor frame), the next task is to separate the components. This is done with the use of ``super-tiles'' in the time-frequency plane, by superimposing the previous dual-window (tonal and transient) expansion. Then, within each super-tile, an entropy criterion chooses which tile (tonal or transient) is represented better and below a threshold, and subtracts these from the original signal. This is performed iteratively until the tonal and transient layers emerge.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=16cm]{./tfjigsaw-sep-example.png}
+	\caption{TFJigsawSep for separating tonal/transient separation}
+	\label{fig:fitz2}
+\end{figure}
+
 
 \subsection{Multilayer decomposition}
 
