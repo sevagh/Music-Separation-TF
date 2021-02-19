@@ -416,63 +416,101 @@ The parameters of Jigsaw Sep are as follows: (describe them).
 
 \begin{table}[ht]
 	\centering
-\begin{tabular}{ |l|l| |c|c| }
+\begin{tabular}{ |l|l|l|l|l|l|l| |c|c|c|c|c|c|c| }
 	 \hline
-	  Name & Configuration \\
+	  Name & p & r1 & r2 & v2 & winsize1 & winsize2 \\
 	 \hline
 	 \hline
-	 x1pass\_hpss\_f\_\{128-16384\} & 1-pass Fitzgerald (soft mask) with STFT of size 128-16384 \\
+	 tfjigsaw-1 & 2 & 0.88 & 1.05 & false & 4096 & 256 \\
 	 \hline
-	 x1pass\_hpss\_f\_cqt\_\{12-96\} & 1-pass Fitzgerald (soft mask) with CQT of bins-per-octave 12-96 \\
+	 tfjigsaw-2 & 2 & 0.88 & 1.05 & true & 4096 & 256 \\
 	 \hline
-	 x1pass\_hpss\_d\_\{128-16384\} & 1-pass Driedger (hard mask) with STFT of size 128-16384 \\
+	 tfjigsaw-3 & 4 & 0.88 & 1.05 & false & 4096 & 256 \\
 	 \hline
-	 x1pass\_hpss\_d\_cqt\_\{12-96\} & 1-pass Driedger (hard mask) with CQT of bins-per-octave 12-96 \\
+	 tfjigsaw-4 & 2 & 0.88 & 1.03 & false & 4096 & 256 \\
+	 \hline
+	 tfjigsaw-5 & 2 & 0.85 & 1.05 & false & 4096 & 256 \\
+	 \hline
+	 tfjigsaw-6 & 2 & 0.88 & 0.89 & false & 4096 & 256 \\
+	 \hline
+	 tfjigsaw-7 & 2 & 0.85 & 1.05 & true & 4096 & 256 \\
+	 \hline
+	 tfjigsaw-8 & 5 & 0.85 & 1.05 & true & 4096 & 256 \\
+	 \hline
+	 tfjigsaw-9 & 9 & 0.85 & 1.05 & true & 4096 & 256 \\
+	 \hline
+	 tfjigsaw-10 & 2 & 0.88 & 1.03 & false & 16384 & 4096 \\
+	 \hline
+	 tfjigsaw-11 & 2 & 0.88 & 1.03 & false & 8192 & 2048 \\
+	 \hline
+	 tfjigsaw-12 & 2 & 0.85 & 1.05 & true & 16384 & 4096 \\
+	 \hline
+	 tfjigsaw-13 & 2 & 0.85 & 1.05 & false & 16384 & 4096 \\
+	 \hline
+	 tfjigsaw-14 & 2 & 0.88 & 1.05 & false & 16384 & 256 \\
+	 \hline
+	 tfjigsaw-15 & 2 & 0.88 & 1.05 & false & 16384 & 2048 \\
+	 \hline
+	 tfjigsaw-16 & 2 & 0.88 & 1.05 & false & 16384 & 1024 \\
+	 \hline
+	 tfjigsaw-17 & 2 & 0.88 & 1.05 & false & 8192 & 512 \\
 	 \hline
 \end{tabular}
 	\caption{TFJigsaw configurations}
 	\label{table:round2jigsaw}
 \end{table}
 
-From the tested configurations in figures \ref{fig:jigsaw1} and \ref{fig:jigsaw2}, we can see that in fact, the harmonic separation of configuration \Verb#tfjigsaw-1#, using all defaults, achieves excellent results for target and artifacts -- it does not have the highest interference score, but this is usually a tradeoff, with better interference resulting from more aggressive removal, which results in more artifacts. In a subjective listening test, \Verb#tfjigsaw-1# sounds the best. On the other hand, good parameters could not be found for percussive separation scores for the TFJigsaw, which almost all suffered from a low artifact score (i.e., suffered from a presence of artifacts). This doesn't necessarily mean that TFJigsaw  is bad at percussive separation -- further study might be required to explore why this is the case, and how the results can be improved.
+From the tested configurations in figures \ref{fig:jigsaw}, we can see that in fact, the harmonic separation of configuration \Verb#tfjigsaw-1#, using all defaults, achieves excellent results for target and artifacts -- it does not have the highest interference score, but this is usually a tradeoff, with better interference resulting from more aggressive removal, which results in more artifacts. In a subjective listening test, \Verb#tfjigsaw-1# sounds the best. On the other hand, good parameters could not be found for percussive separation scores for the TFJigsaw, which almost all suffered from a low artifact score (i.e., suffered from a presence of artifacts). This doesn't necessarily mean that TFJigsaw  is bad at percussive separation -- further study might be required to explore why this is the case, and how the results can be improved.
 
 \begin{figure}[ht]
 	\centering
 	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Jigsaw_PEASS_abbrev.png}}
-	\vspace{-1.25em}
-	\caption{TFJigsaw PEASS results, batch 1}
-	\label{fig:jigsaw1}
-\end{figure}
-
-\begin{figure}[ht]
-	\centering
 	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Jigsaw2_PEASS_abbrev.png}}
 	\vspace{-1.25em}
-	\caption{TFJigsaw PEASS results, batch 2}
-	\label{fig:jigsaw2}
-\end{figure}
-
-\begin{figure}[ht]
-	\centering
-	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/WMDCT_PEASS_abbrev.png}}
-	\vspace{-1.25em}
-	\caption{WMDCT PEASS results, batch 1}
-	\label{fig:wmdct1}
+	\caption{TFJigsaw PEASS results}
+	\label{fig:jigsaw}
 \end{figure}
 
 \begin{figure}[ht]
 	\centering
 	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/WMDCT2_PEASS_abbrev.png}}
+	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/WMDCT_PEASS_abbrev.png}}
 	\vspace{-1.25em}
-	\caption{WMDCT PEASS results, batch 2}
-	\label{fig:wmdct2}
+	\caption{WMDCT PEASS results}
+	\label{fig:wmdct}
 \end{figure}
 
+\subsubsection{Hybrid -- TFJigsaw-HPSS}
 
-\vfill
-\clearpage % force a page break before references
+\begin{wrapfigure}{r}{5cm}
+	\vspace{-1.0em}
+	\includegraphics[width=5cm]{./hybrid_hpss_block_diagram.png}
+	\caption{Hybrid HPSS}
+	\label{fig:hybridhpss}
+\end{wrapfigure}
+
+The first hybrid algorithm created is for harmonic/percussive source separation. Noting that the \Verb#tfjigsaw-1# configuration achieved the best harmonic separation, and that median-filtering and soft masking with STFT-2048 achieved the best percussive separation, the proposed hybrid is a combination of both. First, the harmonic component is separated using TFJigsaw (the percussive output is discarded).
+
+Next, median filtering with STFT-2048 is applied on the input signal, with a twist -- the percussive estimate is computed like typical, with a median filter. However, the harmonic estimate is computed by taking the STFT-2048 magnitude of the harmonic component output by TFJigsaw. The harmonic estimate from median filtering the STFT is discarded.
+
+Finally, soft masks are computed from the percussive and harmonic estimates and applied to the STFT to get the percussive component. The block diagram of the proposed system is presented in figure \ref{fig:hybridhpss}.
+
+In figure \ref{fig:finalhpss}, we can see that the hybrid HPSS combines good harmonic and percussive separations from the two original algorithms, respectively. The PEASS scores show that it compares favorably with the Open-Unmix neural network solution. The vocal hybrid (which will be shown next) has better percussive separation performance across all scores, but slightly worse interference in the harmonic separation.
+
+\begin{figure}[ht]
+	\centering
+	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Final_HPSS_PEASS_abbrev.png}}
+	\vspace{-1.25em}
+	\caption{Final HPSS results, PEASS scores}
+	\label{fig:finalhpss}
+\end{figure}
 
 \subsection{Harmonic/percussive/vocal source separation}
+\label{subsec:mfvocalsep}
+
+The next task is harmonic/percussive/vocal source separation. The mixtures are combined from the instrument stems including vocals from the same 5 minutes of MUSDB18-HQ, and as before, the PEASS results are shown in heatmaps.
+
+\subsubsection{Median-filtering with STFT/CQT masking}
 
 The median filtering algorithms and a general framework for two-pass median filtering harmonic/percussive source separation were provided in \ref{subsec:mfilthpss}. The paper \cite{fitzgerald2} noted the following:
 \begin{tight_enumerate}
@@ -520,44 +558,7 @@ When choosing between the harmonic separation scores of the linear STFT-16384 an
 	\label{fig:vocalround1soft}
 \end{figure}
 
-\vfill
-\clearpage % force a page break before references
-
-%%%%%%%%%%%%%%%%%%%%%
-% HYBRID ALGORITHMS %
-%%%%%%%%%%%%%%%%%%%%%
-\section{Hybrid algorithms}
-\label{sec:hybrids}
-
-\subsection{Harmonic/percussive hybrid -- TFJigsaw-HPSS}
-
-\begin{wrapfigure}{r}{5cm}
-	\vspace{-1.0em}
-	\includegraphics[width=5cm]{./hybrid_hpss_block_diagram.png}
-	\caption{Hybrid HPSS}
-	\label{fig:hybridhpss}
-\end{wrapfigure}
-
-The first hybrid algorithm created is for harmonic/percussive source separation. Noting that the \Verb#tfjigsaw-1# configuration achieved the best harmonic separation, and that median-filtering and soft masking with STFT-2048 achieved the best percussive separation, the proposed hybrid is a combination of both. First, the harmonic component is separated using TFJigsaw (the percussive output is discarded).
-
-Next, median filtering with STFT-2048 is applied on the input signal, with a twist -- the percussive estimate is computed like typical, with a median filter. However, the harmonic estimate is computed by taking the STFT-2048 magnitude of the harmonic component output by TFJigsaw. The harmonic estimate from median filtering the STFT is discarded.
-
-Finally, soft masks are computed from the percussive and harmonic estimates and applied to the STFT to get the percussive component. The block diagram of the proposed system is presented in figure \ref{fig:hybridhpss}.
-
-In figure \ref{fig:finalhpss}, we can see that the hybrid HPSS combines good harmonic and percussive separations from the two original algorithms, respectively. The PEASS scores show that it compares favorably with the Open-Unmix neural network solution.
-
-\begin{figure}[ht]
-	\centering
-	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Final_HPSS_PEASS_abbrev.png}}
-	\vspace{-1.25em}
-	\caption{Final HPSS results, PEASS scores}
-	\label{fig:finalhpss}
-\end{figure}
-
-\vfill
-\clearpage % force a page break before references
-
-\subsection{Harmonic/percussive/vocal hybrid -- Iterative-CQT-Sep}
+\subsubsection{Hybrid -- Iterative-CQT-Sep}
 
 \begin{wrapfigure}{r}{8cm}
 	\includegraphics[width=8cm]{./hybrid_vocal_block_diagram.png}
@@ -566,15 +567,30 @@ In figure \ref{fig:finalhpss}, we can see that the hybrid HPSS combines good har
 	\label{fig:hybridvocal}
 \end{wrapfigure}
 
-Lorem ipsem Lorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsem
+In section \ref{subsec:mfvocalsep}, \citet{fitzgerald2}'s multipass algorithm for harmonic/percussive/source separation was presented and evaluated. The author's findings were confirmed -- following a first iteration for harmonic separation with an STFT-16384, using a CQT-24 in the second iteration gives a good vocal estimate, and using an STFT-1024 in the second gives a good percussive estimate. It was also noted that using the CQT-96 in the first iteration led to a higher quality percussive or vocal separation in the next iteration, but created a high-interference harmonic separation. The hybrid combines all of the above findings with some refinements:
+
+\begin{tight_enumerate}
+	\item
+		Median-filter CQT-96 in the first position -- the harmonic output is the ``almost final'' harmonic component, and the percussive output is the next input.
+	\item
+		Median-filter CQT-24 in the second iteration, where the harmonic output is the final vocal component. Add the percussive separation from this iteration to the percussive output of previous iteration, to use as the next input.
+	\item
+		Median-filter STFT-1024 in the third, where the percussive output is the final percussive component.
+	\item
+		Using a CQT-12, get harmonic, vocal, and percussive magnitude estimates from the ``almost final'' harmonic and final vocal and percussive components. Create and apply a soft mask for harmonic refinement, in an attempt to reduce vocal and percussive interference.
+\end{tight_enumerate}
+
+The system is shown in the block diagram in figure \ref{fig:hybridvocal}.
 
 \begin{figure}[ht]
 	\centering
 	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Final_Vocal_PEASS_abbrev.png}}
 	\vspace{-1.25em}
-	\caption{Final HPSS results, PEASS scores}
+	\caption{Final vocal results, PEASS scores}
 	\label{fig:finalvocal}
 \end{figure}
+
+The results of the evaluation are in figure \ref{fig:finalvocal}. The hybrid vocal algorithm gets the best percussive score, beating the multipass Fitzgerald configuration from the paper\cite{fitzgerald2} which had the highest percussive score. The harmonic score sacrifices interference for a better target and artifact scores. However, note that the interference score (16.32) is higher than the original interference score of the CQT-96 in the first position (4.81). This shows that the fourth step for harmonic refinement had the desired effect of reducing the interference in the harmonic separation.
 
 \vfill
 \clearpage % force a page break before references
