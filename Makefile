@@ -20,7 +20,7 @@ clean: vocal-clean
 clean: hpss-clean
 
 fmt:
-	black data/prepare_data.py algorithms/umx.py evaluation/heatmap.py
+	black data/prepare_data.py algorithms/umx.py evaluation/heatmap.py evaluation/bssv4_eval.py
 
 vocal-clean: vocal-data-clean
 vocal-clean: vocal-results-clean

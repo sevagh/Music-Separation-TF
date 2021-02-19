@@ -147,7 +147,7 @@ The hard mask used in \cite{driedger} is of the form:
 
 , where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero.
 
-\subsection{TF Jigsaw}
+\subsection{TFJigsaw}
 
 The next algorithm considered is the Time-Frequency Jigsaw Puzzle\cite{tfjigsaw}, which is implemented in the Large Time-Frequency Analysis toolbox \cite{ltfat, tfjigsaw2, tfjigsaw3}. Tonal/transient (or harmonic/percussive) separation is among one of the possible applications of TFJigsaw. The insight is similar to the multipass approach described previously -- in a TF representation with high frequency resolution, tonal sounds are well-represented, and in a TF representation with high time resolution, transient sounds are well-represented:
 
@@ -175,18 +175,18 @@ After creating two representations of the signal (one tonal with a large window 
 
 Note that the terms \textit{sparsity} and \textit{entropy} (w.r.t. TF analysis and audio signal representation) will be given a deeper treatment in section \ref{sec:theory}.
 
-\subsection{Audioshrink}
+\subsection{WMDCTLasso}
 
-The final algorithm for tonal/transient separation considered is referred to as ``Audioshrink'' from its name in the LTFAT\cite{wmdct3}. The technique is described in a paper by \citet{wmdct}, and several demos on websites are available \cite{wmdct2, wmdct3}.
+The final algorithm for tonal/transient separation considered is referred to as ``WMDCTLasso.'' In LTFAT, its name is ``Audioshrink.''\cite{wmdct3}. The technique is described in a paper by \citet{wmdct}, and several demos on websites are available \cite{wmdct2, wmdct3}.
 
-The audioshrink algorithm performs a decomposition based on structured sparsity. It uses WMDCTs (Windowed Modified Discrete Cosine Transform) applied with two different time-frequency resolutions, by using a wide and narrow window -- with the wide window, the tonal sounds are well-represented, and with the narrow window, transient sounds are well-represented.
+The WMDCTLasso algorithm performs a decomposition based on structured sparsity. It uses WMDCTs (Windowed Modified Discrete Cosine Transform) applied with two different time-frequency resolutions, by using a wide and narrow window -- with the wide window, the tonal sounds are well-represented, and with the narrow window, transient sounds are well-represented.
 
 Next, a method called group lasso shrink is applied to separate the tonal and transient layers by exploiting their respective sparsity in each time-frequency representation. An example of a resulting decomposition of jazz music is shown in figure \ref{fig:wmdctex}.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=16cm]{./wmdctjazz.png}
-	\caption{Audioshrink (or WMDCT + group lasso) for tonal/transient separation in jazz music}
+	\caption{WMDCTLasso for tonal/transient separation in jazz music}
 	\label{fig:wmdctex}
 \end{figure}
 
@@ -198,15 +198,15 @@ The term \textit{sparsity} is encountered again. In place of using an entropy cr
 \section{Theory}
 \label{sec:theory}
 
-In all of the presented algorithms, there is at least one, but more commonly two, Gabor dictionaries built from the input signal, using different Gabor atoms. The STFT and CQT are well-known Gabor systems, while TF Jigsaw and Audioshrink build their own custom Gabor dictionaries using the low-level frame functions available in LTFAT. This requires a general overview of what Gabor analysis and Gabor dictionaries are, and a demonstration of a signal represented with each of the time-frequency representations used by the different algorithms.
+In all of the presented algorithms, there is at least one, but more commonly two, Gabor dictionaries built from the input signal, using different Gabor atoms. The STFT and CQT are well-known Gabor systems, while TFJigsaw and WMDCTLasso build their own custom Gabor dictionaries using the low-level frame functions available in LTFAT. This requires a general overview of what Gabor analysis and Gabor dictionaries are, and a demonstration of a signal represented with each of the time-frequency representations used by the different algorithms.
 
-Second, the terms sparse signal representation and entropy are encountered in TF Jigsaw and Audioshrink, which will be explained further. It will also be shown that the median filter used in the simpler HPSS algorithms, by isolating transients as vertical lines and tonal sounds as horizontal lines, is a form of exploiting sparsity in the time-frequency plane.
+Second, the terms sparse signal representation and entropy are encountered in TFJigsaw and WMDCTLasso, which will be explained further. It will also be shown that the median filter used in the simpler HPSS algorithms, by isolating transients as vertical lines and tonal sounds as horizontal lines, is a form of exploiting sparsity in the time-frequency plane.
 
-\subsection{Tonal and transient sounds}
+\subsection{\textbf{\textcolor{red}{TODO }}Tonal and transient sounds}
 
-\subsection{Gabor dictionaries and time-frequency representations}
+\subsection{\textbf{\textcolor{red}{TODO }}Gabor dictionaries and time-frequency representations}
 
-\subsection{Sparsity, entropy, and matching pursuit}
+\subsection{\textbf{\textcolor{red}{TODO }}Sparsity, entropy, and matching pursuit}
 
 %%%%%%%%%%%%%%%
 % METHODOLOGY %
@@ -281,9 +281,9 @@ The language chosen to implement the algorithms was MATLAB. It is an obvious cho
 One final issue is that Open-Unmix, the deep learning solution chosen as a reference, is implemented for Python with pytorch\cite{pytorch}. The solution was to write a MATLAB shim script for Open-Unmix, which uses the `system' command in MATLAB to run Open-Unmix using the operating system. In this way, every algorithm could be executed by the MATLAB testbench.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-% Initial evaluations %
+% Evaluations %
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Initial evaluations}
+\section{Algorithm evaluations}
 \label{sec:elim}
 
 \textbf{N.B.:} as a shorthand, STFT with window size X will be referred to as STFT-X, and CQT with bins-per-octave X will be referred to as CQT-X. For example, CQT-96 is a CQT with 96 bins-per-octave, and STFT-2048 is an STFT with window size 2048.
@@ -343,11 +343,11 @@ The first and original median-filtering HPSS algorithm with soft masks was intro
   \label{lst:pseudocodes}
 \end{figure}
 
-Some parameters are fixed in the evaluation, since they're not relevant to time-frequency resolution. Median filter lengths of $l_{H} = l_{P} = 17$ were used for the STFT, and $l_{H} = 17, l_{P} = 7$ for the CQT (as suggested in \cite{fitzgerald2}). The power for the soft masking was set to $p = 2$, and the separation factor for the hard masking was set to $\beta = 2$ (paper defaults). The results can be seen in figures \ref{fig:round1soft} and \ref{fig:round1hard}. The naming scheme for the configuration of the variants tested are in table \ref{table:round1hpss}.
+Some parameters are fixed in the evaluation, since they're not relevant to time-frequency resolution. Median filter lengths of $l_{H} = l_{P} = 17$ were used for the STFT, and $l_{H} = 17, l_{P} = 7$ for the CQT (as suggested in \cite{fitzgerald1, fitzgerald2}). The power for the soft masking was set to $p = 2$, and the separation factor for the hard masking was set to $\beta = 2$ (as suggested in \cite{fitzgerald1, driedger}). The results can be seen in figures \ref{fig:round1soft} and \ref{fig:round1hard}. The naming scheme for the tested configurations is described in table \ref{table:round1hpss}.
 
 \begin{table}[ht]
 	\centering
-\begin{tabular}{ |l|l| |c|c| }
+\begin{tabular}{ |l|l|c|c| }
 	 \hline
 	  Name & Configuration \\
 	 \hline
@@ -379,16 +379,13 @@ CQT-96 demonstrates good results for both harmonic and percussive separation wit
 \begin{figure}[ht]
 	\centering
 	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/1pass_Driedger_PEASS_abbrev.png}}
-	\vspace{-1.25em}
 	\caption{One-pass hard-masking PEASS results}
 	\label{fig:round1hard}
 \end{figure}
 
 \subsubsection{Two-pass algorithms with STFT/CQT masking}
 
-\citet{driedger}'s iterative algorithm is presented for harmonic/percussive source separation. The pseudocode is shown in listing \ref{lst:pseudocodes}.
-
-The conclusions from the previous round of testing are used to prepare 3 variants of two-pass hard masking HPSS:
+\citet{driedger}'s iterative algorithm is presented for harmonic/percussive source separation. The algorithm is shown in listing \ref{lst:pseudocodes}. The conclusions from the previous round of testing are used to prepare 3 variants of two-pass hard masking HPSS:
 \begin{tight_enumerate}
 	\item
 		The first variant, ``id'' (Iterative Driedger), uses an STFT-16384 in the first pass, and an STFT-2048 in the second pass (the best performing STFT configurations for harmonic and percussive separation, respectively).
@@ -403,20 +400,43 @@ The results in figure \ref{fig:round2hard} show that the CQT-96/STFT-2048 algori
 \begin{figure}[ht]
 	\centering
 	\makebox[\textwidth]{\includegraphics[width=14cm]{../evaluation/heatmaps/2pass_Driedger_PEASS_abbrev.png}}
-	\vspace{-1.25em}
 	\caption{Two-pass hard-masking PEASS results}
 	\label{fig:round2hard}
 \end{figure}
 
-\subsubsection{TF Jigsaw}
+\subsubsection{TFJigsaw}
 
-An algorithm considered which uses a custom time-frequency analysis is the Time-Frequency Jigsaw Puzzle \cite{tfjigsaw}, which is implemented in LTFAT \cite{tfjigsaw2}. The implementation was adapted directly from the LTFAT demo \cite{tfjigsaw3}. Similar to the STFT or CQT algorithms above, the tfjigsawsep function in LTFAT allows for configuring the window size of the Gabor systems used for the tonal and transient components, which can be considered analogous to the two-pass methods seen above. The default settings are a Hann window of size 4096 for the tonal system and 256 for the transient system.
+An algorithm considered which uses a custom time-frequency analysis is the Time-Frequency Jigsaw Puzzle \cite{tfjigsaw}, implemented in LTFAT \cite{tfjigsaw2}. The implementation was adapted directly from the LTFAT demo \cite{tfjigsaw3}. Similar to the STFT or CQT algorithms above, the tfjigsawsep function in LTFAT allows for configuring the window size of the Gabor systems used for the tonal and transient components, which can be considered analogous to the two-pass methods seen above. The default settings are a Hann window of size 4096 for the tonal system and 256 for the transient system. The TFJigsaw algorithm is described in listing \ref{lst:tfjigsaw}.
 
-The parameters of Jigsaw Sep are as follows: (describe them).
+\begin{figure}[h]
+  \centering
+  \centering
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
+|$f = \text{mixed audio}$|
+|$a,M,\text{winsize},b\{1,2\} = \text{Gabor systems 1 and 2 configuration}$|
+|$[\text{ref}1, \text{ref}2] = \text{generate estimate of random white noise entropy within supertile}$|
+|$[\text{tau}1, \text{tau}2] = [\text{ref}1 \cdot r1, \text{ref}2 \cdot r2]$|
+|$c1 = \text{DGTReal}(f, \text{winsize}1, a1, M1)\qquad\text{\textbf{Discrete Gabor Transform}}$|
+|$c2 = \text{DGTReal}(f, \text{winsize}2, a2, M2)$|
+|$f1 = \text{frequency supertile location, Gabor system 1}$|
+|$f2 = \text{frequency supertile location, Gabor system 2}$|
+|$t1 = \text{time supertile location, Gabor system 1}$|
+|$t2 = \text{time supertile location, Gabor system 2}$|
+|$[c1, c2] = \text{decision}(c1,c2,f1,f2,t1,t2,\text{tau}1,\text{tau}2)$|
+|$f_{\text{tonal}} = \text{IDGTReal}(c1)\qquad\qquad\text{\textbf{Inverse discrete Gabor Transform}}$|
+|$f_{\text{transient}} = \text{IDGTReal}(c2)$|
+\end{minted}
+  \captionof{listing}{TFJigsaw tonal/transient separation algorithm}
+  \label{lst:tfjigsaw}
+\end{figure}
+
+The \Verb#decision# function uses R{\'e}nyi entropy to decide whether a signal is more random than random white noise represented within a supertile, and sets those coefficients to zero. For example, a transient sound will have a high entropy, or randomness, in the tonal Gabor system -- worse than white noise -- so it can be set to zero, creating a tonal separation (and vice-versa for transient separation). A consequence of using random white noise (in line 3 of the code listing) is that TFJigsawsep is non-deterministic. That is, you can run TFJigsaw separation with the same input signal and the same parameters, and get back a different result due to the different random white noise generated for the entropy comparison.
+
+The parameters of Jigsaw Sep are as follows: $v2$ uses version 2 of the algorithm, $p$ is the proportion of the time-frequency supertile relative to the step sizes, $r1$ is the significance level of the tonal layer compared to white noise, and $r2$ is the same for the transient layer. General recommendations are $r2 > r1$, $r2 \approx 1.05$ for good percussion, $v2 = true$ for good tonal, $p = \text{small}$ for music separation. A variety of parameters were tested, shown in table \ref{table:round2jigsaw}.
 
 \begin{table}[ht]
 	\centering
-\begin{tabular}{ |l|l|l|l|l|l|l| |c|c|c|c|c|c|c| }
+\begin{tabular}{ |l|l|l|l|l|l|l|c|c|c|c|c|c|c| }
 	 \hline
 	  Name & p & r1 & r2 & v2 & winsize1 & winsize2 \\
 	 \hline
@@ -460,25 +480,31 @@ The parameters of Jigsaw Sep are as follows: (describe them).
 	\label{table:round2jigsaw}
 \end{table}
 
-From the tested configurations in figures \ref{fig:jigsaw}, we can see that in fact, the harmonic separation of configuration \Verb#tfjigsaw-1#, using all defaults, achieves excellent results for target and artifacts -- it does not have the highest interference score, but this is usually a tradeoff, with better interference resulting from more aggressive removal, which results in more artifacts. In a subjective listening test, \Verb#tfjigsaw-1# sounds the best. On the other hand, good parameters could not be found for percussive separation scores for the TFJigsaw, which almost all suffered from a low artifact score (i.e., suffered from a presence of artifacts). This doesn't necessarily mean that TFJigsaw  is bad at percussive separation -- further study might be required to explore why this is the case, and how the results can be improved.
+From the tested configurations in figure \ref{fig:jigsaw}, we can see that in fact, the harmonic separation of configuration \Verb#tfjigsaw-1# achieves excellent results for target and artifacts -- it does not have the highest interference score, but this is usually a tradeoff, with better interference resulting from more aggressive removal, which results in more artifacts. In a subjective listening test, \Verb#tfjigsaw-1# sounds the best. On the other hand, good parameters could not be found for percussive separation scores for the TFJigsaw, which almost all suffered from a low artifact score (i.e., suffered from a presence of artifacts). This doesn't necessarily mean that TFJigsaw  is bad at percussive separation -- further study might be required to explore why this is the case, and how the results can be improved.
 
 \begin{figure}[ht]
 	\centering
 	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Jigsaw_PEASS_abbrev.png}}
 	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Jigsaw2_PEASS_abbrev.png}}
-	\vspace{-1.25em}
 	\caption{TFJigsaw PEASS results}
 	\label{fig:jigsaw}
 \end{figure}
+
+\vfill
+\clearpage
+
+\subsubsection{\textbf{\textcolor{red}{TODO }}WMDCTLasso}
 
 \begin{figure}[ht]
 	\centering
 	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/WMDCT2_PEASS_abbrev.png}}
 	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/WMDCT_PEASS_abbrev.png}}
-	\vspace{-1.25em}
 	\caption{WMDCT PEASS results}
 	\label{fig:wmdct}
 \end{figure}
+
+\vfill
+\clearpage
 
 \subsubsection{Hybrid -- TFJigsaw-HPSS}
 
@@ -500,17 +526,16 @@ In figure \ref{fig:finalhpss}, we can see that the hybrid HPSS combines good har
 \begin{figure}[ht]
 	\centering
 	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Final_HPSS_PEASS_abbrev.png}}
-	\vspace{-1.25em}
 	\caption{Final HPSS results, PEASS scores}
 	\label{fig:finalhpss}
 \end{figure}
 
 \subsection{Harmonic/percussive/vocal source separation}
-\label{subsec:mfvocalsep}
 
 The next task is harmonic/percussive/vocal source separation. The mixtures are combined from the instrument stems including vocals from the same 5 minutes of MUSDB18-HQ, and as before, the PEASS results are shown in heatmaps.
 
 \subsubsection{Median-filtering with STFT/CQT masking}
+\label{subsec:mfvocalsep}
 
 The median filtering algorithms and a general framework for two-pass median filtering harmonic/percussive source separation were provided in \ref{subsec:mfilthpss}. The paper \cite{fitzgerald2} noted the following:
 \begin{tight_enumerate}
@@ -526,7 +551,7 @@ The results are shown in figure \ref{fig:vocalround1soft}, and the algorithm nam
 
 \begin{table}[ht]
 	\centering
-\begin{tabular}{ |l|l|l| |c|c|c| }
+\begin{tabular}{ |l|l|l|c|c|c| }
 	 \hline
 	  Name & First pass & Second pass  \\
 	 \hline
@@ -546,28 +571,22 @@ The results are shown in figure \ref{fig:vocalround1soft}, and the algorithm nam
 	\label{table:round3softvocal}
 \end{table}
 
-The vocal separation has a stable quality in every case where the second pass is a CQT, regardless of the values for bins-per-octave. The percussive separation is best with a linear STFT-1024 in the second pass, but respectable with the CQT up to 48 bins-per-octave.
+The CQT in the first position chosen is always the CQT-96, for maximum frequency resolution. The vocal separation has a stable quality in every case where the second pass is a CQT, regardless of the values for bins-per-octave. The percussive separation is best with a linear STFT-1024 in the second pass, but respectable with the CQT up to 48 bins-per-octave.
 
 When choosing between the harmonic separation scores of the linear STFT-16384 and nonlinear CQT-96 in the first pass, we can see that using a CQT gives a very high target and artifact score, but a very poor interference score. In other words, there is hardly any separation being done. On the other hand, the target score of STFT-16384's harmonic separation is very low, indicating the absence of the desired sound.
 
-\begin{figure}[ht]
-	\centering
-	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/2pass_Fitzgerald_PEASS_abbrev.png}}
-	\vspace{-1.25em}
-	\caption{Multipass Fitzgerald (soft mask) PEASS results}
-	\label{fig:vocalround1soft}
-\end{figure}
+\vfill
+\clearpage % force a page break before references
 
 \subsubsection{Hybrid -- Iterative-CQT-Sep}
 
 \begin{wrapfigure}{r}{8cm}
 	\includegraphics[width=8cm]{./hybrid_vocal_block_diagram.png}
-	\vspace{-1.25em}
 	\caption{Hybrid harmonic/percussive/vocal block diagram}
 	\label{fig:hybridvocal}
 \end{wrapfigure}
 
-In section \ref{subsec:mfvocalsep}, \citet{fitzgerald2}'s multipass algorithm for harmonic/percussive/source separation was presented and evaluated. The author's findings were confirmed -- following a first iteration for harmonic separation with an STFT-16384, using a CQT-24 in the second iteration gives a good vocal estimate, and using an STFT-1024 in the second gives a good percussive estimate. It was also noted that using the CQT-96 in the first iteration led to a higher quality percussive or vocal separation in the next iteration, but created a high-interference harmonic separation. The hybrid combines all of the above findings with some refinements:
+In section \ref{subsec:mfvocalsep}, \citet{fitzgerald2}'s multipass algorithm for harmonic/percussive/source separation was presented and evaluated. The authors' findings were confirmed -- following a first iteration for harmonic separation with an STFT-16384, using a CQT-24 in the second iteration gives a good vocal estimate, and using an STFT-1024 in the second gives a good percussive estimate. It was also noted that using the CQT-96 in the first iteration led to a higher quality percussive or vocal separation in the next iteration, but created a high-interference harmonic separation. The hybrid combines all of the above findings with some refinements:
 
 \begin{tight_enumerate}
 	\item
@@ -582,15 +601,25 @@ In section \ref{subsec:mfvocalsep}, \citet{fitzgerald2}'s multipass algorithm fo
 
 The system is shown in the block diagram in figure \ref{fig:hybridvocal}.
 
+The results of the evaluation are in figure \ref{fig:finalvocal}. The hybrid vocal algorithm gets the best percussive score, beating the multipass Fitzgerald configuration from the paper\cite{fitzgerald2} which had the highest percussive score. The harmonic score sacrifices interference for a better target and artifact scores. However, note that the interference score (16.32) is higher than the original interference score of the CQT-96 in the first position (4.81). This shows that the fourth step for harmonic refinement had the desired effect of reducing the interference in the harmonic separation.
+
 \begin{figure}[ht]
 	\centering
+	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/2pass_Fitzgerald_PEASS_abbrev.png}}
+	\caption{Multipass Fitzgerald (soft mask) PEASS results}
+	\label{fig:vocalround1soft}
+	\vspace{1em}
 	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Final_Vocal_PEASS_abbrev.png}}
-	\vspace{-1.25em}
 	\caption{Final vocal results, PEASS scores}
 	\label{fig:finalvocal}
 \end{figure}
 
-The results of the evaluation are in figure \ref{fig:finalvocal}. The hybrid vocal algorithm gets the best percussive score, beating the multipass Fitzgerald configuration from the paper\cite{fitzgerald2} which had the highest percussive score. The harmonic score sacrifices interference for a better target and artifact scores. However, note that the interference score (16.32) is higher than the original interference score of the CQT-96 in the first position (4.81). This shows that the fourth step for harmonic refinement had the desired effect of reducing the interference in the harmonic separation.
+\vfill
+\clearpage % force a page break before references
+
+\section{\textbf{\textcolor{red}{TODO }}Discussion and conclusion}
+
+The first thing I will mention is that despite showing good PEASS scores, the conclusion is not certain that the presented hybrid algorithms beat a state-of-the-art neural network. The neural network has been trained and evaluated with BSS, an alternative 
 
 \vfill
 \clearpage % force a page break before references

@@ -131,7 +131,9 @@ if __name__ == "__main__":
             if vocals_present:
                 ax_peass_vocal.set_title("Vocal")
                 sns.heatmap(
-                    pd.DataFrame(results["vocal_peass"]).transpose().fillna(value=np.nan),
+                    pd.DataFrame(results["vocal_peass"])
+                    .transpose()
+                    .fillna(value=np.nan),
                     annot=True,
                     cbar=False,
                     cmap=cmap,
@@ -229,7 +231,9 @@ if __name__ == "__main__":
             if vocals_present:
                 ax_pemoq_vocal.set_title("Vocal")
                 sns.heatmap(
-                    pd.DataFrame(results["vocal_pemoq"]).transpose().fillna(value=np.nan),
+                    pd.DataFrame(results["vocal_pemoq"])
+                    .transpose()
+                    .fillna(value=np.nan),
                     annot=True,
                     cbar=False,
                     cmap=cmap,
