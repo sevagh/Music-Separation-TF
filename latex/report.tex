@@ -4,6 +4,7 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{makecell}
 \usepackage{wrapfig}
 \usepackage{verbatim}
 \usepackage{listings}
@@ -292,6 +293,7 @@ One final issue is that Open-Unmix, the deep learning solution chosen as a refer
 The first task is harmonic/percussive source separation. The mixtures are combined from the instrument stems (excluding vocals). The evaluation is performed on 5 minutes of music from MUSDB18-HQ, as was mentioned. The results are displayed as colored heatmaps, where green is the best result and red is the worst. This enables a quick visual verification of the best performers.
 
 \subsubsection{Median-filtering with STFT/CQT masking}
+\label{subsec:mfilthpss}
 
 We can consider two generalized frameworks for harmonic/percussive (and optionally vocal) source separation with masking and median filtering of either the STFT and CQT, considering the one-pass and two-pass variants separately. In both cases, we can substitute different window sizes of STFT, or the CQT with different bins per octave, to test the effects. The block diagram of the system under test is shown in figure \ref{fig:fitz2}, and the algorithms are described in listing \ref{lst:pseudocodes}.
 
@@ -341,7 +343,27 @@ The first and original median-filtering HPSS algorithm with soft masks was intro
   \label{lst:pseudocodes}
 \end{figure}
 
-Some parameters are fixed in the evaluation, since they're not relevant to time-frequency resolution. Median filter lengths of $l_{H} = l_{P} = 17$ were used for the STFT, and $l_{H} = 17, l_{P} = 7$ for the CQT (as suggested in \cite{fitzgerald2}). The power for the soft masking was set to $p = 2$, and the separation factor for the hard masking was set to $\beta = 2$ (paper defaults). The results can be seen in figures \ref{fig:round1soft} and \ref{fig:round1hard}.
+Some parameters are fixed in the evaluation, since they're not relevant to time-frequency resolution. Median filter lengths of $l_{H} = l_{P} = 17$ were used for the STFT, and $l_{H} = 17, l_{P} = 7$ for the CQT (as suggested in \cite{fitzgerald2}). The power for the soft masking was set to $p = 2$, and the separation factor for the hard masking was set to $\beta = 2$ (paper defaults). The results can be seen in figures \ref{fig:round1soft} and \ref{fig:round1hard}. The naming scheme for the configuration of the variants tested are in table \ref{table:round1hpss}.
+
+\begin{table}[ht]
+	\centering
+\begin{tabular}{ |l|l| |c|c| }
+	 \hline
+	  Name & Configuration \\
+	 \hline
+	 \hline
+	 x1pass\_hpss\_f\_\{128-16384\} & 1-pass Fitzgerald (soft mask) with STFT of size 128-16384 \\
+	 \hline
+	 x1pass\_hpss\_f\_cqt\_\{12-96\} & 1-pass Fitzgerald (soft mask) with CQT of bins-per-octave 12-96 \\
+	 \hline
+	 x1pass\_hpss\_d\_\{128-16384\} & 1-pass Driedger (hard mask) with STFT of size 128-16384 \\
+	 \hline
+	 x1pass\_hpss\_d\_cqt\_\{12-96\} & 1-pass Driedger (hard mask) with CQT of bins-per-octave 12-96 \\
+	 \hline
+\end{tabular}
+	\caption{One-pass HPSS configuration naming scheme}
+	\label{table:round1hpss}
+\end{table}
 
 With soft masking, using CQT-96 achieves the best score in both the harmonic and percussive separation's target, and is the best performer from all variants in percussive separation. In the harmonic separation, the evaluated STFT configurations showed better interference and worse artifacts compared to the CQT configurations. With hard masking, all of the evaluations showed poor target and artifact scores. This is consistent with the quality of soft versus hard time-frequency masking mentioned in the masking overview \cite{masking} in the introduction. CQT-96 outperforms all the STFTs for harmonic separation in the hard masking algorithm. The STFT-2048 performs the best at percussive separation.
 
@@ -369,14 +391,14 @@ CQT-96 demonstrates good results for both harmonic and percussive separation wit
 The conclusions from the previous round of testing are used to prepare 3 variants of two-pass hard masking HPSS:
 \begin{tight_enumerate}
 	\item
-		The first variant uses STFT-16384 in the first pass, and STFT-2048 in the second pass (the best performing STFT configurations for harmonic and percussive separation, respectively).
+		The first variant, ``id'' (Iterative Driedger), uses an STFT-16384 in the first pass, and an STFT-2048 in the second pass (the best performing STFT configurations for harmonic and percussive separation, respectively).
 	\item
-		The second variant uses CQT-96 in the first pass for the harmonic separation (top harmonic performer), and STFT-2048 (top percussive performer) in the second pass.
+		The second variant, ``id\_cqt1'' uses a CQT-96 in the first pass for the harmonic separation (top harmonic performer), and STFT-2048 (top percussive performer) in the second pass.
 	\item
-		The third variant is the default with the exact settings (STFT-4096 for harmonic, STFT-256 for percussive) from the paper \cite{driedger}.
+		The third variant, ``id\_default,'' is the default with the exact settings (STFT-4096 for harmonic, STFT-256 for percussive) from the paper \cite{driedger}.
 \end{tight_enumerate}
 
-The results in \ref{fig:round2hard} show that the CQT-96/STFT-2048 algorithm performs the best. By the PEASS evaluation, the target and artifact scores for the CQT-96/STFT-2048 variant are better, at the expense of a slightly lower interference score.
+The results in figure \ref{fig:round2hard} show that the CQT-96/STFT-2048 algorithm performs the best. By the PEASS evaluation, the target and artifact scores for the CQT-96/STFT-2048 variant are better, at the expense of a slightly lower interference score.
 
 \begin{figure}[ht]
 	\centering
@@ -391,6 +413,26 @@ The results in \ref{fig:round2hard} show that the CQT-96/STFT-2048 algorithm per
 An algorithm considered which uses a custom time-frequency analysis is the Time-Frequency Jigsaw Puzzle \cite{tfjigsaw}, which is implemented in LTFAT \cite{tfjigsaw2}. The implementation was adapted directly from the LTFAT demo \cite{tfjigsaw3}. Similar to the STFT or CQT algorithms above, the tfjigsawsep function in LTFAT allows for configuring the window size of the Gabor systems used for the tonal and transient components, which can be considered analogous to the two-pass methods seen above. The default settings are a Hann window of size 4096 for the tonal system and 256 for the transient system.
 
 The parameters of Jigsaw Sep are as follows: (describe them).
+
+\begin{table}[ht]
+	\centering
+\begin{tabular}{ |l|l| |c|c| }
+	 \hline
+	  Name & Configuration \\
+	 \hline
+	 \hline
+	 x1pass\_hpss\_f\_\{128-16384\} & 1-pass Fitzgerald (soft mask) with STFT of size 128-16384 \\
+	 \hline
+	 x1pass\_hpss\_f\_cqt\_\{12-96\} & 1-pass Fitzgerald (soft mask) with CQT of bins-per-octave 12-96 \\
+	 \hline
+	 x1pass\_hpss\_d\_\{128-16384\} & 1-pass Driedger (hard mask) with STFT of size 128-16384 \\
+	 \hline
+	 x1pass\_hpss\_d\_cqt\_\{12-96\} & 1-pass Driedger (hard mask) with CQT of bins-per-octave 12-96 \\
+	 \hline
+\end{tabular}
+	\caption{TFJigsaw configurations}
+	\label{table:round2jigsaw}
+\end{table}
 
 From the tested configurations in figures \ref{fig:jigsaw1} and \ref{fig:jigsaw2}, we can see that in fact, the harmonic separation of configuration \Verb#tfjigsaw-1#, using all defaults, achieves excellent results for target and artifacts -- it does not have the highest interference score, but this is usually a tradeoff, with better interference resulting from more aggressive removal, which results in more artifacts. In a subjective listening test, \Verb#tfjigsaw-1# sounds the best. On the other hand, good parameters could not be found for percussive separation scores for the TFJigsaw, which almost all suffered from a low artifact score (i.e., suffered from a presence of artifacts). This doesn't necessarily mean that TFJigsaw  is bad at percussive separation -- further study might be required to explore why this is the case, and how the results can be improved.
 
@@ -432,11 +474,49 @@ From the tested configurations in figures \ref{fig:jigsaw1} and \ref{fig:jigsaw2
 
 \subsection{Harmonic/percussive/vocal source separation}
 
+The median filtering algorithms and a general framework for two-pass median filtering harmonic/percussive source separation were provided in \ref{subsec:mfilthpss}. The paper \cite{fitzgerald2} noted the following:
+\begin{tight_enumerate}
+	\item
+		Using an STFT-16384 in the first pass led to a good harmonic separation
+	\item
+		Using an STFT-1024 in the second pass led to a good percussive separation
+	\item
+		Using a CQT-24 in the second pass led to a good vocal separation
+\end{tight_enumerate}
+
+The results are shown in figure \ref{fig:vocalround1soft}, and the algorithm names and configurations are described in table \ref{table:round3softvocal}. One interesting outcome is that using a CQT-96 in the first iteration in place of the STFT-16384 resulted in a better vocal and percussive separation, at the expense of the harmonic separation. The paper's original results were reproduced -- the variant with two linear STFTs (STFT-16384, STFT-1024) produced a better percussive and worse vocal separation, and the variant with a linear STFT and nonlinear CQT (STFT-16384, CQT-24) produced a better vocal separation.
+
+\begin{table}[ht]
+	\centering
+\begin{tabular}{ |l|l|l| |c|c|c| }
+	 \hline
+	  Name & First pass & Second pass  \\
+	 \hline
+	 \hline
+	 mf\_default\_linear & STFT-16384 & STFT-1024 \\
+	 \hline
+	 mf\_default\_cqt & STFT-16384 & CQT-24 \\
+	 \hline
+	 mf\_cqt1 & CQT-96 & STFT-1024 \\
+	 \hline
+	 mf\_cqt2\_\{12-96\} & STFT-16384 & CQT-\{12-96\} \\
+	 \hline
+	 mf\_cqt3\_\{12-96\} & CQT-96 & CQT-\{12-96\} \\
+	 \hline
+\end{tabular}
+	\caption{Multipass Fitzgerald configurations}
+	\label{table:round3softvocal}
+\end{table}
+
+The vocal separation has a stable quality in every case where the second pass is a CQT, regardless of the values for bins-per-octave. The percussive separation is best with a linear STFT-1024 in the second pass, but respectable with the CQT up to 48 bins-per-octave.
+
+When choosing between the harmonic separation scores of the linear STFT-16384 and nonlinear CQT-96 in the first pass, we can see that using a CQT gives a very high target and artifact score, but a very poor interference score. In other words, there is hardly any separation being done. On the other hand, the target score of STFT-16384's harmonic separation is very low, indicating the absence of the desired sound.
+
 \begin{figure}[ht]
 	\centering
 	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/2pass_Fitzgerald_PEASS_abbrev.png}}
 	\vspace{-1.25em}
-	\caption{Two-pass soft-masking PEASS results}
+	\caption{Multipass Fitzgerald (soft mask) PEASS results}
 	\label{fig:vocalround1soft}
 \end{figure}
 
@@ -449,7 +529,7 @@ From the tested configurations in figures \ref{fig:jigsaw1} and \ref{fig:jigsaw2
 \section{Hybrid algorithms}
 \label{sec:hybrids}
 
-\subsection{Harmonic/percussive hybrid -- TFJigsaw + median-filtering STFT}
+\subsection{Harmonic/percussive hybrid -- TFJigsaw-HPSS}
 
 \begin{wrapfigure}{r}{5cm}
 	\vspace{-1.0em}
@@ -474,17 +554,19 @@ In figure \ref{fig:finalhpss}, we can see that the hybrid HPSS combines good har
 	\label{fig:finalhpss}
 \end{figure}
 
-\subsection{Harmonic/percussive/vocal hybrid -- Iterative median-filtering CQT}
+\vfill
+\clearpage % force a page break before references
 
-\begin{figure}[ht]
-	\centering
-	\makebox[\textwidth]{\includegraphics[width=10cm]{./hybrid_vocal_block_diagram.png}}
+\subsection{Harmonic/percussive/vocal hybrid -- Iterative-CQT-Sep}
+
+\begin{wrapfigure}{r}{8cm}
+	\includegraphics[width=8cm]{./hybrid_vocal_block_diagram.png}
 	\vspace{-1.25em}
 	\caption{Hybrid harmonic/percussive/vocal block diagram}
 	\label{fig:hybridvocal}
-\end{figure}
+\end{wrapfigure}
 
-\subsection{Harmonic/percussive/vocal separation results}
+Lorem ipsem Lorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsemLorem ipsem
 
 \begin{figure}[ht]
 	\centering
@@ -497,7 +579,7 @@ In figure \ref{fig:finalhpss}, we can see that the hybrid HPSS combines good har
 \vfill
 \clearpage % force a page break before references
 
-\nocite{*}
+%\nocite{*}
 \printbibheading[title={References}]
 \printbibliography[heading=none]
 
