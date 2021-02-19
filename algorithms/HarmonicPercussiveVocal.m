@@ -144,13 +144,12 @@ end
 
 if size(xh2, 1) < size(x, 1)
     xh2 = [xh2; x(size(xh2, 1)+1:size(x, 1))];
-    xp2 = [xp2; x(size(xp2, 1)+1:size(x, 1))];
 end
 
 % use 2nd iter vocal estimation to improve harmonic sep
 x_vocal = xh2;
 x_harmonic = xh1;
-x_percussive = xp2+xp3;
+x_percussive = xp3;
 
 % CQT of harmonic signal
 % use a high frequency resolution here as  well
@@ -188,6 +187,6 @@ xpOut = sprintf("%s/%s_percussive.wav", p.Results.OutDir, prefix);
 xvOut = sprintf("%s/%s_vocal.wav", p.Results.OutDir, prefix);
 
 audiowrite(xhOut, xh4, fs);
-audiowrite(xpOut, xp3 + xp2, fs);
+audiowrite(xpOut, xp3, fs);
 audiowrite(xvOut, xh2, fs);
 end

@@ -23,13 +23,9 @@ parse(p, filename, varargin{:});
 
 [x, fs] = audioread(p.Results.filename);
 
-fprintf("%f %f %f %d\n", p.Results.r1, p.Results.r2, p.Results.p, p.Results.V2);
-
 if p.Results.V2
-    display('SEVAG SAID THIS!')
     [seps, ~] = tfjigsawsep(x, p.Results.r1, p.Results.r2, p.Results.p,'ver2','fs', fs, 'winsize1', p.Results.winsize1, 'a1', p.Results.a1, 'M1', p.Results.winsize1, 'winsize2', p.Results.winsize2, 'a2', p.Results.a2, 'M2', p.Results.winsize2);
 else
-    display('RAFFI SAID THAT!')
     [seps, ~] = tfjigsawsep(x, p.Results.r1, p.Results.r2, p.Results.p, 'fs', fs, 'winsize1', p.Results.winsize1, 'a1', p.Results.a1, 'M1', p.Results.winsize1, 'winsize2', p.Results.winsize2, 'a2', p.Results.a2, 'M2', p.Results.winsize2);
 end
 

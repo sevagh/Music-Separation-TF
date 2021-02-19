@@ -110,13 +110,13 @@ In music source separation, a mixed song is split into its constituent component
 		Harmonic/percussive/vocal source separation
 \end{tight_enumerate}
 
-In music analysis (assuming contemporary Western music), important features are driven by the harmonic instruments (e.g., pitch, melody, key), while others (e.g., rhythm, beats, tempo) are influenced more strongly by the percussive instruments. The singing voice contains yet more information, such as the lyrics and song structure. As such, an algorithm for high-quality separation of mixed music into its harmonic, percussive, and vocal components would be generally useful for further analysis of each component.
+In music analysis (assuming contemporary Western music), important features are driven by the harmonic instruments (e.g., pitch, melody, key), while others (e.g., rhythm, beats, tempo) are influenced more strongly by the percussive instruments. The singing voice contains yet more information, such as the lyrics and song structure. An algorithm for high-quality separation of mixed music into its harmonic, percussive, and vocal components would be generally useful.
 
 \subsection{Median-filtering the STFT and CQT}
 
-Harmonic (or steady-state, or tonal) sounds are narrowband (contain few well-defined frequencies) and steady (maintain the same frequency components over long periods of time), while percussive sounds  are broadband (contain most of the frequency spectrum) and transient (fast decay). \citet{fitzgerald1} noted that harmonic and percussive sounds appear as horizontal and vertical lines respectively in the short-time Fourier transform, and applied a median filter in the vertical and horizontal directions to estimate the harmonic and percussive components.
+Harmonic (or steady-state, or tonal) sounds are narrowband and steady in time, while percussive (or transient) sounds are broadband and have a fast decay. \citet{fitzgerald1} noted that they appear as horizontal and vertical lines respectively in the short-time Fourier transform, and applied a median filter in the vertical and horizontal directions to estimate the harmonic and percussive components.
 
-Median filtering is a technique for image processing where a pixel is replaced by the median value of its neighbors in a window, or filter, which slides across all pixels. By applying a median filter shaped like a horizontal rectangle, isolated vertical lines are set to 0 since their neighboring pixels are 0. Similarly, a median filter shaped like a vertical rectangle will set isolated horizontal lines to 0. This step results in an estimate of the harmonic and percussive magnitude spectrograms, from which soft masks can be computed. The masks are then applied to the original STFT and inverted to create the harmonic and percussive signals. An example can be seen in figure \ref{fig:fitz1}.
+Median filtering is a technique for image processing where a pixel is replaced by the median value of its neighbors in a window, or filter, which slides across all pixels. By applying a median filter shaped like a horizontal rectangle (i.e., stretching in time) to the STFT, vertical (or percussive) features are diminished since their neighboring pixels are empty, preserving horizontal (or harmonic) features. This can be repeated with the axes flipped to obtain the percussive estimate. From these estimates, soft masks are computed which are applied to the original STFT and inverted to create harmonic and percussive signals, shown in figure \ref{fig:fitz1}.
 
 \begin{figure}[ht]
 	\centering
@@ -129,16 +129,8 @@ Median filtering is a technique for image processing where a pixel is replaced b
 
 \citet{driedger} replaced the soft mask with a binary/hard mask, and also introduced a two-pass variant. The first pass separates the harmonic component using an STFT with a large window size for high frequency resolution, followed by the second pass which separates the percussive component using an STFT with a small window size for high time resolution. \citet{fitzgerald2} created a similar iterative variant using soft masks. Additionally, they noted that when they replaced the small-window STFT with the constant-Q transform in the second pass, they obtained a separation of the human singing voice.
 
-From these methods, we can consider two generalized frameworks for harmonic/percussive (and optionally vocal) source separation with masking and median filtering of either the STFT and CQT, considering the one-pass and two-pass variants separately. In both cases, we can substitute different window sizes of STFT, or the CQT with different bins per octave, to test the effects. The block diagram of the system under test is shown in figure \ref{fig:fitz2}.
-
-\begin{figure}[ht]
-	\centering
-	\includegraphics[width=12cm]{./medianfiltdiagram.png}
-	\caption{A general framework for median filtering music separation}
-	\label{fig:fitz2}
-\end{figure}
-
 \begin{wrapfigure}{r}{8cm}
+	\vspace{-1.0em}
 	\includegraphics[width=8cm]{./maskdemo.png}
 	\caption{Results of a soft and hard oracle mask applied for speech denoising}
 	\label{fig:masks}
@@ -162,19 +154,42 @@ The next algorithm considered is the Time-Frequency Jigsaw Puzzle\cite{tfjigsaw}
 	[...] the starting point is to define the tonal layer of the signal as the ``component'' which admits a sparse expansion with respect to a Gabor frame with high frequency resolution (i.e. with a wide window), and the transient layer as the ``component'' which admits a sparse expansion with respect to a Gabor frame with high time resolution (i.e. a narrow window).
 \end{quote}
 
-After creating two representations of the signal (one tonal with a large window Gabor frame, one transient with a small window Gabor frame), the next task is to separate the components. This is done with the use of ``super-tiles'' in the time-frequency plane, by superimposing the previous dual-window (tonal and transient) expansion. Then, within each super-tile, an entropy criterion chooses which tile (tonal or transient) is represented better and below a threshold, and subtracts these from the original signal. This is performed iteratively until the tonal and transient layers emerge.
+\begin{figure}[ht]
+	\centering
+	\subfloat[Two lattices within a super-tile; the rectangular region is the super-tile, the ellipses represent the domains within which each TF atom's spectrogram exceeds some fixed threshold, and the dots represent their center (the TF sampling points)]{\includegraphics[height=4cm]{./tfjigsaw-supertiles.png}}
+	\hspace{1em}
+	\subfloat[$G^{0}$ and $G^{1}$ represent the analysis maps for the two Gabor frames, $\tilde{G}^{0}_{p}$ and $\tilde{G}^{1}_{p}$ represent the partial synthesis maps from the selected TF atoms, and $\mathcal{H}$ represents the calculation of entropy and corresponding decision]{\includegraphics[height=4cm]{./tfjigsaw-entropycriterion.png}}
+	\caption{\citet{tfjigsaw}'s illustrations of the TF Jigsaw Puzzle}
+	\label{fig:supertiles}
+\end{figure}
+
+After creating two representations of the signal (one tonal with a large window Gabor frame, one transient with a small window Gabor frame), these are superimposed in a single time-frequency plane to create so-called ``super-tiles.'' The next task is to separate the components; within each super-tile, an entropy criterion chooses which tile (tonal or transient) is represented better and below a threshold, and subtracts these from the original signal. This is performed iteratively until the tonal and transient layers emerge. The super-tiles and entropy criterion are shown in figure \ref{fig:supertiles}, and the results are shown in figure \ref{fig:tfjigsawdemo}.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=16cm]{./tfjigsaw-sep-example.png}
-	\caption{TFJigsawSep for separating tonal/transient separation}
-	\label{fig:fitz2}
+	\caption{TFJigsawSep for tonal/transient separation}
+	\label{fig:tfjigsawdemo}
 \end{figure}
 
+Note that the terms \textit{sparsity} and \textit{entropy} (w.r.t. TF analysis and audio signal representation) will be given a deeper treatment in section \ref{sec:theory}.
 
-\subsection{Multilayer decomposition}
+\subsection{Audioshrink}
 
-The final algorithm considered is the multi
+The final algorithm for tonal/transient separation considered is referred to as ``Audioshrink'' from its name in the LTFAT\cite{wmdct3}. The technique is described in a paper by \citet{wmdct}, and several demos on websites are available \cite{wmdct2, wmdct3}.
+
+The audioshrink algorithm performs a decomposition based on structured sparsity. It uses WMDCTs (Windowed Modified Discrete Cosine Transform) applied with two different time-frequency resolutions, by using a wide and narrow window -- with the wide window, the tonal sounds are well-represented, and with the narrow window, transient sounds are well-represented.
+
+Next, a method called group lasso shrink is applied to separate the tonal and transient layers by exploiting their respective sparsity in each time-frequency representation. An example of a resulting decomposition of jazz music is shown in figure \ref{fig:wmdctex}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=16cm]{./wmdctjazz.png}
+	\caption{Audioshrink (or WMDCT + group lasso) for tonal/transient separation in jazz music}
+	\label{fig:wmdctex}
+\end{figure}
+
+The term \textit{sparsity} is encountered again. In place of using an entropy criterion like in TFJigsaw, instead a technique called lasso shrinkage (or specifically, the group lasso variant) is used. The goal is the same -- to determine which part of the signal is best represented by the wide-window time-frequency representation, which is likely the tonal component, and similar for the case of the transient components and narrow window.
 
 %%%%%%%%%%%%%%
 % THEORY     %
@@ -182,15 +197,15 @@ The final algorithm considered is the multi
 \section{Theory}
 \label{sec:theory}
 
-\subsection{Gabor dictionaries}
+In all of the presented algorithms, there is at least one, but more commonly two, Gabor dictionaries built from the input signal, using different Gabor atoms. The STFT and CQT are well-known Gabor systems, while TF Jigsaw and Audioshrink build their own custom Gabor dictionaries using the low-level frame functions available in LTFAT. This requires a general overview of what Gabor analysis and Gabor dictionaries are, and a demonstration of a signal represented with each of the time-frequency representations used by the different algorithms.
 
-\subsubsection{STFT and CQT}
+Second, the terms sparse signal representation and entropy are encountered in TF Jigsaw and Audioshrink, which will be explained further. It will also be shown that the median filter used in the simpler HPSS algorithms, by isolating transients as vertical lines and tonal sounds as horizontal lines, is a form of exploiting sparsity in the time-frequency plane.
 
-\subsubsection{Time-frequency resolution}
+\subsection{Tonal and transient sounds}
 
-\subsection{TF Jigsaw}
+\subsection{Gabor dictionaries and time-frequency representations}
 
-\subsection{Group lasso shrink}
+\subsection{Sparsity, entropy, and matching pursuit}
 
 %%%%%%%%%%%%%%%
 % METHODOLOGY %
@@ -276,9 +291,18 @@ One final issue is that Open-Unmix, the deep learning solution chosen as a refer
 
 The first task is harmonic/percussive source separation. The mixtures are combined from the instrument stems (excluding vocals). The evaluation is performed on 5 minutes of music from MUSDB18-HQ, as was mentioned. The results are displayed as colored heatmaps, where green is the best result and red is the worst. This enables a quick visual verification of the best performers.
 
-\subsubsection{One-pass algorithms with STFT/CQT masking}
+\subsubsection{Median-filtering with STFT/CQT masking}
 
-The first and original median-filtering HPSS algorithm with soft masks was introduced by \citet{fitzgerald1}. The modification introduced by \citet{driedger} uses hard masks (the same paper contains the two-pass variant, which will be discussed later). Pseudocode for both algorithms is shown in listing \ref{code:pseudocodes}.
+We can consider two generalized frameworks for harmonic/percussive (and optionally vocal) source separation with masking and median filtering of either the STFT and CQT, considering the one-pass and two-pass variants separately. In both cases, we can substitute different window sizes of STFT, or the CQT with different bins per octave, to test the effects. The block diagram of the system under test is shown in figure \ref{fig:fitz2}, and the algorithms are described in listing \ref{lst:pseudocodes}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=10cm]{./medianfiltdiagram.png}
+	\caption{A general framework for median filtering music separation}
+	\label{fig:fitz2}
+\end{figure}
+
+The first and original median-filtering HPSS algorithm with soft masks was introduced by \citet{fitzgerald1}. The modification introduced by \citet{driedger} uses hard masks (the same paper contains the two-pass variant, which will be discussed later).
 
 \begin{figure}[h]
   \centering
@@ -297,7 +321,6 @@ The first and original median-filtering HPSS algorithm with soft masks was intro
 |$h = \text{ISTFT}(\hat{H})\text{\textbf{ or ICQT}}$|
 |$p = \text{ISTFT}(\hat{P})\text{\textbf{  or ICQT}}$|
 \end{minted}
-  \captionof{listing}{1-pass median-filtering HPSS algorithm}
  \end{minipage}
 \hspace{0.02\textwidth}
  \begin{minipage}{0.48\textwidth}
@@ -313,9 +336,9 @@ The first and original median-filtering HPSS algorithm with soft masks was intro
 |$h2 = \text{ISTFT}(\hat{H2})\text{\textbf{ or ICQT}}$|
 |$\text{\textbf{final percussive} } p1 = \text{ISTFT}(\hat{P2})\text{\textbf{ or ICQT}}$|
 \end{minted}
-  \captionof{listing}{2-pass median-filtering HPSS algorithm}
  \end{minipage}
-  \label{code:pseudocodes}
+  \captionof{listing}{1- and 2-pass median-filtering HPSS algorithms}
+  \label{lst:pseudocodes}
 \end{figure}
 
 Some parameters are fixed in the evaluation, since they're not relevant to time-frequency resolution. Median filter lengths of $l_{H} = l_{P} = 17$ were used for the STFT, and $l_{H} = 17, l_{P} = 7$ for the CQT (as suggested in \cite{fitzgerald2}). The power for the soft masking was set to $p = 2$, and the separation factor for the hard masking was set to $\beta = 2$ (paper defaults). The results can be seen in figures \ref{fig:round1soft} and \ref{fig:round1hard}.
@@ -341,7 +364,7 @@ CQT-96 demonstrates good results for both harmonic and percussive separation wit
 
 \subsubsection{Two-pass algorithms with STFT/CQT masking}
 
-\citet{driedger}'s iterative algorithm is presented for harmonic/percussive source separation. The pseudocode is shown in listing \ref{code:pseudocodes}.
+\citet{driedger}'s iterative algorithm is presented for harmonic/percussive source separation. The pseudocode is shown in listing \ref{lst:pseudocodes}.
 
 The conclusions from the previous round of testing are used to prepare 3 variants of two-pass hard masking HPSS:
 \begin{tight_enumerate}
@@ -357,7 +380,7 @@ The results in \ref{fig:round2hard} show that the CQT-96/STFT-2048 algorithm per
 
 \begin{figure}[ht]
 	\centering
-	\makebox[\textwidth]{\includegraphics[width=8cm]{../evaluation/heatmaps/2pass_Driedger_PEASS_abbrev.png}}
+	\makebox[\textwidth]{\includegraphics[width=14cm]{../evaluation/heatmaps/2pass_Driedger_PEASS_abbrev.png}}
 	\vspace{-1.25em}
 	\caption{Two-pass hard-masking PEASS results}
 	\label{fig:round2hard}
@@ -367,7 +390,9 @@ The results in \ref{fig:round2hard} show that the CQT-96/STFT-2048 algorithm per
 
 An algorithm considered which uses a custom time-frequency analysis is the Time-Frequency Jigsaw Puzzle \cite{tfjigsaw}, which is implemented in LTFAT \cite{tfjigsaw2}. The implementation was adapted directly from the LTFAT demo \cite{tfjigsaw3}. Similar to the STFT or CQT algorithms above, the tfjigsawsep function in LTFAT allows for configuring the window size of the Gabor systems used for the tonal and transient components, which can be considered analogous to the two-pass methods seen above. The default settings are a Hann window of size 4096 for the tonal system and 256 for the transient system.
 
-The parameters of Jigsaw Sep are as follows: (describe them). From the tested configurations in figures \ref{fig:jigsaw1} and \ref{fig:jigsaw2}, we can see that in fact, the harmonic separation of configuration \Verb#tfjigsaw-1#, using all defaults, achieves excellent results for target and artifacts -- it does not have the highest interference score, but this is usually a tradeoff, with better interference resulting from more aggressive removal, which results in more artifacts. In a subjective listening test, \Verb#tfjigsaw-1# sounds the best. On the other hand, good parameters could not be found for percussive separation scores for the TFJigsaw, which almost all suffered from a low artifact score (i.e., suffered from a presence of artifacts). This doesn't necessarily mean that TFJigsaw  is bad at percussive separation -- further study might be required to explore why this is the case, and how the results can be improved.
+The parameters of Jigsaw Sep are as follows: (describe them).
+
+From the tested configurations in figures \ref{fig:jigsaw1} and \ref{fig:jigsaw2}, we can see that in fact, the harmonic separation of configuration \Verb#tfjigsaw-1#, using all defaults, achieves excellent results for target and artifacts -- it does not have the highest interference score, but this is usually a tradeoff, with better interference resulting from more aggressive removal, which results in more artifacts. In a subjective listening test, \Verb#tfjigsaw-1# sounds the best. On the other hand, good parameters could not be found for percussive separation scores for the TFJigsaw, which almost all suffered from a low artifact score (i.e., suffered from a presence of artifacts). This doesn't necessarily mean that TFJigsaw  is bad at percussive separation -- further study might be required to explore why this is the case, and how the results can be improved.
 
 \begin{figure}[ht]
 	\centering
@@ -426,17 +451,37 @@ The parameters of Jigsaw Sep are as follows: (describe them). From the tested co
 
 \subsection{Harmonic/percussive hybrid -- TFJigsaw + median-filtering STFT}
 
-\subsection{Harmonic/percussive/vocal hybrid -- Iterative median-filtering CQT}
+\begin{wrapfigure}{r}{5cm}
+	\vspace{-1.0em}
+	\includegraphics[width=5cm]{./hybrid_hpss_block_diagram.png}
+	\caption{Hybrid HPSS}
+	\label{fig:hybridhpss}
+\end{wrapfigure}
 
-\subsection{Harmonic/percussive separation results}
+The first hybrid algorithm created is for harmonic/percussive source separation. Noting that the \Verb#tfjigsaw-1# configuration achieved the best harmonic separation, and that median-filtering and soft masking with STFT-2048 achieved the best percussive separation, the proposed hybrid is a combination of both. First, the harmonic component is separated using TFJigsaw (the percussive output is discarded).
+
+Next, median filtering with STFT-2048 is applied on the input signal, with a twist -- the percussive estimate is computed like typical, with a median filter. However, the harmonic estimate is computed by taking the STFT-2048 magnitude of the harmonic component output by TFJigsaw. The harmonic estimate from median filtering the STFT is discarded.
+
+Finally, soft masks are computed from the percussive and harmonic estimates and applied to the STFT to get the percussive component. The block diagram of the proposed system is presented in figure \ref{fig:hybridhpss}.
+
+In figure \ref{fig:finalhpss}, we can see that the hybrid HPSS combines good harmonic and percussive separations from the two original algorithms, respectively. The PEASS scores show that it compares favorably with the Open-Unmix neural network solution.
 
 \begin{figure}[ht]
 	\centering
 	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Final_HPSS_PEASS_abbrev.png}}
-	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Final_HPSS_BSS_abbrev.png}}
 	\vspace{-1.25em}
-	\caption{Final HPSS results, PEASS and BSS}
+	\caption{Final HPSS results, PEASS scores}
 	\label{fig:finalhpss}
+\end{figure}
+
+\subsection{Harmonic/percussive/vocal hybrid -- Iterative median-filtering CQT}
+
+\begin{figure}[ht]
+	\centering
+	\makebox[\textwidth]{\includegraphics[width=10cm]{./hybrid_vocal_block_diagram.png}}
+	\vspace{-1.25em}
+	\caption{Hybrid harmonic/percussive/vocal block diagram}
+	\label{fig:hybridvocal}
 \end{figure}
 
 \subsection{Harmonic/percussive/vocal separation results}
@@ -444,10 +489,9 @@ The parameters of Jigsaw Sep are as follows: (describe them). From the tested co
 \begin{figure}[ht]
 	\centering
 	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Final_Vocal_PEASS_abbrev.png}}
-	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Final_Vocal_BSS_abbrev.png}}
 	\vspace{-1.25em}
-	\caption{Final HPSS results, PEASS and BSS}
-	\label{fig:finalhpss}
+	\caption{Final HPSS results, PEASS scores}
+	\label{fig:finalvocal}
 \end{figure}
 
 \vfill

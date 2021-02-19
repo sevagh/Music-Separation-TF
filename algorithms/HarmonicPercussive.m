@@ -52,11 +52,9 @@ P = movmedian(Smag, LPercSTFT, 1);
 Hp = H .^ Power;
 Pp = P .^ Power;
 total = Hp + Pp;
-Mh = Hp ./ total;
 Mp = Pp ./ total;
 
 % recover the complex STFT H and P from S using the masks
-H = Mh .* Shalf;
 P = Mp .* Shalf;
 
 % we previously dropped the redundant second half of the fft
