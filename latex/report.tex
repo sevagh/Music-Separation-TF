@@ -91,7 +91,7 @@
 % ABSTRACT			%
 %%%%%%%%%%%%%%
 \begin{abstract}
-	\citet{fitzgerald1} presented an algorithm for separating a musical mix into harmonic and percussive components by masking the short-time Fourier transform (STFT). \citet{driedger} created an iterative version, improving the separation by using two STFTs with different time-frequency resolution. \citet{fitzgerald2} replaced the STFT with the constant-Q transform (CQT) to separate vocals. \citet{tfjigsaw}'s Jigsaw Puzzle and \citet{wmdct}'s structured sparsity method both use custom time-frequency analyses based on Gabor expansions and frame theory. This paper presents a survey and evaluation of these different algorithms for harmonic/percussive/vocal source separation, from the perspective of the different time-frequency analyses used.
+	\citet{fitzgerald1} presented an algorithm for separating a musical mix into harmonic and percussive components by masking the short-time Fourier transform (STFT). \citet{driedger} created an iterative version, improving the separation by using two STFTs with different time-frequency resolution. \citet{fitzgerald2} replaced the STFT with the constant-Q transform (CQT) to separate vocals. \citet{tfjigsaw}'s Jigsaw Puzzle and \citet{wmdct}'s structured sparsity method both use custom time-frequency analyses based on Gabor expansions and frame theory. This paper presents a survey and evaluation of these different algorithms for harmonic/percussive (and vocal) source separation, from the perspective of the different time-frequency analyses used.
 \end{abstract}
 
 %%%%%%%%%%%%%%
@@ -599,9 +599,7 @@ In section \ref{subsec:mfvocalsep}, \citet{fitzgerald2}'s multipass algorithm fo
 		Using a CQT-12, get harmonic, vocal, and percussive magnitude estimates from the ``almost final'' harmonic and final vocal and percussive components. Create and apply a soft mask for harmonic refinement, in an attempt to reduce vocal and percussive interference.
 \end{tight_enumerate}
 
-The system is shown in the block diagram in figure \ref{fig:hybridvocal}.
-
-The results of the evaluation are in figure \ref{fig:finalvocal}. The hybrid vocal algorithm gets the best percussive score, beating the multipass Fitzgerald configuration from the paper\cite{fitzgerald2} which had the highest percussive score. The harmonic score sacrifices interference for a better target and artifact scores. However, note that the interference score (16.32) is higher than the original interference score of the CQT-96 in the first position (4.81). This shows that the fourth step for harmonic refinement had the desired effect of reducing the interference in the harmonic separation.
+The system is shown in the block diagram in figure \ref{fig:hybridvocal}. The results of the evaluation are in figure \ref{fig:finalvocal}. The hybrid vocal algorithm gets the best percussive score, beating the multipass Fitzgerald configuration from the paper\cite{fitzgerald2} which had the highest percussive score. The harmonic score sacrifices interference for a better target and artifact scores. However, note that the interference score (16.32) is higher than the original interference score of the CQT-96 in the first position (4.81). This shows that the fourth step for harmonic refinement had the desired effect of reducing the interference in the harmonic separation.
 
 \begin{figure}[ht]
 	\centering
@@ -617,9 +615,39 @@ The results of the evaluation are in figure \ref{fig:finalvocal}. The hybrid voc
 \vfill
 \clearpage % force a page break before references
 
-\section{\textbf{\textcolor{red}{TODO }}Discussion and conclusion}
+\section{Discussion and conclusion}
 
-The first thing I will mention is that despite showing good PEASS scores, the conclusion is not certain that the presented hybrid algorithms beat a state-of-the-art neural network. The neural network has been trained and evaluated with BSS, an alternative 
+It is important to mention that despite showing good PEASS scores, a conclusion cannot be made that the presented hybrid algorithms beat Open-Unmix. Open-Unmix claims state-of-the-art results \cite{umxsota} in the BSS metric. In the SigSep community, the BSS evaluation measure used is BSS v4, their own modification, available in their Python libraries museval\cite{museval} and bsseval\cite{bsseval}.
+
+To avoid questions of bias, evaluations on the final HPSS and vocal algorithms were redone using the bsseval library, containing SigSep's own BSS v4 implementation. Based on the modular Python and MATLAB testbench in this project, it was simple to write a new Python script which traverses the previous separation directory and computes BSS v4 metrics and heatmaps. The BSS v4 metrics can be seen in figures \ref{fig:bssv4hpss} and \ref{fig:bssv4vocal}.
+
+Although the hybrids are no longer shown to beat Open-Unmix, some previous conclusions based on the PEASS scores are also observed with the BSS v4 scores:
+
+\begin{tight_itemize}
+	\item
+		In the HPSS task, the 1-pass soft mask algorithm using a single CQT-96 shows a strong harmonic and percussive separation performance in BSSv4, confirming that it is a good choice for a simple and low-cost implementation. However, it still suffers from a low interference score in the harmonic component. It has very good percussive performance, beating both hybrids.
+	\item
+		In the HPSS task, both hybrids have a better target and artifact score than the original iterative Driedger algorithm, although worse interference -- again, consistent with the expectations from soft and hard TF masking \cite{masking}.
+	\item
+		In the harmonic/percussive/vocal separation task, the hybrid-vocal algorithm has a better interference score than mf-cqt1 (which uses a CQT-96 in the first iteration's harmonic separation). This confirms that step 4 of the hybrid vocal algorithm, the harmonic refinement step, achieves the desired effect of boosting the interference-related score (at the expense of a lower target score).
+	\item
+		In the harmonic/percussive/vocal separation task, both original configurations of \citet{fitzgerald2} are beat by the hybrid-vocal in the target and artifact score of all 3 components (harmonic, percussive, and vocal). However, the original configurations have a better interference score.
+\end{tight_itemize}
+
+In contemporary source separation literature\cite{nussl}, \citet{fitzgerald1}'s original HPSS algorithm is referred to as primitive. In SiSEC 2018\cite{sigsep2018}, HPSS scored very low in the evaluations, and the evaluation campaign revealed that deep learning solutions are leading the pack for source separation. This report showed that by considering different aspects of time-frequency resolution, respectable results could be obtained while maintaining the simplicity of the original median-filtering idea. Using a CQT with 96 bins-per-octave in place of the STFT gives surprisingly good performance in harmonic/percussive source separation, and creating a multi-iteration hybrid algorithm with multiple CQTs (and one STFT), still only using simple median-filtering and soft masking, led to strong separation results for harmonic/percussive/vocal components.
+
+While the PEASS scores make the median-filtering based techniques look promising, the situation is not as clear-cut when considering BSS v4 scores. For this, I have opened a GitHub issue with the SigSep community\cite{ghissue}, discussing how I found unexpected results in the PEASS scores, and asking if they have considered PEASS over BSS when designing or evaluating Open-Unmix.
+
+\begin{figure}[ht]
+	\centering
+	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Final_HPSS_BSSv4_abbrev.png}}
+	\caption{Final HPSS results, BSS v4 scores}
+	\label{fig:bssv4hpss}
+	\vspace{1em}
+	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Final_Vocal_BSSv4_abbrev.png}}
+	\caption{Final vocal results, BSS v4 scores}
+	\label{fig:bssv4vocal}
+\end{figure}
 
 \vfill
 \clearpage % force a page break before references

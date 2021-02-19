@@ -79,7 +79,7 @@ if __name__ == "__main__":
 
         vocals_present = False
         n_subplot = 2
-        if results.get("vocal_peass", None) is not None:
+        if results.get("vocal_peass", None) is not None or results.get("vocal_bss", None) is not None or results.get("vocal_pemoq", None) is not None:
             vocals_present = True
             n_subplot = 3
 
