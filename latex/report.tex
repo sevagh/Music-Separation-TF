@@ -3,6 +3,7 @@
 \usepackage[shortlabels]{enumitem}
 \usepackage{graphicx}
 \usepackage{amsmath}
+\usepackage[titletoc,title]{appendix}
 \usepackage{amssymb}
 \usepackage{makecell}
 \usepackage{wrapfig}
@@ -207,6 +208,10 @@ Second, the terms sparse signal representation and entropy are encountered in TF
 \subsection{\textbf{\textcolor{red}{TODO }}Gabor dictionaries and time-frequency representations}
 
 \subsection{\textbf{\textcolor{red}{TODO }}Sparsity, entropy, and matching pursuit}
+\label{sec:theorysparsity}
+
+\vfill
+\clearpage
 
 %%%%%%%%%%%%%%%
 % METHODOLOGY %
@@ -241,9 +246,9 @@ The SigSep (\href{https://sigsep.github.io/}{https://sigsep.github.io/}) communi
 
 \subsection{Evaluated music}
 
-The most popular music stem dataset used by SISEC and SigSep is the MUSDB18 dataset \cite{musdb18} (or the HQ, high-quality, equivalent \cite{musdb18-hq}). MUSDB18-HQ contains stems (.wav files per component/instrument, e.g., drum.wav, vocal.wav, bass.wav) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research. 
+The most popular music stem dataset used by SISEC and SigSep is the MUSDB18 dataset \cite{musdb18} (or the HQ, high-quality, equivalent \cite{musdb18-hq}). MUSDB18-HQ contains stereo wav files sampled at 44100 Hz representing stems (drum, vocal, bass, and other) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research. 
 
-A limited subset of MUSDB18-HQ was evaluated, or 5 total minutes of music, consisting of 4 segments of 15 seconds duration taken from 5 separate tracks. One data set was prepared for harmonic/percussive separation evaluation (vocals omitted from the mix), and one data set for harmonic/percussive/vocal evaluation (vocals are present). The evaluation was limited to 5 minutes of music since the PEASS measure is computationally expensive.
+A limited subset of MUSDB18-HQ was evaluated, or 5 total minutes of music, consisting of 4 segments of 15 seconds duration taken from 5 separate tracks. The algorithms are sample rate agnostic, so the sample rate of MUSDB18-HQ is used (44100 Hz). For simplicity, only mono audio is supported in the algorithms, and the conversion from stereo to mono is done in the Python wav segmentation script. One data set was prepared for harmonic/percussive separation evaluation (vocals omitted from the mix), and one data set for harmonic/percussive/vocal evaluation (vocals are present). The evaluation was limited to 5 minutes of music since the PEASS measure is computationally expensive.
 
 The songs in the MUSDB18-HQ dataset are split into train and test sets. Since the final comparison of this paper will consider a neural network model which was trained on MUSDB18, the evaluation data is taken from the test set -- if we took it from the training set, the neural network could overfit and overperform.
 
@@ -480,7 +485,7 @@ The parameters of Jigsaw Sep are as follows: $v2$ uses version 2 of the algorith
 	\label{table:round2jigsaw}
 \end{table}
 
-From the tested configurations in figure \ref{fig:jigsaw}, we can see that in fact, the harmonic separation of configuration \Verb#tfjigsaw-1# achieves excellent results for target and artifacts -- it does not have the highest interference score, but this is usually a tradeoff, with better interference resulting from more aggressive removal, which results in more artifacts. In a subjective listening test, \Verb#tfjigsaw-1# sounds the best. On the other hand, good parameters could not be found for percussive separation scores for the TFJigsaw, which almost all suffered from a low artifact score (i.e., suffered from a presence of artifacts). This doesn't necessarily mean that TFJigsaw  is bad at percussive separation -- further study might be required to explore why this is the case, and how the results can be improved.
+From the tested configurations in figure \ref{fig:jigsaw}, we can see that the harmonic separation of configuration \Verb#tfjigsaw-1# achieves excellent results for target and artifacts -- it does not have the highest interference score, but this is usually a tradeoff, with better interference resulting from more aggressive removal, which results in more artifacts. In a subjective listening test, \Verb#tfjigsaw-1# sounds the best. On the other hand, good parameters could not be found for percussive separation scores for the TFJigsaw, which almost all suffered from a low artifact score (i.e., suffered from a presence of artifacts). This doesn't necessarily mean that TFJigsaw  is bad at percussive separation -- further study might be required to explore why this is the case, and how the results can be improved.
 
 \begin{figure}[ht]
 	\centering
@@ -493,7 +498,73 @@ From the tested configurations in figure \ref{fig:jigsaw}, we can see that in fa
 \vfill
 \clearpage
 
-\subsubsection{\textbf{\textcolor{red}{TODO }}WMDCTLasso}
+\subsubsection{WMDCTLasso}
+
+The last algorithm, WMDCTLasso\cite{wmdct}, also implemented in LTFAT \cite{wmdct3}. As seen before, there are two settings for window sizes of the Gabor systems used for the WMDCT frames used in the tonal and transient Gabor systems. The default settings are a Hann window of size 4096 for the tonal system and 256 for the transient system. The algorithm is described in listing \ref{lst:wmdctlasso}.
+
+\begin{figure}[h]
+  \centering
+  \centering
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
+|$f = \text{mixed audio}$|
+|$F1 = \text{frametight}(\text{frame}(\text{wmdct}, \text{gauss}, \text{winsize}_{h}))\qquad\text{\textbf{WMDCT frame transform} }$|
+|$F2 = \text{frametight}(\text{frame}(\text{wmdct}, \text{gauss}, \text{winsize}_{p}))$|
+|$c1 = \text{franagrouplasso}(F1, f, \lambda_{h}, \text{soft}, \text{freq})$|
+|$c2 = \text{franagrouplasso}(F2, f, \lambda_{p}, \text{soft}, \text{time})$|
+|$xh = \text{frsyn}(F1, c1)\qquad\qquad\qquad\text{\textbf{Inverse WMDCT frame transform} }$|
+|$xp = \text{frsyn}(F2, c2)$|
+\end{minted}
+  \captionof{listing}{WMDCTLasso tonal/transient separation algorithm}
+  \label{lst:wmdctlasso}
+\end{figure}
+
+The \Verb#franagrouplasso# function is provided in the LFAT, and solves the group lasso regression problem in the time-frequency domain. The theoretical background was covered in section \ref{sec:theorysparsity}. It is used in the WMDCTLasso algorithm to search for tonal components (with the `freq' argument), and transient components (with the `time' argument). The parameters of WMDCT are $\lambda$, or sparsity, for the Group Lasso regression for each of the tonal and transient systems, and Gaussian window sizes for the WMDCT frames for each system. A variety of parameter combinations were tested, shown in table \ref{table:round2wmdct}. The defaults, taken from the demo, are window sizes of 256 (tonal) and 32 (transient), and lambda values of 0.8 (tonal) and 0.5 (transient) for the percussive system.
+
+\begin{table}[ht]
+	\centering
+\begin{tabular}{ |l|l|l|l|l|c|c|c|c|c| }
+	 \hline
+	  Name & $\lambda_{h}$ & $\lambda_{p}$ & $\text{winsize}_{h}$ & $\text{winsize}_{p}$ \\
+	 \hline
+	 \hline
+	 wmdctlasso-1 & 0.8 & 0.5 & 256 & 32 \\
+	 \hline
+	 wmdctlasso-2 & 0.8 & 0.5 & 4096 & 64 \\
+	 \hline
+	 wmdctlasso-3 & 0.8 & 0.5 & 16384 & 128 \\
+	 \hline
+	 wmdctlasso-4 & 0.8 & 0.5 & 16384 & 256 \\
+	 \hline
+	 wmdctlasso-5 & 0.8 & 0.5 & 4096 & 256 \\
+	 \hline
+	 wmdctlasso-6 & 1.0 & 1.0 & 4096 & 64 \\
+	 \hline
+	 wmdctlasso-7 & 0.5 & 0.5 & 16384 & 128 \\
+	 \hline
+	 wmdctlasso-8 & 0.2 & 0.2 & 16384 & 256 \\
+	 \hline
+	 wmdctlasso-9 & 0.9 & 0.4 & 4096 & 256 \\
+	 \hline
+	 wmdctlasso-10 (same as 1) & & & & \\
+	 \hline
+	 wmdctlasso-11 & 0.8 & 0.5 & 512 & 32 \\
+	 \hline
+	 wmdctlasso-12 & 0.8 & 0.5 & 1024 & 32 \\
+	 \hline
+	 wmdctlasso-13 & 0.8 & 0.5 & 256 & 16 \\
+	 \hline
+	 wmdctlasso-14 & 0.8 & 0.5 & 256 & 8 \\
+	 \hline
+	 wmdctlasso-15 & 1.0 & 1.0 & 256 & 32 \\
+	 \hline
+	 wmdctlasso-16 & 0.2 & 0.5 & 256 & 32 \\
+	 \hline
+\end{tabular}
+	\caption{WMDCT configurations}
+	\label{table:round2wmdct}
+\end{table}
+
+From the tested configurations in figure \ref{fig:wmdct}, we can see results that look more like the hard-masking HPSS results (in figure \ref{fig:round1hard}). Interference is good, at the expense of artifacts, or artifacts and target are good, at the expense of interference. Another interesting effect of the WMDCLasso algorithm is that during the listening test, the effect on percussion sounded like a noise gate, with harmonic and vocals briefly being audible during a drum hit and then being strongly suppressed after. However, none of the tested configurations showed promising PEASS results, or good quality separation in the listening tests.
 
 \begin{figure}[ht]
 	\centering
@@ -653,7 +724,21 @@ While the PEASS scores make the median-filtering based techniques look promising
 \clearpage % force a page break before references
 
 %\nocite{*}
-\printbibheading[title={References}]
+\section{References}
 \printbibliography[heading=none]
+
+\vfill
+\clearpage %force a page break
+
+\begin{appendices}
+\section{\textbf{\textcolor{red}{TODO }}Open-Unmix}
+
+describe how open-unmix works
+
+\section{\textbf{\textcolor{red}{TODO }}MiXiN}
+
+describe MiXiN
+
+\end{appendices}
 
 \end{document}
