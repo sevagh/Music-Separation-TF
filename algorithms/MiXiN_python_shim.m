@@ -25,7 +25,9 @@ if p.Results.SingleModel
 	argstr = sprintf('%s %s', argstr, "--single-model");
 end
 
-mixin_python_cmd = sprintf('/usr/bin/python ~/repos/MiXiN/xtract_mixin.py %s --first-prefix --outdir %s %s', fname, outdir, argstr);
+[mypath, ~, ~] = fileparts(mfilename('fullpath'));
+vendoredMixinScript = fullfile(mypath, '../vendor/MiXiN/xtract_mixin.py');
+mixin_python_cmd = sprintf('/usr/bin/python %s %s --first-prefix --outdir %s %s', vendoredMixinScript, fname, outdir, argstr);
 
 [status, out] = system(mixin_python_cmd);
 display(status)
