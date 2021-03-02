@@ -2,3 +2,7 @@ seaborn
 matplotlib
 pandas
 git+git://github.com/sigsep/bsseval#egg=bsseval
+essentia
+numpy
+soundfile
+git+git://github.com/sevagh/nsgt#egg=nsgt
