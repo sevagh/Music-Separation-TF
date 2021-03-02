@@ -22,6 +22,9 @@ clean: hpss-clean
 fmt:
 	black data/*.py algorithms/*.py evaluation/*.py
 
+lint:
+	pyflakes data/*.py algorithms/*.py evaluation/*.py
+
 vocal-clean: vocal-data-clean
 vocal-clean: vocal-results-clean
 

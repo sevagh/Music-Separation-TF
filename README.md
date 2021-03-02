@@ -43,7 +43,7 @@ The low quality of the harmonic separation is expected, since the causal median 
 
 Realtime HPSS with sliding STFT is implemented in MATLAB, with a stream size of 1024 (implying a hop of 1024 and frame size of 2048), which takes 0.621ms per iteration in MATLAB (the same idea leads to a [very fast CUDA implementation](https://github.com/sevagh/Zen)).
 
-Realtime HPSS with the sliCQ is implemented in Python, since the [Python NSGT](https://github.com/grrrr/nsgt) has a better version of sliCQ compared to the [MATLAB NSGToolbox](http://nsg.sourceforge.net/). It also uses a stream size of 1024 (implying a transition area of 1024 and a slice length of 4096), but the computational cost of the sliCQ implementation is high, leading to 166ms per iteration.
+Realtime HPSS with the sliCQ is implemented in Python, since the [Python NSGT package](https://github.com/grrrr/nsgt) has a version of sliCQ that's more usable in a realtime context, compared to the [MATLAB NSGToolbox](http://nsg.sourceforge.net/). It also uses a stream size of 1024 (implying a transition area of 1024 and a slice length of 4096), but the computational cost of the sliCQ implementation is high, leading to ~50ms per iteration. Since the sliCQ returns 3 sets of coefficients, the median filter is applied against the (3, X, Y)-dimension coefficients, 3x more than the STFT case. Next, a stream size of 1024 (slice length 4096) is so small that the desired 12 bins per octave at constant Q has frequencies that cannot be realized - meaning larger would be _even better_. More work is needed to find the best way of using the sliCQ in a realtime HPSS algorithm.
 
 Performance numbers in this repository are not a final judgement, since better implementations can be written once a concept is validated.
 

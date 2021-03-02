@@ -30,7 +30,7 @@ def main():
     parser.add_argument(
         "--stream-size",
         type=int,
-        default=2048,
+        default=1024,
         help="stream size for simulated realtime from wav (default=%(default)s)",
     )
     parser.add_argument("input", type=str, help="input file")
@@ -68,9 +68,7 @@ def main():
         trlen,
         fs,
         real=True,
-        recwnd=True,
         matrixform=True,
-        multithreading=True,
     )
     total_time = 0.0
 
