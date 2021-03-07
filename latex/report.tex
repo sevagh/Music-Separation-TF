@@ -191,35 +191,57 @@ Second, the terms sparse signal representation and entropy are encountered in TF
 \citet{gabor1946}'s seminal signal processing paper, \textit{The Theory of Communication}, contained the first suggestion of time-frequency decomposition of a signal by applying the Fourier transform locally to overlapping portions of the signal multiplied by Gaussian windows. This can be called the 1-D Gabor dictionary:
 \[ \mathcal{G} = \{\phi_{n, m}(x) = w(x - \beta m)e^{j2\pi \alpha n x}\}_{n,m \in \mathbb{Z}}, \]
 
-where $w(\cdot)$ is a Gaussian low-pass window function localized at 0, and $\alpha$ and $\beta$ control the time and frequency resolution of the transform. With his transform, Gabor also introduced the first formulation of the time-frequency uncertainty principle, stating that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit.'' This is illustrated in figure \ref{fig:gabortf}, which also shows how the width of the Gaussian affects the time-frequency resolution.
+where $w(\cdot)$ is a Gaussian low-pass window function localized at 0, and $\alpha$ and $\beta$ control the time and frequency resolution of the transform. With his transform, Gabor also introduced the first formulation of the time-frequency uncertainty principle, stating that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit.'' Mathematically, this can be stated as:
+\[ \sigma_{t}\sigma_{f} \ge \frac{1}{4\pi}, \Delta t\Delta f \ge 1 \]
+
+The values $\sigma_{t,f}$ represent the standard deviation, while $\Delta_{t,f}$ are, as defined by Gabor, ``the uncertainties inherent in the definition of the epoch $t$ and frequency $f$ of an oscillation.'' This is further illustrated in figure \ref{fig:gabortf}, which shows the tiling of the time-frequency plane, and how the width of the Gaussian can be adjusted to change the time-frequency resolution.
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Max signal localization in TF: rectangles of size $\Delta t\Delta f = 1$]{\includegraphics[height=4.5cm]{./gabor1.png}}
+	\subfloat[Maximum signal localization in TF: $logon$ with a lower bound area of $\Delta t\Delta f = 1$]{\includegraphics[height=4.5cm]{./gabor1.png}}
 	\hspace{2.5em}
-	\subfloat[Change TF tiling by modifying Gaussian]{\includegraphics[height=4.5cm]{./gabor2.png}}
+	\subfloat[Modifying TF resolution with the Gaussian window shape]{\includegraphics[height=4.5cm]{./gabor2.png}}
 	\caption{Gabor's time-frequency uncertainty principal, and the \textit{logon}, or basic unit of time-frequency information}
 	\label{fig:gabortf}
 \end{figure}
 
-The TF uncertainty principle arises from the fact that time and frequency are, in quantum physics terms, conjugate variables, or Fourier transforms of each other, and from the fact that the Fourier transform is a linear operator. Gabor himself came to the same conclusion, stating that ``the foregoing solutions [of the Fourier transform], though unquestionably mathematiccally correct, are somewhat difficult to reconcile with our physical intuitions and our physical concepts of such variable frequency mechanisms as, for instance, the siren.''
+The TF uncertainty principle arises from the fact that time and frequency are, in quantum physics terms, conjugate variables, or Fourier transforms of each other, and from the fact that the Fourier transform is a linear operator. Psychoacoustic research shows that humans have been able to beat the time-frequency uncertainty principle \cite{psycho1, psycho2}, indicating the presence of nonlinear operators in the auditory system.
 
-Moreover, psychoacoustic research shows that humans have been able to beat the time-frequency uncertainty principle \cite{psycho1, psycho2}, indicating the presence of nonlinear operators in the auditory system. As such, wavelet approaches using nonlinear atoms to beat this limit are an area of active research.
+Gabor similarly noted the need for variable-frequency analysis, stating that ``the foregoing solutions [of the Fourier transform], though unquestionably mathematically correct, are somewhat difficult to reconcile with our physical intuitions and our physical concepts of such variable frequency mechanisms as, for instance, the siren.''
 
-The STFT, or short-time Fourier transform, was independently discovered \cite{stftindie}, and \citet{dictionary} describes that additional work in the 1980s led to the STFT being described as a special case of the Gabor transform, in homage to Gabor's pioneering work.
+The STFT, or short-time Fourier transform, has been described independently from Gabor's work \cite{stftindie}, but additional research in the 1980s \cite{dictionary} led to the STFT being formalized and described as a special case of the Gabor transform, in recognition of Gabor's pioneering work.
 
-\citet{dictionary} also discuss the shift from the term \textit{transform}, e.g., the Gabor transform or STFT, to \textit{dictionary}, stating that works by \cite{dictionary1} and \cite{dictionary2} began the ``fundamental shift from transforms to dictionaries for sparse signal representation.'' Accordingly, an important outcome of this terminology change was the ``idea that a signal was allowed to have more than one description in the representation domain, and that selecting the best one depended on the task.'' Similar ideas were shown in \citet{doerflerphd}'s dissertation, suggesting the use of multiple Gabor dictionaries for representing music, for the two following reasons:
+DESCRIBE STFT HERE hann window overlap etc.
+\textbf{\textcolor{red}{TODO }}
+
+\citet{dictionary} describe the shift from the term \textit{transform}, e.g., the Gabor transform or STFT, to \textit{dictionary}, stating that works by \cite{dictionary1} and \cite{dictionary2} began the ``fundamental shift from transforms to dictionaries for sparse signal representation.'' Accordingly, an important outcome of this terminology change was the ``idea that a signal was allowed to have more than one description in the representation domain, and that selecting the best one depended on the task.'' Similar ideas were shown in \citet{doerflerphd}'s dissertation, suggesting the use of multiple Gabor dictionaries for representing music, for the two following reasons:
 
 \begin{tight_itemize}
 	\item
-		\textit{Transients} are important musically, driving instrument identification and temporal events such as beats. As transients are in the higher frequency range, good time resolution in that range allows clearer identification of transient events.
+		\textit{Transients} are important musically, driving instrument identification and temporal events such as beats. As transients and broadband signals occur in the high frequency range, good time resolution in that range allows clearer identification of transient events.
 	\item
-		 The low frequencies of the bass instruments lay the harmonic basis of the song, requiring good frequency resolution at lower frequencies.
+		 Notes in the low frequency lay the harmonic basis of the song, requiring very fine frequency resolution.
 \end{tight_itemize}
 
-The idea for a musically-appropriate transform, the Constant-Q Transform was first proposed by \citet{jbrown}. B
+\citet{tfjigsaw}'s TF Jigsaw Puzzle algorithm works along these lines, establishing a multi-dictionary Gabor analysis by using two different window sizes ($R = 2$ in \citet{doerflerphd}'s terminology) for tonal and transient representation. In fact, this idea appears in most of the studied harmonic/percussive separation algorithms: the large window analysis leading to high frequency resolution for the optimal separation of pitched instruments, and the small window analysis leading to high time resolution for the optimal separation of transients.
 
-\subsection{\textbf{\textcolor{red}{TODO }}Tonal and transient sounds}
+However, \citet{doerflerphd} notes that there is a downside of high redundancy in such multi-dictionary analyses (e.g., using two STFTs is an example of high redundancy). There should be an ideal \textit{single} transform which adapts itself to the different characteristics of the signal being studied, rather than creating a new transform or dictionary for each characteristic. The idea for a musically-appropriate single transform, the Constant-Q Transform was first proposed by \citet{jbrown}.
+
+DESCRIBE CQT HERE
+\textbf{\textcolor{red}{TODO }}
+
+THEN WHY FITZGERALD SAYS ITS GOOD FOR VOICE
+\textbf{\textcolor{red}{TODO }}
+
+Her first formulation was non-invertible, and thus only suitable for analysis. Subsequent work by \cite{balazs, jaillet} applied formal frame theory to create a perfectly invertible and minimally redundant Constant-Q transform, by adapting the basic Gabor transform (which can also be called \textit{stationary}, since the Gaussian atoms are of a constant size with a time shift) to create the important Nonstationary Gabor Transform (NSGT, or NSDGT for the discrete-time variant).
+
+\subsubsection{\textbf{\textcolor{red}{TODO }}Tonal and transient sounds}
+
+AND THEIR REPRESENTATION WITH EACH BASIS
+\textbf{\textcolor{red}{TODO }}
+
+\clearpage
+\vfill
 
 \subsection{\textbf{\textcolor{red}{TODO }}Time-frequency masking}
 
@@ -243,6 +265,10 @@ The hard mask used in \cite{driedger} is of the form:
 
 Soft masks generally produce higher quality sound, as shown in figure \ref{fig:masks}. The oracle mask is the ideal mask for a given signal -- to compute it, the target signal must be known. 
 
+FLESH THIS OUT! \textbf{\textcolor{red}{TODO }}
+
+\clearpage
+\vfill
 
 \subsection{\textbf{\textcolor{red}{TODO }}Sparsity, entropy, and matching pursuit}
 \label{sec:theorysparsity}
@@ -313,7 +339,7 @@ The final goal is to combine the best performers to create optimal ``hybrid'' al
 The language chosen to implement the algorithms was MATLAB. It is an obvious choice since it has access to LTFAT, the PEASS Toolkit, many other signal processing tools (e.g., Wavelet Toolbox), and is in general a natural choice for prototyping digital signal processing algorithms. On the other hand, certain tasks for the project are more easily accomplished with Python. One example is in the preparation of the datasets, which requires traversing directories of stem files to produce mix and reference harmonic/percussive/vocal files. Also, Python would be a good choice for data visualization and result aggregation, to be able to use numpy\cite{numpy}, pandas\cite{pandas}, matplotlib\cite{matplotlib}, and seaborn\cite{seaborn}. The solution is to employ both languages wherever appropriate, and use the file system and JSON as universal interchanges:
 \begin{tight_enumerate}
 \item
-	The Python script for data preparation scans the stem directories of MUSDB18-HQ, creates test wav files with a prefix indicating a unique sequence number, and wav files for each of the mix, harmonic, percussive, and vocal components
+	The Python script for data preparation scans the stem directories of MUSDB18-HQ, creates test wav files for each of the mixed and individual source signals, with a prefix indicating a unique sequence number.
 \item
 	The MATLAB testbench script finds all mix files, executes the separation algorithms being tested on each, and writes the separated component outputs to a directory with the algorithm name, e.g., ``1pass-hpss-f-cqt-24,'' for easy identification.
 \item
@@ -322,7 +348,7 @@ The language chosen to implement the algorithms was MATLAB. It is an obvious cho
 	The Python result analysis script takes the JSON string as an input, and produces heatmaps for reporting and visualization.
 \end{tight_enumerate}
 
-One final issue is that Open-Unmix, the deep learning solution chosen as a reference, is implemented for Python with pytorch\cite{pytorch}. The solution was to write a MATLAB shim script for Open-Unmix, which uses the `system' command in MATLAB to run Open-Unmix using the operating system. In this way, every algorithm could be executed by the MATLAB testbench.
+One final issue is that Open-Unmix, the deep learning solution chosen as a reference, is implemented for Python with pytorch\cite{pytorch}. The solution was to write a MATLAB shim script for Open-Unmix, which uses the `system' command in MATLAB to run Open-Unmix using the operating system's Python interpreter. In this way, every algorithm could be executed by the MATLAB testbench.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % Evaluations %
@@ -616,6 +642,11 @@ From the tested configurations in figure \ref{fig:wmdct}, we can see results tha
 \vfill
 \clearpage
 
+\subsubsection{\textbf{\textcolor{red}{TODO }}Realtime algorithms}
+
+\vfill
+\clearpage
+
 \subsubsection{Hybrid -- TFJigsaw-HPSS}
 
 \begin{wrapfigure}{r}{5cm}
@@ -681,7 +712,7 @@ The results are shown in figure \ref{fig:vocalround1soft}, and the algorithm nam
 	\label{table:round3softvocal}
 \end{table}
 
-The CQT in the first position chosen is always the CQT-96, for maximum frequency resolution. The vocal separation has a stable quality in every case where the second pass is a CQT, regardless of the values for bins-per-octave. The percussive separation is best with a linear STFT-1024 in the second pass, but respectable with the CQT up to 48 bins-per-octave.
+The vocal separation has a stable quality in every case where the second pass is a CQT, regardless of the values for bins-per-octave. The percussive separation is best with a linear STFT-1024 in the second pass, but respectable with the CQT up to 48 bins-per-octave.
 
 When choosing between the harmonic separation scores of the linear STFT-16384 and nonlinear CQT-96 in the first pass, we can see that using a CQT gives a very high target and artifact score, but a very poor interference score. In other words, there is hardly any separation being done. On the other hand, the target score of STFT-16384's harmonic separation is very low, indicating the absence of the desired sound.
 
@@ -744,7 +775,7 @@ Although the hybrids are no longer shown to beat Open-Unmix, some previous concl
 		In the harmonic/percussive/vocal separation task, both original configurations of \citet{fitzgerald2} are beat by the hybrid-vocal in the target and artifact score of all 3 components (harmonic, percussive, and vocal). However, the original configurations have a better interference score.
 \end{tight_itemize}
 
-In contemporary source separation literature\cite{nussl}, \citet{fitzgerald1}'s original HPSS algorithm is referred to as primitive. In SiSEC 2018\cite{sigsep2018}, HPSS scored very low in the evaluations, and the evaluation campaign revealed that deep learning solutions are leading the pack for source separation. This report showed that by considering different aspects of time-frequency resolution, respectable results could be obtained while maintaining the simplicity of the original median-filtering idea. Using a CQT with 96 bins-per-octave in place of the STFT gives surprisingly good performance in harmonic/percussive source separation, and creating a multi-iteration hybrid algorithm with multiple CQTs (and one STFT), still only using simple median-filtering and soft masking, led to strong separation results for harmonic/percussive/vocal components.
+In contemporary source separation literature\cite{nussl}, \citet{fitzgerald1}'s original HPSS algorithm is referred to as primitive. In SiSEC 2018\cite{sigsep2018}, HPSS scored very low in the evaluations, and the evaluation campaign revealed that deep learning solutions are getting the best results for source separation. This report showed that by considering different aspects of time-frequency resolution, respectable results could be obtained while maintaining the simplicity of the original median-filtering idea. Using a CQT with 96 bins-per-octave in place of the STFT gives surprisingly good performance in harmonic/percussive source separation, and creating a multi-iteration hybrid algorithm with multiple CQTs (and one STFT), still only using simple median-filtering and soft masking, led to strong separation results for harmonic/percussive/vocal components.
 
 While the PEASS scores make the median-filtering based techniques look promising, the situation is not as clear-cut when considering BSS v4 scores. For this, I have opened a GitHub issue with the SigSep community\cite{ghissue}, discussing how I found unexpected results in the PEASS scores, and asking if they have considered PEASS over BSS when designing or evaluating Open-Unmix.
 
