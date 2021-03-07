@@ -92,7 +92,7 @@
 % ABSTRACT			%
 %%%%%%%%%%%%%%
 \begin{abstract}
-	\citet{fitzgerald1} presented an algorithm for separating a musical mix into harmonic and percussive components by masking the short-time Fourier transform (STFT). \citet{driedger} created an iterative version, improving the separation by using two STFTs with different time-frequency resolution. \citet{fitzgerald2} replaced the STFT with the constant-Q transform (CQT) to separate vocals. \citet{tfjigsaw}'s Jigsaw Puzzle and \citet{wmdct}'s structured sparsity method both use custom time-frequency analyses based on Gabor expansions and frame theory. This paper presents a survey and evaluation of these different algorithms for harmonic/percussive (and vocal) source separation, from the perspective of the different time-frequency analyses used.
+	\citet{fitzgerald1} presented an algorithm for separating a musical mix into harmonic and percussive components by masking the short-time Fourier transform (STFT). \citet{driedger} created an iterative version, improving the separation by using two STFTs with different window sizes. \citet{fitzgerald2} replaced the STFT with the constant-Q transform (CQT) to separate vocals. \citet{tfjigsaw}'s Jigsaw Puzzle and \citet{wmdct}'s structured sparsity methods for tonal/transient separation use custom time-frequency analyses based on Gabor expansions and frame theory. This paper presents a survey and evaluation of these different algorithms for harmonic/percussive (and vocal) source separation, from the perspective of the different time-frequency analyses used.
 \end{abstract}
 
 %%%%%%%%%%%%%%
@@ -103,16 +103,16 @@
 
 \subsection{Music source separation}
 
-In music source separation, a mixed song is split into its constituent components, or sources. There are different types of source separation; in this report, two cases will be considered:
+In music analysis (assuming contemporary Western music), important features are driven by the harmonic instruments (e.g., pitch, melody, key), while others (e.g., rhythm, beats, tempo) are influenced more strongly by the percussive instruments. The singing voice contains yet more information, such as the lyrics and song structure. An algorithm for high-quality separation of mixed music into its harmonic, percussive, and vocal components would be generally useful.
+
+The task of music source separation is to split a mixed song into its constituent components, or sources. \citet{musicsepgood} describe that while music source separation could operate on the level of instruments (e.g., saxophone, piano), for simplicity there are broader and more general categories of sources with similar characteristics that can be separated -- harmonic, percussive, and singing voice. In this report, two cases will be considered:
 
 \begin{tight_enumerate}
 	\item
 		Harmonic/percussive source separation (HPSS) -- also called steady-state/transient separation \cite{bayarres}, or tonal/transient separation \cite{tfjigsaw, wmdct}
 	\item
-		Harmonic/percussive/vocal source separation
+		Harmonic/percussive/vocal (or singing voice) source separation
 \end{tight_enumerate}
-
-In music analysis (assuming contemporary Western music), important features are driven by the harmonic instruments (e.g., pitch, melody, key), while others (e.g., rhythm, beats, tempo) are influenced more strongly by the percussive instruments. The singing voice contains yet more information, such as the lyrics and song structure. An algorithm for high-quality separation of mixed music into its harmonic, percussive, and vocal components would be generally useful.
 
 \subsection{Median-filtering the STFT and CQT}
 
@@ -131,26 +131,9 @@ Median filtering is a technique for image processing where a pixel is replaced b
 
 \citet{driedger} replaced the soft mask with a binary/hard mask, and also introduced a two-pass variant. The first pass separates the harmonic component using an STFT with a large window size for high frequency resolution, followed by the second pass which separates the percussive component using an STFT with a small window size for high time resolution. \citet{fitzgerald2} created a similar iterative variant using soft masks. Additionally, they noted that when they replaced the small-window STFT with the constant-Q transform in the second pass, they obtained a separation of the human singing voice.
 
-\begin{wrapfigure}{r}{8cm}
-	\vspace{-1.0em}
-	\includegraphics[width=8cm]{./maskdemo.png}
-	\caption{Results of a soft and hard oracle mask applied for speech denoising}
-	\label{fig:masks}
-\end{wrapfigure}
-
-\citet{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter), is a matrix of the same size as the complex STFT, by which the STFT is multiplied to mask/filter/suppress specific time-frequency tiles. A soft mask has real values $\in [0, 1]$, and a binary or hard mask has logical values, i.e. only 0 and 1. Soft masks generally produce higher quality sound, as shown in figure \ref{fig:masks}. The oracle mask is the ideal mask for a given signal -- to compute it, the target signal must be known. The soft mask used in \cite{fitzgerald1, fitzgerald2} is a Wiener filter, of the form:
-
-\[ M = \frac{\text{target}^{2}}{\text{target}^{2} + \text{interference}^{2}} \]
-
-The hard mask used in \cite{driedger} is of the form:
-
-\[ M = \frac{\text{target}}{\text{interference}+\epsilon} \le \beta \]
-
-, where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero.
-
 \subsection{TFJigsaw}
 
-The next algorithm considered is the Time-Frequency Jigsaw Puzzle\cite{tfjigsaw}, which is implemented in the Large Time-Frequency Analysis toolbox \cite{ltfat, tfjigsaw2, tfjigsaw3}. Tonal/transient (or harmonic/percussive) separation is among one of the possible applications of TFJigsaw. The insight is similar to the multipass approach described previously -- in a TF representation with high frequency resolution, tonal sounds are well-represented, and in a TF representation with high time resolution, transient sounds are well-represented:
+The next algorithm considered is the Time-Frequency Jigsaw Puzzle\cite{tfjigsaw}, which is implemented in the Large Time-Frequency Analysis toolbox \cite{ltfat, tfjigsaw2, tfjigsaw3}. Tonal/transient (or harmonic/percussive) separation is among one of the possible applications of TFJigsaw. The insight is similar to the iterative approach described previously -- in a TF representation with high frequency resolution, tonal sounds are well-represented, and in a TF representation with high time resolution, transient sounds are well-represented:
 
 \begin{quote}
 	[...] the starting point is to define the tonal layer of the signal as the ``component'' which admits a sparse expansion with respect to a Gabor frame with high frequency resolution (i.e. with a wide window), and the transient layer as the ``component'' which admits a sparse expansion with respect to a Gabor frame with high time resolution (i.e. a narrow window).
@@ -165,7 +148,7 @@ The next algorithm considered is the Time-Frequency Jigsaw Puzzle\cite{tfjigsaw}
 	\label{fig:supertiles}
 \end{figure}
 
-After creating two representations of the signal (one tonal with a large window Gabor frame, one transient with a small window Gabor frame), these are superimposed in a single time-frequency plane to create so-called ``super-tiles.'' The next task is to separate the components; within each super-tile, an entropy criterion chooses which tile (tonal or transient) is represented better and below a threshold, and subtracts these from the original signal. This is performed iteratively until the tonal and transient layers emerge. The super-tiles and entropy criterion are shown in figure \ref{fig:supertiles}, and the results are shown in figure \ref{fig:tfjigsawdemo}.
+After creating two representations of the signal, these are superimposed in a single time-frequency plane to create so-called ``super-tiles.'' Next, within each super-tile, an entropy criterion chooses which tile (tonal or transient) is below a threshold, and subtracts these from the original signal. This is performed iteratively until the tonal and transient layers emerge. The super-tiles and entropy criterion are shown in figure \ref{fig:supertiles}, and the results are shown in figure \ref{fig:tfjigsawdemo}.
 
 \begin{figure}[ht]
 	\centering
@@ -201,14 +184,70 @@ The term \textit{sparsity} is encountered again. In place of using an entropy cr
 
 In all of the presented algorithms, there is at least one, but more commonly two, Gabor dictionaries built from the input signal, using different Gabor atoms. The STFT and CQT are well-known Gabor systems, while TFJigsaw and WMDCTLasso build their own custom Gabor dictionaries using the low-level frame functions available in LTFAT. This requires a general overview of what Gabor analysis and Gabor dictionaries are, and a demonstration of a signal represented with each of the time-frequency representations used by the different algorithms.
 
-Second, the terms sparse signal representation and entropy are encountered in TFJigsaw and WMDCTLasso, which will be explained further. It will also be shown that the median filter used in the simpler HPSS algorithms, by isolating transients as vertical lines and tonal sounds as horizontal lines, is a form of exploiting sparsity in the time-frequency plane.
-
-\subsection{\textbf{\textcolor{red}{TODO }}Tonal and transient sounds}
+Second, the terms sparse signal representation and entropy are encountered in TFJigsaw and WMDCTLasso, which will be explained further. It will also be shown that the median filter used in the simpler HPSS algorithms is a form of exploiting sparsity in the time-frequency plane.
 
 \subsection{\textbf{\textcolor{red}{TODO }}Gabor dictionaries and time-frequency representations}
 
+\citet{gabor1946}'s seminal signal processing paper, \textit{The Theory of Communication}, contained the first suggestion of time-frequency decomposition of a signal by applying the Fourier transform locally to overlapping portions of the signal multiplied by Gaussian windows. This can be called the 1-D Gabor dictionary:
+\[ \mathcal{G} = \{\phi_{n, m}(x) = w(x - \beta m)e^{j2\pi \alpha n x}\}_{n,m \in \mathbb{Z}}, \]
+
+where $w(\cdot)$ is a Gaussian low-pass window function localized at 0, and $\alpha$ and $\beta$ control the time and frequency resolution of the transform. With his transform, Gabor also introduced the first formulation of the time-frequency uncertainty principle, stating that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit.'' This is illustrated in figure \ref{fig:gabortf}, which also shows how the width of the Gaussian affects the time-frequency resolution.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Max signal localization in TF: rectangles of size $\Delta t\Delta f = 1$]{\includegraphics[height=4.5cm]{./gabor1.png}}
+	\hspace{2.5em}
+	\subfloat[Change TF tiling by modifying Gaussian]{\includegraphics[height=4.5cm]{./gabor2.png}}
+	\caption{Gabor's time-frequency uncertainty principal, and the \textit{logon}, or basic unit of time-frequency information}
+	\label{fig:gabortf}
+\end{figure}
+
+The TF uncertainty principle arises from the fact that time and frequency are, in quantum physics terms, conjugate variables, or Fourier transforms of each other, and from the fact that the Fourier transform is a linear operator. Gabor himself came to the same conclusion, stating that ``the foregoing solutions [of the Fourier transform], though unquestionably mathematiccally correct, are somewhat difficult to reconcile with our physical intuitions and our physical concepts of such variable frequency mechanisms as, for instance, the siren.''
+
+Moreover, psychoacoustic research shows that humans have been able to beat the time-frequency uncertainty principle \cite{psycho1, psycho2}, indicating the presence of nonlinear operators in the auditory system. As such, wavelet approaches using nonlinear atoms to beat this limit are an area of active research.
+
+The STFT, or short-time Fourier transform, was independently discovered \cite{stftindie}, and \citet{dictionary} describes that additional work in the 1980s led to the STFT being described as a special case of the Gabor transform, in homage to Gabor's pioneering work.
+
+\citet{dictionary} also discuss the shift from the term \textit{transform}, e.g., the Gabor transform or STFT, to \textit{dictionary}, stating that works by \cite{dictionary1} and \cite{dictionary2} began the ``fundamental shift from transforms to dictionaries for sparse signal representation.'' Accordingly, an important outcome of this terminology change was the ``idea that a signal was allowed to have more than one description in the representation domain, and that selecting the best one depended on the task.'' Similar ideas were shown in \citet{doerflerphd}'s dissertation, suggesting the use of multiple Gabor dictionaries for representing music, for the two following reasons:
+
+\begin{tight_itemize}
+	\item
+		\textit{Transients} are important musically, driving instrument identification and temporal events such as beats. As transients are in the higher frequency range, good time resolution in that range allows clearer identification of transient events.
+	\item
+		 The low frequencies of the bass instruments lay the harmonic basis of the song, requiring good frequency resolution at lower frequencies.
+\end{tight_itemize}
+
+The idea for a musically-appropriate transform, the Constant-Q Transform was first proposed by \citet{jbrown}. B
+
+\subsection{\textbf{\textcolor{red}{TODO }}Tonal and transient sounds}
+
+\subsection{\textbf{\textcolor{red}{TODO }}Time-frequency masking}
+
+Surveys on speech \cite{speechmask} and music separation \cite{musicmask} indicate that the majority of separation algorithms use the technique of time-frequency masking to separate the sources. The median-filtering algorithms of \citet{fitzgerald1, fitzgerald2, driedger} all use time-frequency masking.
+
+\begin{wrapfigure}{r}{8cm}
+	\vspace{-1.0em}
+	\includegraphics[width=8cm]{./maskdemo.png}
+	\caption{Results of a soft and hard oracle mask applied for speech denoising}
+	\label{fig:masks}
+	\vspace{-1.5em}
+\end{wrapfigure}
+
+\citet{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins. A soft mask has real values $\in [0, 1]$, and a binary or hard mask has logical values, i.e., only 0 and 1. The soft mask used in \cite{fitzgerald1, fitzgerald2} is a Wiener filter, of the form:
+\[ M = \frac{\text{target}^{2}}{\text{target}^{2} + \text{interference}^{2}} \]
+
+The hard mask used in \cite{driedger} is of the form:
+\[ M = \frac{\text{target}}{\text{interference}+\epsilon} \le \beta \]
+
+, where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero.
+
+Soft masks generally produce higher quality sound, as shown in figure \ref{fig:masks}. The oracle mask is the ideal mask for a given signal -- to compute it, the target signal must be known. 
+
+
 \subsection{\textbf{\textcolor{red}{TODO }}Sparsity, entropy, and matching pursuit}
 \label{sec:theorysparsity}
+
+\subsubsection{\textbf{\textcolor{red}{TODO }}Median filtering as matching pursuit}
 
 \vfill
 \clearpage
