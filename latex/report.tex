@@ -186,33 +186,37 @@ In all of the presented algorithms, there is at least one, but more commonly two
 
 Second, the terms sparse signal representation and entropy are encountered in TFJigsaw and WMDCTLasso, which will be explained further. It will also be shown that the median filter used in the simpler HPSS algorithms is a form of exploiting sparsity in the time-frequency plane.
 
-\subsection{\textbf{\textcolor{red}{TODO }}Gabor dictionaries and time-frequency representations}
+\subsection{Gabor dictionaries and time-frequency representations}
 
-\citet{gabor1946}'s seminal signal processing paper, \textit{The Theory of Communication}, contained the first suggestion of time-frequency decomposition of a signal by applying the Fourier transform locally to overlapping portions of the signal multiplied by Gaussian windows. This can be called the 1-D Gabor dictionary:
-\[ \mathcal{G} = \{\phi_{n, m}(x) = w(x - \beta m)e^{j2\pi \alpha n x}\}_{n,m \in \mathbb{Z}}, \]
+\citet{gabor1946}'s seminal signal processing paper, \textit{The Theory of Communication}, contained the first suggestion of time-frequency decomposition of a signal by applying the Fourier transform locally to overlapping portions of the signal multiplied by Gaussian windows. In other words, Gabor proposed that any signal of finite energy can be decomposed into a linear combination of time-frequency shifts of the Gaussian function. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described in equation (1):
+\begin{flalign}
+	\nonumber \mathbf{G(f)} &= [G_{1}(f), G_{2}(f), ..., G_{k}(f)]\\
+	G_{m}(f) &= \sum_{n = -\infty}^{\infty}x(n)g(n-\beta m)e^{-j2\pi \alpha n},
+\end{flalign}
 
-where $w(\cdot)$ is a Gaussian low-pass window function localized at 0, and $\alpha$ and $\beta$ control the time and frequency resolution of the transform. With his transform, Gabor also introduced the first formulation of the time-frequency uncertainty principle, stating that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit.'' Mathematically, this can be stated as:
-\[ \sigma_{t}\sigma_{f} \ge \frac{1}{4\pi}, \Delta t\Delta f \ge 1 \]
+where $g(\cdot)$ is a Gaussian low-pass window function localized at 0, $G_{m}(f)$ is the DFT of the signal centered around time $\beta m$, and $\alpha$ and $\beta$ control the time and frequency resolution of the transform. With his transform, Gabor also introduced the first formulation of the time-frequency uncertainty principle (which is minimized by using the Gaussian function as a window), stating that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit.'' Gabor called this the \textit{logon}, or smallest possible unit of time-frequency information. Mathematically, this can be stated as:
+\[ \Delta t\Delta f \ge 1 \]
 
-The values $\sigma_{t,f}$ represent the standard deviation, while $\Delta_{t,f}$ are, as defined by Gabor, ``the uncertainties inherent in the definition of the epoch $t$ and frequency $f$ of an oscillation.'' This is further illustrated in figure \ref{fig:gabortf}, which shows the tiling of the time-frequency plane, and how the width of the Gaussian can be adjusted to change the time-frequency resolution.
+$\Delta t$ and $\Delta f$ are, as defined by Gabor, ``the uncertainties inherent in the definition of the epoch $t$ and frequency $f$ of an oscillation.'' The TF uncertainty principle arises from the fact that time and frequency are, in quantum physics terms, conjugate variables, or Fourier transforms of each other. This is further illustrated in figure \ref{fig:gabortf}, which shows the tiling of the time-frequency plane, and how frequency and time resolution must be sacrificed for one another by the lower bound of the time-frequency tile area.
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Maximum signal localization in TF: $logon$ with a lower bound area of $\Delta t\Delta f = 1$]{\includegraphics[height=4.5cm]{./gabor1.png}}
-	\hspace{2.5em}
-	\subfloat[Modifying TF resolution with the Gaussian window shape]{\includegraphics[height=4.5cm]{./gabor2.png}}
-	\caption{Gabor's time-frequency uncertainty principal, and the \textit{logon}, or basic unit of time-frequency information}
+	\subfloat{\includegraphics[height=3cm]{./gabor3.png}}
+	\hspace{0.1em}
+	\subfloat{\includegraphics[height=2.56cm]{./gabor4.png}}
+	\caption{A demonstration of the mutually exclusive formulations of time analysis and frequency analysis, and the lower bound of time-frequency resolution defined by Gabor's TF uncertainty principle \cite{gabordiagrams}}
 	\label{fig:gabortf}
 \end{figure}
 
-The TF uncertainty principle arises from the fact that time and frequency are, in quantum physics terms, conjugate variables, or Fourier transforms of each other, and from the fact that the Fourier transform is a linear operator. Psychoacoustic research shows that humans have been able to beat the time-frequency uncertainty principle \cite{psycho1, psycho2}, indicating the presence of nonlinear operators in the auditory system.
+Gabor noted the need for variable-frequency analysis, stating that ``the foregoing solutions [of the Fourier transform], though unquestionably mathematically correct, are somewhat difficult to reconcile with our physical intuitions and our physical concepts of such variable frequency mechanisms as, for instance, the siren.'' Similarly, psychoacoustics research shows that humans have been able to beat the time-frequency uncertainty principle \cite{psycho1, psycho2}, indicating the presence of nonlinear operators in the auditory system.
 
-Gabor similarly noted the need for variable-frequency analysis, stating that ``the foregoing solutions [of the Fourier transform], though unquestionably mathematically correct, are somewhat difficult to reconcile with our physical intuitions and our physical concepts of such variable frequency mechanisms as, for instance, the siren.''
+The STFT, or short-time Fourier transform, has been described independently from Gabor's work \cite{stftindie}, but additional research in the 1980s \cite{dictionary} led to the STFT being formalized and described as a special case of the Gabor transform, in recognition of Gabor's pioneering work. The STFT $X(f)$ of a discrete-time signal $x(n)$ is described in equation (2):
+\begin{flalign}
+	\nonumber \mathbf{X(f)} &= [X_{1}(f), X_{2}(f), ..., X_{k}(f)]\\
+	X_{m}(f) &= \sum_{n = -\infty}^{\infty}x(n)g(n-mR)e^{-j2\pi f n},
+\end{flalign}
 
-The STFT, or short-time Fourier transform, has been described independently from Gabor's work \cite{stftindie}, but additional research in the 1980s \cite{dictionary} led to the STFT being formalized and described as a special case of the Gabor transform, in recognition of Gabor's pioneering work.
-
-DESCRIBE STFT HERE hann window overlap etc.
-\textbf{\textcolor{red}{TODO }}
+where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window. Note how similar equations (1) and (2) are, which is expected since the original Gabor transform is the STFT with a Gaussian window. Practically, the STFT allows the use of different windows and overlap sizes \cite{stftinvertible}, as long as overlap-add conditions are respected \cite{cola}.
 
 \citet{dictionary} describe the shift from the term \textit{transform}, e.g., the Gabor transform or STFT, to \textit{dictionary}, stating that works by \cite{dictionary1} and \cite{dictionary2} began the ``fundamental shift from transforms to dictionaries for sparse signal representation.'' Accordingly, an important outcome of this terminology change was the ``idea that a signal was allowed to have more than one description in the representation domain, and that selecting the best one depended on the task.'' Similar ideas were shown in \citet{doerflerphd}'s dissertation, suggesting the use of multiple Gabor dictionaries for representing music, for the two following reasons:
 
@@ -223,22 +227,69 @@ DESCRIBE STFT HERE hann window overlap etc.
 		 Notes in the low frequency lay the harmonic basis of the song, requiring very fine frequency resolution.
 \end{tight_itemize}
 
-\citet{tfjigsaw}'s TF Jigsaw Puzzle algorithm works along these lines, establishing a multi-dictionary Gabor analysis by using two different window sizes ($R = 2$ in \citet{doerflerphd}'s terminology) for tonal and transient representation. In fact, this idea appears in most of the studied harmonic/percussive separation algorithms: the large window analysis leading to high frequency resolution for the optimal separation of pitched instruments, and the small window analysis leading to high time resolution for the optimal separation of transients.
+\citet{tfjigsaw}'s TF Jigsaw Puzzle algorithm works along these lines, establishing a multi-dictionary Gabor analysis by using two different window sizes ($R = 2$ for two dictionaries, using \citet{doerflerphd}'s terminology) for tonal and transient representation. In fact, this idea appears in most of the studied harmonic/percussive separation algorithms: the large window analysis leading to high frequency resolution for the optimal separation of pitched instruments, and the small window analysis leading to high time resolution for the optimal separation of transients.
 
-However, \citet{doerflerphd} notes that there is a downside of high redundancy in such multi-dictionary analyses (e.g., using two STFTs is an example of high redundancy). There should be an ideal \textit{single} transform which adapts itself to the different characteristics of the signal being studied, rather than creating a new transform or dictionary for each characteristic. The idea for a musically-appropriate single transform, the Constant-Q Transform was first proposed by \citet{jbrown}.
+However, \citet{doerflerphd} notes that there is a downside of high redundancy in such multi-dictionary analyses (e.g., using two STFTs is an example of high redundancy). There should be an ideal \textit{single} transform which adapts itself to the different characteristics of the signal being studied, rather than creating a new transform or dictionary for each characteristic.
 
-DESCRIBE CQT HERE
-\textbf{\textcolor{red}{TODO }}
+The idea for a musically-appropriate single transform, the Constant-Q Transform, was first proposed by \citet{jbrown}. The goal was to create a transform which maintained a constant ratio of frequency to frequency resolution, for the following reasons:
 
-THEN WHY FITZGERALD SAYS ITS GOOD FOR VOICE
-\textbf{\textcolor{red}{TODO }}
+\begin{tight_itemize}
+	\item
+		The harmonics of the fundamental frequency created by musical instruments have a consistent spacing in the logarithmic scale, or the \textit{constant pattern}
+	\item
+		Log-frequency spectra, demonstrating the constant pattern for harmonics, would be more useful in musical tasks than linear-frequency spectra
+\end{tight_itemize}
 
-Her first formulation was non-invertible, and thus only suitable for analysis. Subsequent work by \cite{balazs, jaillet} applied formal frame theory to create a perfectly invertible and minimally redundant Constant-Q transform, by adapting the basic Gabor transform (which can also be called \textit{stationary}, since the Gaussian atoms are of a constant size with a time shift) to create the important Nonstationary Gabor Transform (NSGT, or NSDGT for the discrete-time variant).
+This is illustrated in figure \ref{fig:violin}, showing a linear and CQT representation of violin playing a scale. Note that the musical features of the violin -- distinct notes played, even spacing between the harmonics, and the strong formant frequency in the \textasciitilde3000 Hz region -- which are clearly visible in the CQT, and not in the linear-frequency DFT.
 
-\subsubsection{\textbf{\textcolor{red}{TODO }}Tonal and transient sounds}
+\begin{figure}[ht]
+	\centering
+	\subfloat[Linear-frequency DFT]{\includegraphics[height=5.2cm]{./violindft.png}}
+	\hspace{0.5em}
+	\subfloat[Constant-Q transform]{\includegraphics[height=5.5cm]{./violincqt.png}}
+	\caption{Violin playing the diatonic scale, $G_{3} \text{(196Hz)} - G_{5} \text{(784Hz)}$\cite{jbrown}}
+	\label{fig:violin}
+\end{figure}
 
-AND THEIR REPRESENTATION WITH EACH BASIS
-\textbf{\textcolor{red}{TODO }}
+The first formulation of the CQT was constructed using specific window sizes for each frequency region of interest, and was not designed to be invertible, thus making it only suitable for analysis. Subsequent work by \cite{balazs, jaillet} applied formal frame theory to create a perfectly invertible and minimally redundant Constant-Q transform, by adapting the basic Gabor transform (which can also be called \textit{stationary}, since the Gaussian atoms are of a constant size with a time shift) to create the important Nonstationary Gabor Transform (NSGT, or NSDGT for the discrete-time variant).
+
+Recall equation (1) for the discrete Gabor transform, which used time-shifted copies of identical Gaussian windows as the Gabor atoms for the decomposition:
+\[ g_{m,n} = g(n-\beta m)e^{-j2\pi \alpha n} \]
+
+The parameters $\beta$ and $\alpha$ control the time and frequency resolution of the transform. In the case of the nonstationary Gabor transform with resolution changing over time, the Gabor atoms consist of window functions selected from a set of functions $g_{m}$ using a fixed frequency sampling step $\alpha_{m}$:
+\[ g_{m,n} = g_{m}(n)e^{-j2\pi \alpha_{m} n} \]
+
+\citet{balazs} state that ``this is similar to the standard Gabor scheme [...] with the possibility to vary the window $g_{m}$ for each position $\beta_{m}$. Thus, sampling of the time-frequency plane is done on a grid which is irregular over time, but regular over frequency at each temporal position.'' Moreover, if we set $g_{m}(n) = g(n - \beta m)$ and fix the time and frequency constants $\beta$, $\alpha_{m} = \alpha$, we get back the classic form of the stationary discrete Gabor transform.
+
+Similarly, for the nonstationary Gabor transform with resolution changing over frequency, the Gabor atoms used are selected from a set of functions $h_{n}$ using a fixed time sampling step $\beta_{n}$:
+\[ h_{m,n} = h_{n}(n - \beta_{n}m) \]
+
+\citet{balazs} state that ``in practice we will choose each function $h_{n}$ as a well-localized band-pass function with center frequency $\alpha_{m}$.'' We get back the classic form of the stationary discrete Gabor transform by selecting functions $h_{n}(n) = g(n - \beta_{n} m)e^{-j2\pi \alpha n}$ and fix the time and frequency constants $\alpha$, $\beta_{n} = \beta$.
+
+The time-frequency lattice of the stationary and nonstationary Gabor transforms can be seen in figure \ref{fig:nsgts}.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Stationary]{\includegraphics[height=4cm]{./sgt.png}}
+	\hspace{0.35em}
+	\subfloat[Nonstationary in time]{\includegraphics[height=4cm]{./nsgt_time.png}}
+	\hspace{0.35em}
+	\subfloat[Nonstationary in frequency]{\includegraphics[height=4cm]{./nsgt_freq.png}}
+	\caption{Time-frequency lattice of different Gabor transforms}
+	\label{fig:nsgts}
+\end{figure}
+
+To recap, \citet{adaptivecqt} describes the concepts presented so far as follows:
+
+\begin{quote}
+	The definition of multiple Gabor frames, which is comprehensively treated in \cite{doerflerphd}, provides Gabor frames with analysis techniques with multiple resolutions. The nonstationary Gabor frames (see \cite{balazs, jaillet} for their definition and implementation) are a further development; they fully exploit theoretical properties [...], and they provide for a class of FFT-based algorithms [...] together with perfect reconstruction formulas.
+\end{quote}
+
+Several important outcomes of the NSGT were the invertible CQT with a fast FFT-based implementation \cite{invertiblecqt}, and the realtime invertible CQT \cite{rtcqt}. Aside from being available in LTFAT, the official MATLAB Wavelet Toolbox contains perfectly invertible implementations of the CQT and ICQT (inverse CQT) based on the NSGT \cite{matlabcqt}; these transforms are used extensively throughout this paper, present in every MATLAB algorithm which uses the CQT. In the Python case, the NSGT library is used \cite{nsgtpy}, which contains both the invertible and realtime implementations \cite{invertiblecqt, rtcqt}.
+
+\subsection{\textbf{\textcolor{red}{TODO }}Representations of tonal and transient sounds}
+
+After describing the theoretical history of these various signal transforms, a useful exercise would be to represent the classic glockenspeil signal with different dictionaries to gain some practical, hands-on experience with the characteristics, advantages, and disadvantages of each transform.
 
 \clearpage
 \vfill
@@ -500,7 +551,7 @@ An algorithm considered which uses a custom time-frequency analysis is the Time-
   \label{lst:tfjigsaw}
 \end{figure}
 
-The \Verb#decision# function uses R{\'e}nyi entropy to decide whether a signal is more random than random white noise represented within a supertile, and sets those coefficients to zero. For example, a transient sound will have a high entropy, or randomness, in the tonal Gabor system -- worse than white noise -- so it can be set to zero, creating a tonal separation (and vice-versa for transient separation). A consequence of using random white noise (in line 3 of the code listing) is that TFJigsawsep is non-deterministic. That is, you can run TFJigsaw separation with the same input signal and the same parameters, and get back a different result due to the different random white noise generated for the entropy comparison.
+The \Verb#decision# function uses R{\'e}nyi entropy to decide whether a signal is more random than random white noise represented within a supertile, and sets those coefficients to zero. For example, a transient sound will have a high entropy, or randomness, in the tonal Gabor system -- worse than white noise -- so it can be set to zero, creating a tonal separation (and vice-versa for transient separation). A consequence of using random white noise (in line 3 of the code listing) is that TFJigsawsep is non-deterministic. That is, you can run TFJigsaw separation with the same input signal and parameters, and get back a different result due to the different random white noise generated for the entropy comparison.
 
 The parameters of Jigsaw Sep are as follows: $v2$ uses version 2 of the algorithm, $p$ is the proportion of the time-frequency supertile relative to the step sizes, $r1$ is the significance level of the tonal layer compared to white noise, and $r2$ is the same for the transient layer. General recommendations are $r2 > r1$, $r2 \approx 1.05$ for good percussion, $v2 = true$ for good tonal, $p = \text{small}$ for music separation. A variety of parameters were tested, shown in table \ref{table:round2jigsaw}.
 
