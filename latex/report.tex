@@ -216,7 +216,7 @@ The STFT, or short-time Fourier transform, has been described independently from
 	X_{m}(f) &= \sum_{n = -\infty}^{\infty}x(n)g(n-mR)e^{-j2\pi f n},
 \end{flalign}
 
-where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window. Note how similar equations (1) and (2) are, which is expected since the original Gabor transform is the STFT with a Gaussian window. Practically, the STFT allows the use of different windows and overlap sizes \cite{stftinvertible}, as long as overlap-add conditions are respected \cite{cola}.
+where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window. Note how similar equations (1) and (2) are, which is expected since the original Gabor transform is the STFT with a Gaussian window. Practically, the STFT allows the use of different windows and overlap sizes \cite{stftinvertible}, as long as overlap-add conditions are respected.\footnote{\href{https://www.mathworks.com/help/signal/ref/iscola.html}{https://www.mathworks.com/help/signal/ref/iscola.html}}
 
 \citet{dictionary} describe the shift from the term \textit{transform}, e.g., the Gabor transform or STFT, to \textit{dictionary}, stating that works by \cite{dictionary1} and \cite{dictionary2} began the ``fundamental shift from transforms to dictionaries for sparse signal representation.'' Accordingly, an important outcome of this terminology change was the ``idea that a signal was allowed to have more than one description in the representation domain, and that selecting the best one depended on the task.'' Similar ideas were shown in \citet{doerflerphd}'s dissertation, suggesting the use of multiple Gabor dictionaries for representing music, for the two following reasons:
 
@@ -285,11 +285,139 @@ To recap, \citet{adaptivecqt} describes the concepts presented so far as follows
 	The definition of multiple Gabor frames, which is comprehensively treated in \cite{doerflerphd}, provides Gabor frames with analysis techniques with multiple resolutions. The nonstationary Gabor frames (see \cite{balazs, jaillet} for their definition and implementation) are a further development; they fully exploit theoretical properties [...], and they provide for a class of FFT-based algorithms [...] together with perfect reconstruction formulas.
 \end{quote}
 
-Several important outcomes of the NSGT were the invertible CQT with a fast FFT-based implementation \cite{invertiblecqt}, and the realtime invertible CQT \cite{rtcqt}. Aside from being available in LTFAT, the official MATLAB Wavelet Toolbox contains perfectly invertible implementations of the CQT and ICQT (inverse CQT) based on the NSGT \cite{matlabcqt}; these transforms are used extensively throughout this paper, present in every MATLAB algorithm which uses the CQT. In the Python case, the NSGT library is used \cite{nsgtpy}, which contains both the invertible and realtime implementations \cite{invertiblecqt, rtcqt}.
+Several important outcomes of the NSGT were the invertible CQT with a fast FFT-based implementation \cite{invertiblecqt}, and the realtime invertible CQT \cite{rtcqt}. Aside from being available in LTFAT, the official MATLAB Wavelet Toolbox contains perfectly invertible implementations of the CQT and ICQT (inverse CQT) based on the NSGT \footnote{\href{https://www.mathworks.com/help/wavelet/ref/cqt.html}{https://www.mathworks.com/help/wavelet/ref/cqt.html}}; these transforms are used extensively throughout this paper, present in every MATLAB algorithm which uses the CQT. In the Python case, the NSGT library is used\footnote{\href{https://github.com/grrrr/nsgt}{https://github.com/grrrr/nsgt}}, which contains both the invertible and realtime implementations \cite{invertiblecqt, rtcqt}.
 
-\subsection{\textbf{\textcolor{red}{TODO }}Representations of tonal and transient sounds}
+Finally, figure \ref{fig:nsgtglock} demonstrates the advantages of the NSGT for a musical signal -- note that the small-window STFT has sharply defined time events but blurry frequency bins, and the inverse case for the large-window STFT. Finally, the NSGT contains sharp time and frequency resolution.
 
-After describing the theoretical history of these various signal transforms, a useful exercise would be to represent the classic glockenspeil signal with different dictionaries to gain some practical, hands-on experience with the characteristics, advantages, and disadvantages of each transform.
+\begin{figure}[ht]
+	\centering
+	\subfloat[STFT with 6ms window]{\includegraphics[height=4cm]{./tf_tradeoff_balasz1.png}}
+	\hspace{0.35em}
+	\subfloat[STFT with 93ms window]{\includegraphics[height=4cm]{./tf_tradeoff_balasz2.png}}
+	\hspace{0.35em}
+	\subfloat[NSGT using window evolving between 6--93ms]{\includegraphics[height=4cm]{./tf_tradeoff_balasz3.png}}
+	\caption{Transforms of a glockenspiel signal \cite{balazs}}
+	\label{fig:nsgtglock}
+\end{figure}
+
+\subsection{Representations of tonal and transient sounds}
+
+A useful exercise is to represent the classic glockenspiel signal with different dictionaries to gain some practical, hands-on experience with the characteristics, advantages, and disadvantages of each transform mentioned so far. All plots are generated with MATLAB and LTFAT.
+
+The glockenspiel signal is well-known and useful to demonstrate transient and tonal properties of a musical signal -- it is available in the LTFAT\footnote{\href{https://ltfat.github.io/doc/signals/gspi.html}{https://ltfat.github.io/doc/signals/gspi.html}}, loaded by the \Verb#gspi# function. Figure \ref{fig:glockwaveform} shows the time-domain waveform:
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[height=6.5cm]{./gspi_waveform.png}
+	\caption{Glockenspiel waveform}
+	\label{fig:glockwaveform}
+\end{figure}
+
+Let's first consider the STFT. The standard \Verb#spectrogram# in MATLAB\footnote{\href{https://www.mathworks.com/help/signal/ref/spectrogram.html}{https://www.mathworks.com/help/signal/ref/spectrogram.html}} is computed using the short-time Fourier transform. The number of DFT output bins is set to twice the window size, and the overlap is set to half of the window size. An STFT with 3 different window sizes is shown in figure \ref{fig:glockspecs}.
+
+\begin{figure}[ht]
+	\vspace{-1em}
+	\centering
+	\subfloat[Window size 256]{\includegraphics[height=5cm]{./glock_stft256.png}}
+	\hspace{0.35em}
+	\subfloat[Window size 1024]{\includegraphics[height=5cm]{./glock_stft1024.png}}
+	\hspace{0.35em}
+	\subfloat[Window size 4096]{\includegraphics[height=5cm]{./glock_stft4096.png}}
+	\caption{STFT-based spectrograms of the glockenspiel signal}
+	\label{fig:glockspecs}
+\end{figure}
+
+The maximum frequency is the Nyquist frequency, or half the sample rate -- in this case, it is 22050 Hz (half of 44100 Hz, the gspi sample rate). The frequency resolution of the linear STFT is fixed at $\frac{\mathit{fs}}{N}$, where $\mathit{fs}$ is the sampling frequency or sample rate, and $N$ is the number of output bins of the DFT. The time resolution of the linear STFT depends on the window size. The table \ref{table:stftparams} shows the frequency resolution per window size of the STFT.
+
+\begin{table}[ht]
+	\centering
+\begin{tabular}{ |l|l|l|l|c|c|c|c| }
+	 \hline
+	  Window size (samples) & Window size (ms) & DFT output bins & Frequency resolution (Hz) \\
+	 \hline
+	 \hline
+	 256 & 5.8 & 512 & 86.1 \\
+	 \hline
+	 1024 & 23.2 & 2048 & 21.5  \\
+	 \hline
+	 4096 & 92.9 & 8192 & 5.4  \\
+	 \hline
+\end{tabular}
+	\caption{STFT window sizes and frequency resolution}
+	\label{table:stftparams}
+\end{table}
+
+Note that the time resolution is getting worse as the window size increases -- consider that within a window of 92.9ms, there may be several musical events occurring, such as transients or onsets, which cannot be separately distinguished, and are blurred together. However, as a tradeoff, the frequency resolution is becoming sharper -- each row of the STFT for a window of 92.9ms represents a frequency increment of 5.4Hz. Visually, we observe the time resolution of the spectrogram becoming blurrier while the frequency resolution gets sharper as the window size increases.
+
+Next, let's consider the NSGT-CQT from the MATLAB Wavelet Toolbox function \Verb#cqt#.\footnote{\href{https://www.mathworks.com/help/wavelet/ref/cqt.html}{https://www.mathworks.com/help/wavelet/ref/cqt.html}} Various plots of the CQT are shown in figure \ref{fig:glockcqts}. Note that the bins per octave parameter controls the frequency resolution -- more bins per octave gives us a finer frequency discrimination. The Gabor atoms used to create the CQT are not constant like the STFT -- they consist of a set of window functions with different center frequencies and bandwidths to maintain the constant-Q ratio. The bins-per-octave settings shown are 12, 24, and 48, which correspond to a constant-Q ratio of $2^{\frac{1}{12}}$, or 1.059, 1.029, and 1.014 respectively. Finally, \citet{jbrown}'s desired constant pattern in the logarithmic scale is shown in the last row of plots.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[CQT spectrogram, 12 bins per octave]{\includegraphics[height=5cm]{./glock_cqt12.png}}
+	\hspace{0.35em}
+	\subfloat[CQT spectrogram, 24 bins per octave]{\includegraphics[height=5cm]{./glock_cqt24.png}}
+	\hspace{0.35em}
+	\subfloat[CQT spectrogram, 48 bins per octave]{\includegraphics[height=5cm]{./glock_cqt48.png}}
+	\vspace{0.1em}
+	\subfloat[Ratio, 12 bins per octave]{\includegraphics[height=4cm]{./glock_cqt12_ratio.png}}
+	\hspace{0.35em}
+	\subfloat[Ratio, 24 bins per octave]{\includegraphics[height=4cm]{./glock_cqt24_ratio.png}}
+	\hspace{0.35em}
+	\subfloat[Ratio, 48 bins per octave]{\includegraphics[height=4cm]{./glock_cqt48_ratio.png}}
+	\vspace{0.1em}
+	\subfloat[Gabor frame at Nyquist frequency, 12 bins per octave]{\includegraphics[height=4.5cm]{./glock_cqt12_gaborframe.png}}
+	\hspace{0.35em}
+	\subfloat[Gabor frame at Nyquist frequency, 24 bins per octave]{\includegraphics[height=4.5cm]{./glock_cqt24_gaborframe.png}}
+	\hspace{0.35em}
+	\subfloat[Gabor frame at Nyquist frequency, 48 bins per octave]{\includegraphics[height=4.5cm]{./glock_cqt48_gaborframe.png}}
+	\vspace{0.1em}
+	\subfloat[Center frequencies, 12 bins per octave]{\includegraphics[height=4.25cm]{./glock_cqt12_cf.png}}
+	\hspace{0.35em}
+	\subfloat[Center frequencies, 24 bins per octave]{\includegraphics[height=4.25cm]{./glock_cqt24_cf.png}}
+	\hspace{0.35em}
+	\subfloat[Center frequencies, 48 bins per octave]{\includegraphics[height=4.25cm]{./glock_cqt48_cf.png}}
+	\caption{CQT plots of glockenspiel signal}
+	\label{fig:glockcqts}
+\end{figure}
+
+\clearpage
+\vfill
+
+The advantage of the CQT over the linear-frequency STFT can be seen by displaying the spectrograms side-by-side, in figure \ref{fig:cqtvstft}. Note that the CQT (regardless of bins per octave) seems to be identifying more frequency components from the glockenspiel signal, even if in the case of less bins per octave, the frequency bins are blurry. The time resolution in the CQTs is also sharp, even with high frequency resolution.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[CQT spectrogram, 12 bins per octave]{\includegraphics[height=5.25cm]{./glock_cqt12.png}}
+	\hspace{0.35em}
+	\subfloat[STFT spectrogram, window size 256]{\includegraphics[height=5.25cm]{./glock_stft256.png}}\\
+	\vspace{0.1em}
+	\subfloat[CQT spectrogram, 24 bins per octave]{\includegraphics[height=5.25cm]{./glock_cqt24.png}}
+	\hspace{0.35em}
+	\subfloat[STFT spectrogram, window size 1024]{\includegraphics[height=5.25cm]{./glock_stft1024.png}}\\
+	\vspace{0.1em}
+	\subfloat[CQT spectrogram, 48 bins per octave]{\includegraphics[height=5.25cm]{./glock_cqt48.png}}
+	\hspace{0.35em}
+	\subfloat[STFT spectrogram, window size 4096]{\includegraphics[height=5.25cm]{./glock_stft4096.png}}
+	\caption{CQT versus STFT}
+	\label{fig:cqtvstft}
+\end{figure}
+
+The final two algorithms which used custom frame-based analysis using LTFAT were the TF Jigsaw Puzzle \cite{tfjigsaw} and WMDCTLasso \cite{wmdct}. The tonal and transient systems used by TF Jigsaw are the discrete Gabor transform with a Hann window of size 4096 samples and 256 samples respectively. The tonal and transient systems used by WMDCTLasso are the WMDCT transform with a Gaussian window of 256 and 32 channels respectively. These are implemented in LTFAT\footnote{\href{https://ltfat.github.io/doc/gabor/wmdct.html}{https://ltfat.github.io/doc/gabor/wmdct.html}, \href{https://ltfat.github.io/doc/gabor/dgtreal.html}{https://ltfat.github.io/doc/gabor/dgtreal.html}} and shown in figure \ref{fig:frametransforms}.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Tonal DGTReal]{\includegraphics[height=5.25cm]{./glock_dgtreal_tonal.png}}
+	\hspace{0.35em}
+	\subfloat[Transient DGTReal]{\includegraphics[height=5.25cm]{./glock_dgtreal_transient.png}}
+	\vspace{0.1em}
+	\subfloat[Tonal WMDCT]{\includegraphics[height=5.25cm]{./glock_wmdct_tonal.png}}
+	\hspace{0.35em}
+	\subfloat[Transient WMDCT]{\includegraphics[height=5.25cm]{./glock_wmdct_transient.png}}
+	\caption{Tonal and transient systems used by TF Jigsaw and WMDCTLasso for the glockenspiel signal}
+	\label{fig:frametransforms}
+\end{figure}
+
+The DGTReal is simply the STFT or short-time Fourier transform. The WMDCT is a transform that minimizes redundancy -- the DFT decomposes a signal into complex exponentials, and the DCT decomposes a signal into real cosines. For a more rigorous treatment on the MDCT in relation to the DFT, refer to \cite{mdct}. In short, a \textit{critically sampled} transform is one where the number of transformed samples is equal to the number of time-domain input samples -- considering the STFT, this would be achieved with non-overlapping rectangular windows. However, this suffers poor frequency resolution and block effects after inverting modifications to the transform. Overlapping transforms (such as an STFT with a Hann window and overlap of 50\% window size) contain redundancy. The WMDCT is critically sampled and avoids block effects with time-domain aliasing cancellation. The difference can be observed visually by noticing there is more empty (or black) area in the WMDCT spectrogram, indicating lower redundancy.
 
 \clearpage
 \vfill
