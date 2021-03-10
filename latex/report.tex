@@ -63,7 +63,7 @@
   McGill University \\
  \texttt{sevag.hanssian@mail.mcgill.ca} \\
  \texttt{sevagh@protonmail.com} \\\ \\\ \\
- MUMT 622, Winter 2021 final project\thanks{Source code and materials for this paper are available at \url{https://gitlab.com/sevagh/Music-Separation-TF}}}
+ MUMT 622, Winter 2021 final project\thanks{Source code and materials for this paper are available at \url{https://github.com/sevagh/Music-Separation-TF}}}
 
 \date{}
 
@@ -216,7 +216,7 @@ The STFT, or short-time Fourier transform, has been described independently from
 	X_{m}(f) &= \sum_{n = -\infty}^{\infty}x(n)g(n-mR)e^{-j2\pi f n},
 \end{flalign}
 
-where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window. Note how similar equations (1) and (2) are, which is expected since the original Gabor transform is the STFT with a Gaussian window. Practically, the STFT allows the use of different windows and overlap sizes \cite{stftinvertible}, as long as overlap-add conditions are respected.\footnote{\href{https://www.mathworks.com/help/signal/ref/iscola.html}{https://www.mathworks.com/help/signal/ref/iscola.html}}
+where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window. Note how similar equations (1) and (2) are, which is expected since the original Gabor transform is the STFT with a Gaussian window. Practically, the STFT allows the use of different windows and overlap sizes \cite{stftinvertible}, as long as overlap-add conditions are respected.\footnote{\url{https://www.mathworks.com/help/signal/ref/iscola.html}}
 
 \citet{dictionary} describe the shift from the term \textit{transform}, e.g., the Gabor transform or STFT, to \textit{dictionary}, stating that works by \cite{dictionary1} and \cite{dictionary2} began the ``fundamental shift from transforms to dictionaries for sparse signal representation.'' Accordingly, an important outcome of this terminology change was the ``idea that a signal was allowed to have more than one description in the representation domain, and that selecting the best one depended on the task.'' Similar ideas were shown in \citet{doerflerphd}'s dissertation, suggesting the use of multiple Gabor dictionaries for representing music, for the two following reasons:
 
@@ -285,7 +285,7 @@ To recap, \citet{adaptivecqt} describes the concepts presented so far as follows
 	The definition of multiple Gabor frames, which is comprehensively treated in \cite{doerflerphd}, provides Gabor frames with analysis techniques with multiple resolutions. The nonstationary Gabor frames (see \cite{balazs, jaillet} for their definition and implementation) are a further development; they fully exploit theoretical properties [...], and they provide for a class of FFT-based algorithms [...] together with perfect reconstruction formulas.
 \end{quote}
 
-Several important outcomes of the NSGT were the invertible CQT with a fast FFT-based implementation \cite{invertiblecqt}, and the realtime invertible CQT \cite{rtcqt}. Aside from being available in LTFAT, the official MATLAB Wavelet Toolbox contains perfectly invertible implementations of the CQT and ICQT (inverse CQT) based on the NSGT \footnote{\href{https://www.mathworks.com/help/wavelet/ref/cqt.html}{https://www.mathworks.com/help/wavelet/ref/cqt.html}}; these transforms are used extensively throughout this paper, present in every MATLAB algorithm which uses the CQT. In the Python case, the NSGT library is used\footnote{\href{https://github.com/grrrr/nsgt}{https://github.com/grrrr/nsgt}}, which contains both the invertible and realtime implementations \cite{invertiblecqt, rtcqt}.
+Several important outcomes of the NSGT were the invertible CQT with a fast FFT-based implementation \cite{invertiblecqt}, and the realtime invertible CQT \cite{rtcqt}. Aside from being available in LTFAT, the official MATLAB Wavelet Toolbox contains perfectly invertible implementations of the CQT and ICQT (inverse CQT) based on the NSGT \footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}}; these transforms are used extensively throughout this paper, present in every MATLAB algorithm which uses the CQT. In the Python case, the NSGT library is used,\footnote{\url{https://github.com/grrrr/nsgt}} which contains both the invertible and realtime implementations \cite{invertiblecqt, rtcqt}.
 
 Finally, figure \ref{fig:nsgtglock} demonstrates the advantages of the NSGT for a musical signal -- note that the small-window STFT has sharply defined time events but blurry frequency bins, and the inverse case for the large-window STFT. Finally, the NSGT contains sharp time and frequency resolution.
 
@@ -304,7 +304,7 @@ Finally, figure \ref{fig:nsgtglock} demonstrates the advantages of the NSGT for 
 
 A useful exercise is to represent the classic glockenspiel signal with different dictionaries to gain some practical, hands-on experience with the characteristics, advantages, and disadvantages of each transform mentioned so far. All plots are generated with MATLAB and LTFAT.
 
-The glockenspiel signal is well-known and useful to demonstrate transient and tonal properties of a musical signal -- it is available in the LTFAT\footnote{\href{https://ltfat.github.io/doc/signals/gspi.html}{https://ltfat.github.io/doc/signals/gspi.html}}, loaded by the \Verb#gspi# function. Figure \ref{fig:glockwaveform} shows the time-domain waveform:
+The glockenspiel signal is well-known and useful to demonstrate transient and tonal properties of a musical signal -- it is available in the LTFAT,\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} loaded by the \Verb#gspi# function. Figure \ref{fig:glockwaveform} shows the time-domain waveform:
 
 \begin{figure}[ht]
 	\centering
@@ -313,7 +313,7 @@ The glockenspiel signal is well-known and useful to demonstrate transient and to
 	\label{fig:glockwaveform}
 \end{figure}
 
-Let's first consider the STFT. The standard \Verb#spectrogram# in MATLAB\footnote{\href{https://www.mathworks.com/help/signal/ref/spectrogram.html}{https://www.mathworks.com/help/signal/ref/spectrogram.html}} is computed using the short-time Fourier transform. The number of DFT output bins is set to twice the window size, and the overlap is set to half of the window size. An STFT with 3 different window sizes is shown in figure \ref{fig:glockspecs}.
+Let's first consider the STFT. The standard \Verb#spectrogram# in MATLAB\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} is computed using the short-time Fourier transform. The number of DFT output bins is set to twice the window size, and the overlap is set to half of the window size. An STFT with 3 different window sizes is shown in figure \ref{fig:glockspecs}.
 
 \begin{figure}[ht]
 	\vspace{-1em}
@@ -349,7 +349,7 @@ The maximum frequency is the Nyquist frequency, or half the sample rate -- in th
 
 Note that the time resolution is getting worse as the window size increases -- consider that within a window of 92.9ms, there may be several musical events occurring, such as transients or onsets, which cannot be separately distinguished, and are blurred together. However, as a tradeoff, the frequency resolution is becoming sharper -- each row of the STFT for a window of 92.9ms represents a frequency increment of 5.4Hz. Visually, we observe the time resolution of the spectrogram becoming blurrier while the frequency resolution gets sharper as the window size increases.
 
-Next, let's consider the NSGT-CQT from the MATLAB Wavelet Toolbox function \Verb#cqt#.\footnote{\href{https://www.mathworks.com/help/wavelet/ref/cqt.html}{https://www.mathworks.com/help/wavelet/ref/cqt.html}} Various plots of the CQT are shown in figure \ref{fig:glockcqts}. Note that the bins per octave parameter controls the frequency resolution -- more bins per octave gives us a finer frequency discrimination. The Gabor atoms used to create the CQT are not constant like the STFT -- they consist of a set of window functions with different center frequencies and bandwidths to maintain the constant-Q ratio. The bins-per-octave settings shown are 12, 24, and 48, which correspond to a constant-Q ratio of $2^{\frac{1}{12}}$, or 1.059, 1.029, and 1.014 respectively. Finally, \citet{jbrown}'s desired constant pattern in the logarithmic scale is shown in the last row of plots.
+Next, let's consider the NSGT-CQT from the MATLAB Wavelet Toolbox function \Verb#cqt#.\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} Various plots of the CQT are shown in figure \ref{fig:glockcqts}. Note that the bins per octave parameter controls the frequency resolution -- more bins per octave gives us a finer frequency discrimination. The Gabor atoms used to create the CQT are not constant like the STFT -- they consist of a set of window functions with different center frequencies and bandwidths to maintain the constant-Q ratio. The bins-per-octave settings shown are 12, 24, and 48, which correspond to a constant-Q ratio of $2^{\frac{1}{\text{bins}}}$, or 1.059, 1.029, and 1.014 respectively. Finally, \citet{jbrown}'s desired constant pattern in the logarithmic scale is shown in the last row of plots.
 
 \begin{figure}[ht]
 	\centering
@@ -402,7 +402,7 @@ The advantage of the CQT over the linear-frequency STFT can be seen by displayin
 	\label{fig:cqtvstft}
 \end{figure}
 
-The final two algorithms which used custom frame-based analysis using LTFAT were the TF Jigsaw Puzzle \cite{tfjigsaw} and WMDCTLasso \cite{wmdct}. The tonal and transient systems used by TF Jigsaw are the discrete Gabor transform with a Hann window of size 4096 samples and 256 samples respectively. The tonal and transient systems used by WMDCTLasso are the WMDCT transform with a Gaussian window of 256 and 32 channels respectively. These are implemented in LTFAT\footnote{\href{https://ltfat.github.io/doc/gabor/wmdct.html}{https://ltfat.github.io/doc/gabor/wmdct.html}, \href{https://ltfat.github.io/doc/gabor/dgtreal.html}{https://ltfat.github.io/doc/gabor/dgtreal.html}} and shown in figure \ref{fig:frametransforms}.
+The final two algorithms which used custom frame-based analysis using LTFAT were the TF Jigsaw Puzzle \cite{tfjigsaw} and WMDCTLasso \cite{wmdct}. The tonal and transient systems used by TF Jigsaw are the discrete Gabor transform with a Hann window of size 4096 samples and 256 samples respectively. The tonal and transient systems used by WMDCTLasso are the WMDCT transform with a Gaussian window of 256 and 32 channels respectively. These are implemented in LTFAT\footnote{\url{https://ltfat.github.io/doc/gabor/wmdct.html}, \url{https://ltfat.github.io/doc/gabor/dgtreal.html}} and shown in figure \ref{fig:frametransforms}.
 
 \begin{figure}[ht]
 	\centering
@@ -465,7 +465,7 @@ FLESH THIS OUT! \textbf{\textcolor{red}{TODO }}
 
 \subsection{Objective measures}
 
-The SigSep (\href{https://sigsep.github.io/}{https://sigsep.github.io/}) community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \cite{bss} objective measure for separation quality. The authors of BSS released an improved version that matches better with subjective human evaluations, which they called the PEASS (Perceptual Evaluation methods for Audio Source Separation) Toolkit \cite{peass}, based on PEMO-Q \cite{pemoq}. The PEASS Toolkit for MATLAB \cite{peassmatlab} conveniently includes all 3 measures: PEASS, PEMO-Q, and BSS. Each of these consist of 4 metrics:
+The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \cite{bss} objective measure for separation quality. The authors of BSS released an improved version that matches better with subjective human evaluations, which they called the PEASS (Perceptual Evaluation methods for Audio Source Separation) Toolkit \cite{peass}, based on PEMO-Q \cite{pemoq}. The PEASS Toolkit for MATLAB \cite{peassmatlab} conveniently includes all 3 measures: PEASS, PEMO-Q, and BSS. Each of these consist of 4 metrics:
 
 \begin{tight_itemize}
 \item
@@ -631,6 +631,56 @@ CQT-96 demonstrates good results for both harmonic and percussive separation wit
 	\caption{One-pass hard-masking PEASS results}
 	\label{fig:round1hard}
 \end{figure}
+
+\vfill
+\clearpage
+
+\subsubsection{Realtime median-filtering}
+
+In a previous project\footnote{\url{https://github.com/sevagh/Real-Time-HPSS}} presented for MUMT 501, the same 1-pass median filtering HPSS algorithms were adapted to work in realtime by using a sliding STFT and causal median filter. Figure \ref{fig:rthpss} describes the realtime system.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Sliding realtime STFT-ISTFT]{{\includegraphics[height=8cm]{./slidingstft_diagram.png} }}
+	\subfloat[Realtime HPSS block diagram]{{\includegraphics[height=8cm]{./rthpss_diagram.png} }}\\
+	\vspace{0.1em}
+	\subfloat[Realtime HPSS median filter causality]{{\includegraphics[height=6cm]{./rthpss_causality.png} }}
+	\caption{Realtime median-filtering HPSS}
+	\label{fig:rthpss}
+\end{figure}
+
+As shown in the results for the simple 1-pass median-filtering algorithms, the CQT with 96 bins per octave had a very good performance in harmonic and percussive separation when used in place of the linear-frequency STFT. The same idea is applied to the realtime STFT-based HPSS, to use the CQT. The realtime version of the CQT is the \textit{sliCQ transform}, or sliced constant-Q transform, described by \citet{rtcqt}. The implementation of realtime median filtering of the sliCQ transform was first attempted using the MATLAB implementation of sliCQ NSGToolbox,\footnote{\url{https://www.univie.ac.at/nonstatgab/toolbox.php}} but the code is not suitable for processing an input signal chunk-by-chunk (it takes the entire input signal). However, the officially recommended Python library for the NSGT\footnote{\url{https://github.com/grrrr/nsgt}} contains an implementation of sliCQ which accepts consecutive chunks of the signal.
+
+In the realtime STFT, the hop size is set to be the same as the input stream size, and the window size is $2*\text{hop\_size}$. For example, for an input stream of 1024 samples per chunk, the hop between consecutive chunks is 1024, and every 2 consecutive hops from the stream are stored in a ringbuffer of size 2048 which is the windowed input to the STFT. The equivalent of hop in the sliCQ transform is the transition length, and the equivalent of the window size is the slice length. For a stream size of 1024, the transition length is therefore 1024, and the slice length is 4096.
+
+One main difference between sliCQ and the NSGT-CQT is that sliCQ returns more than 1 channel of coefficients. If the CQT returns a square matrix of NxM, the sliCQ returns 3xNxM. However, as the median filter is a common operation for images which are typically multi-channel (3 channels for RGB, or 4 channels for RGBA), typical median filter functions (in MATLAB, scipy, etc.) can easily support higher dimensions of median filter. The typical 2D median filters for HPSS of dimensions $\text{L\_harmonic } \times 1$, $1 \times \text{L\_percussive}$ are simply extended to $1 \times \text{ L\_harmonic } \times 1$, $1 \times 1 \times \text{ L\_percussive}$, to operate across all 3 channels of the sliCQ transform coefficients. This is described visually in figure \ref{fig:3dmfilt}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=14cm]{./3dmfilt.png}
+	\caption{Graphic showing the 3D median filter for sliCQ coefficients}
+	\label{fig:3dmfilt}
+\end{figure}
+
+One final issue is that with a small stream size of 1024 (which, at a 44100 Hz sample rate represents 23.2ms, reasonable as a realtime stream size), the input slice length of 4096 doesn't support as many frequency bins as we would prefer. The chosen scale was the octave scale with 12 bins per octave and frequency limits of 80Hz to 20000Hz.
+
+In the previous project, the quality of the realtime separation was not analyzed. The same MATLAB code for Realtime-HPSS was reused in this project to take advantage of the MUSDB18-HQ/PEASS/BSSv4 testbench and evaluate the actual quality of the separation. Again, we benefit from the dual Python/MATLAB testbench by being able to compare the MATLAB implementation of Realtime-STFT-HPSS and the Python implementation of Realtime-sliCQ-HPSS. As these are both implemented in different languages, performing a latency or computation time comparison is not useful. The implementations should be considered as a concept or blueprint to test the idea of realtime HPSS, not a serious finished product.
+
+The results for PEASS and BSSv4 are shown in figure \ref{fig:rtresults} with both the soft and hard masking strategies of \citet{fitzgerald1} and \citet{driedger} respectively. The stream size for both is set to 1024, implying a hop of 1024 and window of 2048 in the STFT, and a transition length of 1024 and slice length of 4096 in the sliCQ. The input wav files are processed one chunk at a time to simulate realtime stream processing.
+
+The sliCQ HPSS with 12 bins per octave and hard masks performs the best, making it a good choice for realtime separation.
+
+\begin{figure}[ht]
+	\centering
+	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Realtime_PEASS_abbrev.png}}
+	\vspace{1em}
+	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Realtime_BSSv4_abbrev.png}}
+	\caption{Realtime HPSS results, PEASS and BSSv4 scores}
+	\label{fig:rtresults}
+\end{figure}
+
+\vfill
+\clearpage
 
 \subsubsection{Two-pass algorithms with STFT/CQT masking}
 
@@ -821,11 +871,6 @@ From the tested configurations in figure \ref{fig:wmdct}, we can see results tha
 \vfill
 \clearpage
 
-\subsubsection{\textbf{\textcolor{red}{TODO }}Realtime algorithms}
-
-\vfill
-\clearpage
-
 \subsubsection{Hybrid -- TFJigsaw-HPSS}
 
 \begin{wrapfigure}{r}{5cm}
@@ -937,11 +982,11 @@ The system is shown in the block diagram in figure \ref{fig:hybridvocal}. The re
 
 \section{Discussion and conclusion}
 
-It is important to mention that despite showing good PEASS scores, a conclusion cannot be made that the presented hybrid algorithms beat Open-Unmix. Open-Unmix claims state-of-the-art results \cite{umxsota} in the BSS metric. In the SigSep community, the BSS evaluation measure used is BSS v4, their own modification, available in their Python libraries museval\cite{museval} and bsseval\cite{bsseval}.
+It is important to mention that despite showing good PEASS scores, a conclusion cannot be made that the presented hybrid algorithms beat Open-Unmix. Open-Unmix claims state-of-the-art results \cite{umxsota} in the BSS metric. In the SigSep community, the BSS evaluation measure used is BSSv4, their own modification, available in their Python libraries museval\cite{museval} and bsseval\cite{bsseval}.
 
-To avoid questions of bias, evaluations on the final HPSS and vocal algorithms were redone using the bsseval library, containing SigSep's own BSS v4 implementation. Based on the modular Python and MATLAB testbench in this project, it was simple to write a new Python script which traverses the previous separation directory and computes BSS v4 metrics and heatmaps. The BSS v4 metrics can be seen in figures \ref{fig:bssv4hpss} and \ref{fig:bssv4vocal}.
+To avoid questions of bias, evaluations on the final HPSS and vocal algorithms were redone using the bsseval library, containing SigSep's own BSSv4 implementation. Based on the modular Python and MATLAB testbench in this project, it was simple to write a new Python script which traverses the previous separation directory and computes BSSv4 metrics and heatmaps. The BSSv4 metrics can be seen in figures \ref{fig:bssv4hpss} and \ref{fig:bssv4vocal}.
 
-Although the hybrids are no longer shown to beat Open-Unmix, some previous conclusions based on the PEASS scores are also observed with the BSS v4 scores:
+Although the hybrids are no longer shown to beat Open-Unmix, some previous conclusions based on the PEASS scores are also observed with the BSSv4 scores:
 
 \begin{tight_itemize}
 	\item
@@ -956,16 +1001,16 @@ Although the hybrids are no longer shown to beat Open-Unmix, some previous concl
 
 In contemporary source separation literature\cite{nussl}, \citet{fitzgerald1}'s original HPSS algorithm is referred to as primitive. In SiSEC 2018\cite{sigsep2018}, HPSS scored very low in the evaluations, and the evaluation campaign revealed that deep learning solutions are getting the best results for source separation. This report showed that by considering different aspects of time-frequency resolution, respectable results could be obtained while maintaining the simplicity of the original median-filtering idea. Using a CQT with 96 bins-per-octave in place of the STFT gives surprisingly good performance in harmonic/percussive source separation, and creating a multi-iteration hybrid algorithm with multiple CQTs (and one STFT), still only using simple median-filtering and soft masking, led to strong separation results for harmonic/percussive/vocal components.
 
-While the PEASS scores make the median-filtering based techniques look promising, the situation is not as clear-cut when considering BSS v4 scores. For this, I have opened a GitHub issue with the SigSep community\cite{ghissue}, discussing how I found unexpected results in the PEASS scores, and asking if they have considered PEASS over BSS when designing or evaluating Open-Unmix.
+While the PEASS scores make the median-filtering based techniques look promising, the situation is not as clear-cut when considering BSSv4 scores. For this, I have opened a GitHub issue with the SigSep community,\footnote{\url{https://github.com/sigsep/sigsep-mus-eval/issues/78}} discussing how I found unexpected results in the PEASS scores, and asking if they have considered PEASS over BSS when designing or evaluating Open-Unmix.
 
 \begin{figure}[ht]
 	\centering
 	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Final_HPSS_BSSv4_abbrev.png}}
-	\caption{Final HPSS results, BSS v4 scores}
+	\caption{Final HPSS results, BSSv4 scores}
 	\label{fig:bssv4hpss}
 	\vspace{1em}
 	\makebox[\textwidth]{\includegraphics[width=16cm]{../evaluation/heatmaps/Final_Vocal_BSSv4_abbrev.png}}
-	\caption{Final vocal results, BSS v4 scores}
+	\caption{Final vocal results, BSSv4 scores}
 	\label{fig:bssv4vocal}
 \end{figure}
 
@@ -980,13 +1025,8 @@ While the PEASS scores make the median-filtering based techniques look promising
 \clearpage %force a page break
 
 \begin{appendices}
-\section{\textbf{\textcolor{red}{TODO }}Open-Unmix}
 
-describe how open-unmix works
-
-\section{\textbf{\textcolor{red}{TODO }}MiXiN}
-
-describe MiXiN
+\section{\textbf{\textcolor{red}{TODO }}Code and results}
 
 \end{appendices}
 
