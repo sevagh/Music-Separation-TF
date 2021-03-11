@@ -422,37 +422,37 @@ The DGTReal is simply the STFT or short-time Fourier transform. The WMDCT is a t
 \clearpage
 \vfill
 
-\subsection{\textbf{\textcolor{red}{TODO }}Time-frequency masking}
+\subsection{Time-frequency masking}
 
-Surveys on speech \cite{speechmask} and music separation \cite{musicmask} indicate that the majority of separation algorithms use the technique of time-frequency masking to separate the sources. The median-filtering algorithms of \citet{fitzgerald1, fitzgerald2, driedger} all use time-frequency masking.
+Surveys on speech \cite{speechmask} and music separation \cite{musicmask} indicate that the majority of separation algorithms use the technique of time-frequency masking (or spectral masking) to separate the sources. The median-filtering algorithms of \citet{fitzgerald1, fitzgerald2, driedger} all use time-frequency masking.
 
 \begin{wrapfigure}{r}{8cm}
 	\vspace{-1.0em}
 	\includegraphics[width=8cm]{./maskdemo.png}
-	\caption{Results of a soft and hard oracle mask applied for speech denoising}
+	\caption{Results of a soft and hard oracle mask applied for speech denoising. The oracle mask is the ideal mask for a given signal -- to compute it, the target and interference signals must be known.}
 	\label{fig:masks}
 	\vspace{-1.5em}
 \end{wrapfigure}
 
-\citet{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins. A soft mask has real values $\in [0, 1]$, and a binary or hard mask has logical values, i.e., only 0 and 1. The soft mask used in \cite{fitzgerald1, fitzgerald2} is a Wiener filter, of the form:
-\[ M = \frac{\text{target}^{2}}{\text{target}^{2} + \text{interference}^{2}} \]
+\citet{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins. A soft mask has real values $\in [0, 1]$, and a binary or hard mask has logical values, i.e., only 0 and 1. The soft mask used in \cite{fitzgerald1, fitzgerald2} is a Wiener filter given in the following equation, where $\hat{S}$ represents the complex-valued spectrogram:
+\[ M = \frac{|\hat{S}_{\text{target}}|^{2}}{|\hat{S}_{\text{interference}}|^{2} + |\hat{S}_{\text{target}}|^{2}} \]
 
 The hard mask used in \cite{driedger} is of the form:
-\[ M = \frac{\text{target}}{\text{interference}+\epsilon} \le \beta \]
+\[ M = \frac{|\hat{S}_{\text{target}}|}{|\hat{S}_{\text{interference}}| + \epsilon} \le \beta \]
 
-, where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero.
+, where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero. One advantage of the hard mask's separation factor is that a third component can be extracted. Let's reformulate the hard mask formula in the harmonic/percussive case to present a concrete example:
+\[ M_{\text{harmonic}} = \frac{|\hat{S}_{\text{percussive}}|}{|\hat{S}_{\text{harmonic}}| + \epsilon} > \beta \]
+\[ M_{\text{percussive}} = \frac{|\hat{S}_{\text{harmonic}}|}{|\hat{S}_{\text{percussive}}| + \epsilon} \ge \beta \]
 
-Soft masks generally produce higher quality sound, as shown in figure \ref{fig:masks}. The oracle mask is the ideal mask for a given signal -- to compute it, the target signal must be known. 
+In the median-filtering algorithms, the harmonic and percussive spectrogram estimates are the output of the median filtering step. By setting $\beta > 1$, we are stating that the harmonic and percussive estimates must be at least $\beta$ different from each other -- this gives us the capability to extract a third component, called the residual:
+\[ M_{\text{residual}} = 1 - (M_{\text{harmonic}} + M_{\text{percussive}}) \]
 
-FLESH THIS OUT! \textbf{\textcolor{red}{TODO }}
-
-\clearpage
-\vfill
+Soft masks generally produce higher quality sound. An illustration of spectral masking is shown in figure \ref{fig:masks}.
 
 \subsection{\textbf{\textcolor{red}{TODO }}Sparsity, entropy, and matching pursuit}
 \label{sec:theorysparsity}
 
-\subsubsection{\textbf{\textcolor{red}{TODO }}Median filtering as matching pursuit}
+\textbf{\textcolor{red}{TODO }}Median filtering as matching pursuit
 
 \vfill
 \clearpage
