@@ -449,10 +449,59 @@ In the median-filtering algorithms, the harmonic and percussive spectrogram esti
 
 Soft masks generally produce higher quality sound. An illustration of spectral masking is shown in figure \ref{fig:masks}.
 
-\subsection{\textbf{\textcolor{red}{TODO }}Sparsity, entropy, and matching pursuit}
+\subsection{Sparsity and entropy}
 \label{sec:theorysparsity}
 
-\textbf{\textcolor{red}{TODO }}Median filtering as matching pursuit
+\citet{musicsepgood} describe two common techniques for music source separation -- Kernel Additive Models (KAM) and spectrogram factorization modeling, the most common of which is Non-Negative Matrix Factorization (NMF). KAM ``involves selecting a set of time-frequency bins, which, given the nature of the target source, e.g., percussive, harmonic or vocals, are likely to be similar in value. This set of time-frequency bins is termed a proximity kernel.'' This is exactly the case with the median filtering algorithm, where percussive sounds are classified as vertical lines in the spectrogram, and harmonic sounds are classified as horizontal lines in the spectrogram. The median filter kernel in this case is the proximity kernel, from the perspective of the KAM interpretation.
+
+If one considers the two-pass median-filtering algorithms, using a narrow window TF decomposition for sharper temporal resolution and a wide window TF decomposition for sharper frequency resolution, we observe that the expected (and achieved) result is to improve the quality of separation. In short, this is because the simplistic KAM model of the median filters (for separating vertical and horizontal lines in the spectrogram) works better in each case:
+
+\begin{tight_itemize}
+	\item
+		In the wide window TF analysis, horizontal lines (i.e., harmonic sounds) are represented more sharply, and vertical lines (i.e., percussive sounds) are weaker and more blurry. Median filtering in the horizontal direction will lead to a better separation of the harmonic component.
+	\item
+		The inverse is true for the narrow window TF analysis, leading to a better separation of the percussive component.
+\end{tight_itemize}
+
+Thus we can see that the median filtering proximity kernel separation for harmonic sounds performs better in a TF representation suited for harmonic sounds, and that the median filtering proximity kernel for percussive sounds performs better in a TF representation suited for percussive sounds.
+
+We can even sense the intuition here that extending simple KAM algorithms with hypothetical ``perfect'' TF representations, such that harmonic sounds are defined and percussive sounds don't exist in the harmonic TF representation (and vice versa) would lead to perfect separations. This restates one of the major goals of this paper -- to show that simple source separation techniques can be improved by changing the linear STFT to a better TF dictionary.
+
+This brings us to the terms \textit{sparsity} and \textit{entropy}, which are in fact complementary concepts \cite{honeine2014entropy}. \citet{pastor2015mathematics} define the terms as follows, given a signal $x$, its coefficients $w$ in a given domain, and its probability mass function (PMF) $p$:
+\begin{tight_itemize}
+	\item
+		\textit{Sparsity} is the property of concentrating most of the energy of $x$ in few coefficients of $w$
+	\item
+		\textit{Entropy} is the property of not concentrating most of the probability mass in few atoms of $p$ -- in other words, the entropy of a random variable is a concept of information theory that characterizes the unpredictability inherent in its outcomes
+\end{tight_itemize}
+
+In the TF Jigsaw algorithm \cite{tfjigsaw}, an iterative application of R{\'e}nyi entropy is used to separate the tonal from the transient components. Recall that the time-frequency analysis is split into supertiles consisting of a superimposed overcomplete TF dictionary, consisting of 2 separate Gabor transforms -- narrow and wide window (for better tonal and transient representation respectively). The separation of tonal from transient is done as follows:
+
+\begin{tight_enumerate}
+	\item
+		Initialize a random white noise signal.
+	\item
+		Within a supertile, compare the entropy of the signal being studied with the random white noise. In the case where the entropy of the studied signal is higher than the random white noise by a threshold, set those coefficients to zero. In simplistic terms, we can say that the transient part of the signal being studied is represented \textit{worse}, or has higher entropy than random white noise, in the tonal (or wide window) TF analysis within the supertile. Therefore, it gets set to zero and only the tonal part of the signal under study remains alongside a residual component. As usual, the inverse is true to perform a transient separation with the narrow window TF analysis.
+	\item
+		Repeat this process iteratively until there is no more residual component. At this point the algorithm is considered to have found a good tonal/transient separation, such that the entropy or randomness of the tonal sound is low w.r.t. the wide window TF analysis, and vice-versa for the transient sound in the narrow window TF analysis.
+\end{tight_enumerate}
+
+In the WMDCTLasso algorithm \cite{wmdct}, Group-LASSO (Least Absolute Shrinkage and Selection Operator) is used to separate tonal and transient sounds. To describe the usefulness of Group-LASSO, \citet{sparsitykowalski} first state the problem of tonal + transient + noise decomposition as follows:
+
+\begin{quote}
+To decompose a signal into several layers, one chooses a suitable dictionary for each layer. In the audio signal example, the transient layer is known to be sparsely represented in dictionaries of wavelets, or time-frequency dictionaries (like Gabor or MDCT) with a narrow window. At the opposite, the tonal layer is known to be sparsely represented in time-frequency dictionaries with a wide window.
+\end{quote}
+
+The TF analysis used is the MDCT, and the expectation is that ``the  tonal  layer  is  expected  to  be  sparsely  represented in the frequency domain, with emergent frequencies that may evolve slowly with time (i.e. almost horizontal lines of large MDCT coefficients),'' and ``the transient layer is expected to be sparse in time, but spread out in the frequency domain.'' In the Group-LASSO shrinkage, ``a 1D group of coefficients is either globally retained or discarded. This may be understood as a united group shrinkage, since the same threshold applies to all members of a given group.'' Ultimately, the problem of tonal/transient separation is solved using the MDCT and Group-LASSO by performing the following procedure:
+
+\begin{tight_itemize}
+	\item
+		In the wide window MDCT analysis, use Group-LASSO shrinkage for the frequency group, to set the coefficients of the transient parts of the signal being studied to zero.
+	\item
+		In the narrow window MDCT analysis, use Group-LASSO shrinkage for the time group, to set the coefficients of the tonal parts of the signal being studied to zero.
+\end{tight_itemize}
+
+This section presented a high-level overview of entropy, sparsity, and how these relate to wide- and narrow-window TF analyses in the case of harmonic/percussive source separation. We begin to get a feel at how the core concepts underlying harmonic/percussive source separation appear in every algorithm being studied, in different forms and with different implementation choices to achieve the same goal.
 
 \vfill
 \clearpage
@@ -653,7 +702,7 @@ As shown in the results for the simple 1-pass median-filtering algorithms, the C
 
 In the realtime STFT, the hop size is set to be the same as the input stream size, and the window size is $2*\text{hop\_size}$. For example, for an input stream of 1024 samples per chunk, the hop between consecutive chunks is 1024, and every 2 consecutive hops from the stream are stored in a ringbuffer of size 2048 which is the windowed input to the STFT. The equivalent of hop in the sliCQ transform is the transition length, and the equivalent of the window size is the slice length. For a stream size of 1024, the transition length is therefore 1024, and the slice length is 4096.
 
-One main difference between sliCQ and the NSGT-CQT is that sliCQ returns more than 1 channel of coefficients. If the CQT returns a square matrix of NxM, the sliCQ returns 3xNxM. However, as the median filter is a common operation for images which are typically multi-channel (3 channels for RGB, or 4 channels for RGBA), typical median filter functions (in MATLAB, scipy, etc.) can easily support higher dimensions of median filter. The typical 2D median filters for HPSS of dimensions $\text{L\_harmonic } \times 1$, $1 \times \text{L\_percussive}$ are simply extended to $1 \times \text{ L\_harmonic } \times 1$, $1 \times 1 \times \text{ L\_percussive}$, to operate across all 3 channels of the sliCQ transform coefficients. This is described visually in figure \ref{fig:3dmfilt}.
+One main difference between sliCQ and the NSGT-CQT is that sliCQ returns more than 1 channel of coefficients. If the CQT returns a square matrix of NxM, the sliCQ returns 3xNxM. However, as the median filter is a common operation for images which are typically multi-channel (3 channels for RGB, or 4 channels for RGBA), most median filter functions (in MATLAB, scipy, etc.) can easily support higher dimensions of median filter. The 2D median filters for HPSS of dimensions $\text{L\_harmonic } \times 1$, $1 \times \text{L\_percussive}$ are simply extended to $1 \times \text{ L\_harmonic } \times 1$, $1 \times 1 \times \text{ L\_percussive}$, to operate across all 3 channels of the sliCQ transform coefficients. This is described visually in figure \ref{fig:3dmfilt}.
 
 \begin{figure}[ht]
 	\centering
@@ -1025,6 +1074,8 @@ While the PEASS scores make the median-filtering based techniques look promising
 \clearpage %force a page break
 
 \begin{appendices}
+
+\section{\textbf{\textcolor{red}{TODO }}Deep learning source separation with the NSGT}
 
 \section{\textbf{\textcolor{red}{TODO }}Code and results}
 
