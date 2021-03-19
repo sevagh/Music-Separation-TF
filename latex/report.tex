@@ -133,7 +133,7 @@ Median filtering is a technique for image processing where a pixel is replaced b
 
 \subsection{TFJigsaw}
 
-The next algorithm considered is the Time-Frequency Jigsaw Puzzle\cite{tfjigsaw}, which is implemented in the Large Time-Frequency Analysis toolbox \cite{ltfat, tfjigsaw2, tfjigsaw3}. Tonal/transient (or harmonic/percussive) separation is among one of the possible applications of TFJigsaw. The insight is similar to the iterative approach described previously -- in a TF representation with high frequency resolution, tonal sounds are well-represented, and in a TF representation with high time resolution, transient sounds are well-represented:
+The next algorithm considered is the Time-Frequency Jigsaw Puzzle\cite{tfjigsaw}, which is implemented in the Large Time-Frequency Analysis toolbox \cite{ltfat}.\footnote{\url{https://ltfat.github.io/doc/sigproc/tfjigsawsep.html}, \url{https://github.com/ltfat/ltfat/blob/00c2929ef069d294dd84974af8887a9b91d1f994/demos/demo_tfjigsawsep.m}} Tonal/transient (or harmonic/percussive) separation is among one of the possible applications of TFJigsaw. The insight is similar to the iterative approach described previously -- in a TF representation with high frequency resolution, tonal sounds are well-represented, and in a TF representation with high time resolution, transient sounds are well-represented:
 
 \begin{quote}
 	[...] the starting point is to define the tonal layer of the signal as the ``component'' which admits a sparse expansion with respect to a Gabor frame with high frequency resolution (i.e. with a wide window), and the transient layer as the ``component'' which admits a sparse expansion with respect to a Gabor frame with high time resolution (i.e. a narrow window).
@@ -148,7 +148,7 @@ The next algorithm considered is the Time-Frequency Jigsaw Puzzle\cite{tfjigsaw}
 	\label{fig:supertiles}
 \end{figure}
 
-After creating two representations of the signal, these are superimposed in a single time-frequency plane to create so-called ``super-tiles.'' Next, within each super-tile, an entropy criterion chooses which tile (tonal or transient) is below a threshold, and subtracts these from the original signal. This is performed iteratively until the tonal and transient layers emerge. The super-tiles and entropy criterion are shown in figure \ref{fig:supertiles}, and the results are shown in figure \ref{fig:tfjigsawdemo}.
+After creating two representations of the signal, these are superimposed in a single time-frequency plane to create so-called ``super-tiles.'' Next, within each super-tile, a R{\'e}nyi entropy criterion chooses which tile (tonal or transient) is below a threshold, and subtracts these from the original signal. This is performed iteratively until the tonal and transient layers emerge. The super-tiles and entropy criterion are shown in figure \ref{fig:supertiles}, and the results are shown in figure \ref{fig:tfjigsawdemo}.
 
 \begin{figure}[ht]
 	\centering
@@ -157,15 +157,13 @@ After creating two representations of the signal, these are superimposed in a si
 	\label{fig:tfjigsawdemo}
 \end{figure}
 
-Note that the terms \textit{sparsity} and \textit{entropy} (w.r.t. TF analysis and audio signal representation) will be given a deeper treatment in section \ref{sec:theory}.
-
 \subsection{WMDCTLasso}
 
-The final algorithm for tonal/transient separation considered is referred to as ``WMDCTLasso.'' In LTFAT, its name is ``Audioshrink.''\cite{wmdct3}. The technique is described in a paper by \citet{wmdct}, and several demos on websites are available \cite{wmdct2, wmdct3}.
+The final algorithm for tonal/transient separation considered is referred to as ``WMDCTLasso.'' The technique is described in a paper by \citet{wmdct}, and a web demo is available.\footnote{\url{https://homepage.univie.ac.at/monika.doerfler/StrucAudio.html}} In LTFAT, the name of the algorithm is ``Audioshrink.''\footnote{\url{https://ltfat.github.io/doc/demos/demo_audioshrink.html}}
 
 The WMDCTLasso algorithm performs a decomposition based on structured sparsity. It uses WMDCTs (Windowed Modified Discrete Cosine Transform) applied with two different time-frequency resolutions, by using a wide and narrow window -- with the wide window, the tonal sounds are well-represented, and with the narrow window, transient sounds are well-represented.
 
-Next, a method called group lasso shrink is applied to separate the tonal and transient layers by exploiting their respective sparsity in each time-frequency representation. An example of a resulting decomposition of jazz music is shown in figure \ref{fig:wmdctex}.
+Next, a method called Group-LASSO shrinkage is applied to separate the tonal and transient layers by exploiting their respective sparsity in each time-frequency representation. An example of a resulting decomposition of jazz music is shown in figure \ref{fig:wmdctex}.
 
 \begin{figure}[ht]
 	\centering
@@ -174,7 +172,7 @@ Next, a method called group lasso shrink is applied to separate the tonal and tr
 	\label{fig:wmdctex}
 \end{figure}
 
-The term \textit{sparsity} is encountered again. In place of using an entropy criterion like in TFJigsaw, instead a technique called lasso shrinkage (or specifically, the group lasso variant) is used. The goal is the same -- to determine which part of the signal is best represented by the wide-window time-frequency representation, which is likely the tonal component, and similar for the case of the transient components and narrow window.
+The terms sparsity, entropy, Group-LASSO, and R{\'e}nyi entropy will be given a deeper treatment in section \ref{sec:theorysparsity}.
 
 %%%%%%%%%%%%%%
 % THEORY     %
@@ -422,33 +420,6 @@ The DGTReal is simply the STFT or short-time Fourier transform. The WMDCT is a t
 \clearpage
 \vfill
 
-\subsection{Time-frequency masking}
-
-Surveys on speech \cite{speechmask} and music separation \cite{musicmask} indicate that the majority of separation algorithms use the technique of time-frequency masking (or spectral masking) to separate the sources. The median-filtering algorithms of \citet{fitzgerald1, fitzgerald2, driedger} all use time-frequency masking.
-
-\begin{wrapfigure}{r}{8cm}
-	\vspace{-1.0em}
-	\includegraphics[width=8cm]{./maskdemo.png}
-	\caption{Results of a soft and hard oracle mask applied for speech denoising. The oracle mask is the ideal mask for a given signal -- to compute it, the target and interference signals must be known.}
-	\label{fig:masks}
-	\vspace{-1.5em}
-\end{wrapfigure}
-
-\citet{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins. A soft mask has real values $\in [0, 1]$, and a binary or hard mask has logical values, i.e., only 0 and 1. The soft mask used in \cite{fitzgerald1, fitzgerald2} is a Wiener filter given in the following equation, where $\hat{S}$ represents the complex-valued spectrogram:
-\[ M = \frac{|\hat{S}_{\text{target}}|^{2}}{|\hat{S}_{\text{interference}}|^{2} + |\hat{S}_{\text{target}}|^{2}} \]
-
-The hard mask used in \cite{driedger} is of the form:
-\[ M = \frac{|\hat{S}_{\text{target}}|}{|\hat{S}_{\text{interference}}| + \epsilon} \le \beta \]
-
-, where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero. One advantage of the hard mask's separation factor is that a third component can be extracted. Let's reformulate the hard mask formula in the harmonic/percussive case to present a concrete example:
-\[ M_{\text{harmonic}} = \frac{|\hat{S}_{\text{percussive}}|}{|\hat{S}_{\text{harmonic}}| + \epsilon} > \beta \]
-\[ M_{\text{percussive}} = \frac{|\hat{S}_{\text{harmonic}}|}{|\hat{S}_{\text{percussive}}| + \epsilon} \ge \beta \]
-
-In the median-filtering algorithms, the harmonic and percussive spectrogram estimates are the output of the median filtering step. By setting $\beta > 1$, we are stating that the harmonic and percussive estimates must be at least $\beta$ different from each other -- this gives us the capability to extract a third component, called the residual:
-\[ M_{\text{residual}} = 1 - (M_{\text{harmonic}} + M_{\text{percussive}}) \]
-
-Soft masks generally produce higher quality sound. An illustration of spectral masking is shown in figure \ref{fig:masks}.
-
 \subsection{Sparsity and entropy}
 \label{sec:theorysparsity}
 
@@ -465,7 +436,7 @@ If one considers the two-pass median-filtering algorithms, using a narrow window
 
 Thus we can see that the median filtering proximity kernel separation for harmonic sounds performs better in a TF representation suited for harmonic sounds, and that the median filtering proximity kernel for percussive sounds performs better in a TF representation suited for percussive sounds.
 
-We can even sense the intuition here that extending simple KAM algorithms with hypothetical ``perfect'' TF representations, such that harmonic sounds are defined and percussive sounds don't exist in the harmonic TF representation (and vice versa) would lead to perfect separations. This restates one of the major goals of this paper -- to show that simple source separation techniques can be improved by changing the linear STFT to a better TF dictionary.
+We can even sense the intuition here that extending simple KAM algorithms with better TF representations, such that harmonic sounds are more and more sharply defined, and percussive sounds less, in the harmonic TF representation (and vice-versa for the percussive TF representation) would lead to improved separations. This restates one of the major goals of this paper -- to show that simple source separation techniques can be improved by changing the linear STFT to a better TF dictionary.
 
 This brings us to the terms \textit{sparsity} and \textit{entropy}, which are in fact complementary concepts \cite{honeine2014entropy}. \citet{pastor2015mathematics} define the terms as follows, given a signal $x$, its coefficients $w$ in a given domain, and its probability mass function (PMF) $p$:
 \begin{tight_itemize}
@@ -506,6 +477,33 @@ This section presented a high-level overview of entropy, sparsity, and how these
 \vfill
 \clearpage
 
+\subsection{Time-frequency masking}
+
+Surveys on speech \cite{speechmask} and music separation \cite{musicmask} indicate that the majority of separation algorithms use the technique of time-frequency masking (or spectral masking) to separate the sources. The median-filtering algorithms of \citet{fitzgerald1, fitzgerald2, driedger} all use time-frequency masking.
+
+\begin{wrapfigure}{r}{8cm}
+	\vspace{-1.0em}
+	\includegraphics[width=8cm]{./maskdemo.png}
+	\caption{Results of a soft and hard oracle mask applied for speech denoising. The oracle mask is the ideal mask for a given signal -- to compute it, the target and interference signals must be known.}
+	\label{fig:masks}
+	\vspace{-1.5em}
+\end{wrapfigure}
+
+\citet{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins. A soft mask has real values $\in [0, 1]$, and a binary or hard mask has logical values, i.e., only 0 and 1. The soft mask used in \cite{fitzgerald1, fitzgerald2} is a Wiener filter given in the following equation, where $\hat{S}$ represents the complex-valued spectrogram:
+\[ M = \frac{|\hat{S}_{\text{target}}|^{2}}{|\hat{S}_{\text{interference}}|^{2} + |\hat{S}_{\text{target}}|^{2}} \]
+
+The hard mask used in \cite{driedger} is of the form:
+\[ M = \frac{|\hat{S}_{\text{target}}|}{|\hat{S}_{\text{interference}}| + \epsilon} \le \beta \]
+
+, where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero. One advantage of the hard mask's separation factor is that a third component can be extracted. Let's reformulate the hard mask formula in the harmonic/percussive case to present a concrete example:
+\[ M_{\text{harmonic}} = \frac{|\hat{S}_{\text{percussive}}|}{|\hat{S}_{\text{harmonic}}| + \epsilon} > \beta \]
+\[ M_{\text{percussive}} = \frac{|\hat{S}_{\text{harmonic}}|}{|\hat{S}_{\text{percussive}}| + \epsilon} \ge \beta \]
+
+In the median-filtering algorithms, the harmonic and percussive spectrogram estimates are the output of the median filtering step. By setting $\beta > 1$, we are stating that the harmonic and percussive estimates must be at least $\beta$ different from each other -- this gives us the capability to extract a third component, called the residual:
+\[ M_{\text{residual}} = 1 - (M_{\text{harmonic}} + M_{\text{percussive}}) \]
+
+Soft masks generally produce higher quality sound. An illustration of spectral masking is shown in figure \ref{fig:masks}.
+
 %%%%%%%%%%%%%%%
 % METHODOLOGY %
 %%%%%%%%%%%%%%%
@@ -514,7 +512,7 @@ This section presented a high-level overview of entropy, sparsity, and how these
 
 \subsection{Objective measures}
 
-The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \cite{bss} objective measure for separation quality. The authors of BSS released an improved version that matches better with subjective human evaluations, which they called the PEASS (Perceptual Evaluation methods for Audio Source Separation) Toolkit \cite{peass}, based on PEMO-Q \cite{pemoq}. The PEASS Toolkit for MATLAB \cite{peassmatlab} conveniently includes all 3 measures: PEASS, PEMO-Q, and BSS. Each of these consist of 4 metrics:
+The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \cite{bss} objective measure for separation quality. The authors of BSS released an improved version that matches better with subjective human evaluations, which they called the PEASS (Perceptual Evaluation methods for Audio Source Separation) Toolkit \cite{peass}, based on PEMO-Q \cite{pemoq}. The PEASS Toolkit for MATLAB \footnote{\url{http://bass-db.gforge.inria.fr/peass/}} conveniently includes all 3 measures: PEASS, PEMO-Q, and BSS. Each of these consist of 4 metrics:
 
 \begin{tight_itemize}
 \item
@@ -558,7 +556,7 @@ Due to the large number of algorithms and configurations that will be evaluated,
 	Which of soft or hard masking performs best
 \end{tight_itemize} 
 
-From these, we can move on to two-pass variants, by using the conclusions from the previous evaluation. Next, we can evaluate the TF jigsaw and WMDCT group lasso methods with different configurations. After the harmonic/percussive evaluations are done, we can introduce vocal separation, and repeat. The initial evaluations will be described in the following section, \ref{sec:elim}.
+From these, we can move on to two-pass variants, by using the conclusions from the previous evaluation. Next, we can evaluate the TF jigsaw and WMDCT Group-LASSO methods with different configurations. After the harmonic/percussive evaluations are done, we can introduce vocal separation, and repeat. The initial evaluations will be described in the following section, \ref{sec:elim}.
 
 The final goal is to combine the best performers to create optimal ``hybrid'' algorithms for each task: HPSS and harmonic/percussive/vocal separation. At the last stage, the optimal hybrids will be compared to Open-Unmix \cite{umx}. Open-Unmix is a deep-learning-based music source separation system which achieves near state-of-the-art results. It is fully open-source, and was intended to be a reference and benchmark in the field of signal separation.
 
@@ -843,7 +841,7 @@ From the tested configurations in figure \ref{fig:jigsaw}, we can see that the h
 
 \subsubsection{WMDCTLasso}
 
-The last algorithm, WMDCTLasso\cite{wmdct}, also implemented in LTFAT \cite{wmdct3}. As seen before, there are two settings for window sizes of the Gabor systems used for the WMDCT frames used in the tonal and transient Gabor systems. The default settings are a Hann window of size 4096 for the tonal system and 256 for the transient system. The algorithm is described in listing \ref{lst:wmdctlasso}.
+The last algorithm, WMDCTLasso\cite{wmdct}, is also implemented in LTFAT. As seen before, there are two settings for window sizes of the Gabor systems used for the WMDCT frames used in the tonal and transient Gabor systems. The default settings are a Hann window of size 4096 for the tonal system and 256 for the transient system. The algorithm is described in listing \ref{lst:wmdctlasso}.
 
 \begin{figure}[h]
   \centering
@@ -1031,24 +1029,22 @@ The system is shown in the block diagram in figure \ref{fig:hybridvocal}. The re
 
 \section{Discussion and conclusion}
 
-It is important to mention that despite showing good PEASS scores, a conclusion cannot be made that the presented hybrid algorithms beat Open-Unmix. Open-Unmix claims state-of-the-art results \cite{umxsota} in the BSS metric. In the SigSep community, the BSS evaluation measure used is BSSv4, their own modification, available in their Python libraries museval\cite{museval} and bsseval\cite{bsseval}.
+It is important to mention that despite showing good PEASS scores, a conclusion cannot be made that the presented hybrid algorithms beat Open-Unmix. Open-Unmix claims state-of-the-art results \cite{umxsota} in the BSS metric. In the SigSep community, the BSS evaluation measure used is BSSv4, their own modification, available in their Python libraries museval\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} and bsseval\footnote{\url{https://github.com/sigsep/bsseval}}.
 
-To avoid questions of bias, evaluations on the final HPSS and vocal algorithms were redone using the bsseval library, containing SigSep's own BSSv4 implementation. Based on the modular Python and MATLAB testbench in this project, it was simple to write a new Python script which traverses the previous separation directory and computes BSSv4 metrics and heatmaps. The BSSv4 metrics can be seen in figures \ref{fig:bssv4hpss} and \ref{fig:bssv4vocal}.
-
-Although the hybrids are no longer shown to beat Open-Unmix, some previous conclusions based on the PEASS scores are also observed with the BSSv4 scores:
+To avoid questions of bias, evaluations on the final HPSS and vocal algorithms were redone using the bsseval library, containing SigSep's own BSSv4 implementation. Based on the modular Python and MATLAB testbench in this project, it was simple to write a new Python script which traverses the previous separation directory and computes BSSv4 metrics and heatmaps. The BSSv4 metrics can be seen in figures \ref{fig:bssv4hpss} and \ref{fig:bssv4vocal}. Although the hybrids don't beat Open-Unmix, some previous conclusions based on the PEASS scores are also observed with the BSSv4 scores:
 
 \begin{tight_itemize}
 	\item
-		In the HPSS task, the 1-pass soft mask algorithm using a single CQT-96 shows a strong harmonic and percussive separation performance in BSSv4, confirming that it is a good choice for a simple and low-cost implementation. However, it still suffers from a low interference score in the harmonic component. It has very good percussive performance, beating both hybrids.
+		In the HPSS task, the 1-pass soft mask algorithm using a single CQT-96 shows a strong harmonic and percussive separation performance in BSSv4, confirming that it is a good choice for a simple and low-cost implementation. However, it still suffers from a low harmonic interference score. It has very good percussive performance, beating both hybrids.
 	\item
 		In the HPSS task, both hybrids have a better target and artifact score than the original iterative Driedger algorithm, although worse interference -- again, consistent with the expectations from soft and hard TF masking \cite{masking}.
 	\item
-		In the harmonic/percussive/vocal separation task, the hybrid-vocal algorithm has a better interference score than mf-cqt1 (which uses a CQT-96 in the first iteration's harmonic separation). This confirms that step 4 of the hybrid vocal algorithm, the harmonic refinement step, achieves the desired effect of boosting the interference-related score (at the expense of a lower target score).
+		In the harmonic/percussive/vocal separation task, the hybrid-vocal algorithm has a better interference score than mf-cqt1 (which uses a CQT-96 in the first iteration's harmonic separation). This confirms that step 4 of the hybrid vocal algorithm, the harmonic refinement step, sacrifices some target score to boost the interference score as intended.
 	\item
-		In the harmonic/percussive/vocal separation task, both original configurations of \citet{fitzgerald2} are beat by the hybrid-vocal in the target and artifact score of all 3 components (harmonic, percussive, and vocal). However, the original configurations have a better interference score.
+		In the harmonic/percussive/vocal separation task, both original configurations of \citet{fitzgerald2} are beat by the hybrid-vocal in the target and artifact score of all 3 components (harmonic, percussive, and vocal). However, the original configurations have a better interference score. This tradeoff appears again and again, and is consistent -- stricter cancellation of interfering sources leads to higher artifacts and an undesired reduction of the desired target.
 \end{tight_itemize}
 
-In contemporary source separation literature\cite{nussl}, \citet{fitzgerald1}'s original HPSS algorithm is referred to as primitive. In SiSEC 2018\cite{sigsep2018}, HPSS scored very low in the evaluations, and the evaluation campaign revealed that deep learning solutions are getting the best results for source separation. This report showed that by considering different aspects of time-frequency resolution, respectable results could be obtained while maintaining the simplicity of the original median-filtering idea. Using a CQT with 96 bins-per-octave in place of the STFT gives surprisingly good performance in harmonic/percussive source separation, and creating a multi-iteration hybrid algorithm with multiple CQTs (and one STFT), still only using simple median-filtering and soft masking, led to strong separation results for harmonic/percussive/vocal components.
+In contemporary source separation literature \cite{nussl}, \citet{fitzgerald1}'s original HPSS algorithm is referred to as primitive. In SiSEC 2018 \cite{sigsep2018}, HPSS scored very low in the evaluations, and the evaluation campaign showed deep learning solutions at the top of the evaluations. This report showed that by considering different aspects of time-frequency resolution, respectable results could be obtained while maintaining the simplicity of the original median-filtering idea. Using a CQT with 96 bins-per-octave in place of the STFT gives surprisingly good performance in harmonic/percussive source separation, and creating a multi-iteration hybrid algorithm with multiple CQTs (and one STFT), still only using simple median-filtering and soft masking, led to strong separation results for harmonic/percussive/vocal components.
 
 While the PEASS scores make the median-filtering based techniques look promising, the situation is not as clear-cut when considering BSSv4 scores. For this, I have opened a GitHub issue with the SigSep community,\footnote{\url{https://github.com/sigsep/sigsep-mus-eval/issues/78}} discussing how I found unexpected results in the PEASS scores, and asking if they have considered PEASS over BSS when designing or evaluating Open-Unmix.
 
@@ -1063,6 +1059,10 @@ While the PEASS scores make the median-filtering based techniques look promising
 	\label{fig:bssv4vocal}
 \end{figure}
 
+Appendix \ref{appendix:ml} describes an experimental result of substituting the linear STFT of a deep learning source separation model with the Nonstationary Gabor Transform, to show the viability of using better time-frequency representations (such as the NSGT or CQT) in the vast literature of STFT-based methods.
+
+Finally, appendix \ref{appendix:listings} describes all of the algorithms, code implementations, and raw results which were summarized in this report, included in the project's source code.\footnote{\url{https://github.com/sevagh/Music-Separation-TF}}
+
 \vfill
 \clearpage % force a page break before references
 
@@ -1076,8 +1076,10 @@ While the PEASS scores make the median-filtering based techniques look promising
 \begin{appendices}
 
 \section{\textbf{\textcolor{red}{TODO }}Deep learning source separation with the NSGT}
+\label{appendix:ml}
 
 \section{\textbf{\textcolor{red}{TODO }}Code and results}
+\label{appendix:listings}
 
 \end{appendices}
 
