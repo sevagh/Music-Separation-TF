@@ -125,7 +125,7 @@ Median filtering is a technique for image processing where a pixel is replaced b
 	\subfloat[Mixed signal]{{\includegraphics[width=6cm]{./mixedspecgram.png} }}
 	\subfloat[Percussive separation]{{\includegraphics[width=6cm]{./perc_soft.png} }}
 	\subfloat[Harmonic separation]{{\includegraphics[width=6cm]{./harm_soft.png} }}
-	\caption{Example of median-filtering HPSS}
+	\caption{Example of median filtering HPSS}
 	\label{fig:fitz1}
 \end{figure}
 
@@ -420,12 +420,12 @@ The DGTReal is simply the STFT or short-time Fourier transform. The WMDCT is a t
 \clearpage
 \vfill
 
-\subsection{Sparsity and entropy}
+\subsection{Source separation, sparsity, and entropy}
 \label{sec:theorysparsity}
 
 \citet{musicsepgood} describe two common techniques for music source separation -- Kernel Additive Models (KAM) and spectrogram factorization modeling, the most common of which is Non-Negative Matrix Factorization (NMF). KAM ``involves selecting a set of time-frequency bins, which, given the nature of the target source, e.g., percussive, harmonic or vocals, are likely to be similar in value. This set of time-frequency bins is termed a proximity kernel.'' This is exactly the case with the median filtering algorithm, where percussive sounds are classified as vertical lines in the spectrogram, and harmonic sounds are classified as horizontal lines in the spectrogram. The median filter kernel in this case is the proximity kernel, from the perspective of the KAM interpretation.
 
-If one considers the two-pass median-filtering algorithms, using a narrow window TF decomposition for sharper temporal resolution and a wide window TF decomposition for sharper frequency resolution, we observe that the expected (and achieved) result is to improve the quality of separation. In short, this is because the simplistic KAM model of the median filters (for separating vertical and horizontal lines in the spectrogram) works better in each case:
+If one considers the two-pass median filtering algorithms, using a narrow window TF decomposition for sharper temporal resolution and a wide window TF decomposition for sharper frequency resolution, we observe that the expected (and achieved) result is to improve the quality of separation. In short, this is because the simplistic KAM model of the median filters (for separating vertical and horizontal lines in the spectrogram) works better in each case:
 
 \begin{tight_itemize}
 	\item
@@ -436,7 +436,7 @@ If one considers the two-pass median-filtering algorithms, using a narrow window
 
 Thus we can see that the median filtering proximity kernel separation for harmonic sounds performs better in a TF representation suited for harmonic sounds, and that the median filtering proximity kernel for percussive sounds performs better in a TF representation suited for percussive sounds.
 
-We can even sense the intuition here that extending simple KAM algorithms with better TF representations, such that harmonic sounds are more and more sharply defined, and percussive sounds less, in the harmonic TF representation (and vice-versa for the percussive TF representation) would lead to improved separations. This restates one of the major goals of this paper -- to show that simple source separation techniques can be improved by changing the linear STFT to a better TF dictionary.
+We can even sense the intuition here that extending simple KAM algorithms with better TF representations, such that harmonic sounds are more and more sharply defined, and percussive sounds less, in the harmonic TF representation (and vice-versa for the percussive TF representation) would lead to improved separations. This restates one of the primary goals of this paper -- to show that simple source separation techniques can be improved by changing the linear STFT to a better TF dictionary.
 
 This brings us to the terms \textit{sparsity} and \textit{entropy}, which are in fact complementary concepts \cite{honeine2014entropy}. \citet{pastor2015mathematics} define the terms as follows, given a signal $x$, its coefficients $w$ in a given domain, and its probability mass function (PMF) $p$:
 \begin{tight_itemize}
@@ -446,18 +446,22 @@ This brings us to the terms \textit{sparsity} and \textit{entropy}, which are in
 		\textit{Entropy} is the property of not concentrating most of the probability mass in few atoms of $p$ -- in other words, the entropy of a random variable is a concept of information theory that characterizes the unpredictability inherent in its outcomes
 \end{tight_itemize}
 
-In the TF Jigsaw algorithm \cite{tfjigsaw}, an iterative application of R{\'e}nyi entropy is used to separate the tonal from the transient components. Recall that the time-frequency analysis is split into supertiles consisting of a superimposed overcomplete TF dictionary, consisting of 2 separate Gabor transforms -- narrow and wide window (for better tonal and transient representation respectively). The separation of tonal from transient is done as follows:
+In the TF Jigsaw algorithm \cite{tfjigsaw}, an iterative application of R{\'e}nyi entropy is used to separate the tonal from the transient components.  Recall that a joint multi-dictionary time-frequency analysis is created by superimposing 2 Gabor transforms with a narrow and wide window (for better tonal and transient representation respectively) to create time-frequency ``super-tiles.'' The key idea is that transient signals will have higher entropy, or will be more random, than white noise in a wide window TF analysis (and the inverse for tonal signals in a narrow window TF analysis).
+
+The separation of tonal from transient is done as follows:
 
 \begin{tight_enumerate}
 	\item
 		Initialize a random white noise signal.
 	\item
-		Within a supertile, compare the entropy of the signal being studied with the random white noise. In the case where the entropy of the studied signal is higher than the random white noise by a threshold, set those coefficients to zero. In simplistic terms, we can say that the transient part of the signal being studied is represented \textit{worse}, or has higher entropy than random white noise, in the tonal (or wide window) TF analysis within the supertile. Therefore, it gets set to zero and only the tonal part of the signal under study remains alongside a residual component. As usual, the inverse is true to perform a transient separation with the narrow window TF analysis.
+		Within a supertile, compare the entropy of the signal being studied with the random white noise, considering the tonal/wide window transform coefficients. In the case where the entropy of the studied signal is higher than the random white noise by a threshold, set those coefficients to zero, resulting in a separation into tonal and residual components, and removal of transient components.
 	\item
-		Repeat this process iteratively until there is no more residual component. At this point the algorithm is considered to have found a good tonal/transient separation, such that the entropy or randomness of the tonal sound is low w.r.t. the wide window TF analysis, and vice-versa for the transient sound in the narrow window TF analysis.
+		Repeat this process iteratively until there is no more residual component. At this point the algorithm has fully separated the tonal component, such that the entropy or randomness of the separated tonal component is low (i.e., it is well represented) w.r.t. the wide window TF analysis.
+	\item
+		The above steps can be repeated for the transient/narrow window transform coefficients to separate the transient sound.
 \end{tight_enumerate}
 
-In the WMDCTLasso algorithm \cite{wmdct}, Group-LASSO (Least Absolute Shrinkage and Selection Operator) is used to separate tonal and transient sounds. To describe the usefulness of Group-LASSO, \citet{sparsitykowalski} first state the problem of tonal + transient + noise decomposition as follows:
+In the WMDCTLasso algorithm \cite{wmdct}, Group-LASSO (Least Absolute Shrinkage and Selection Operator) is used to separate tonal and transient sounds by grouping transform coefficients by sparsity. To describe the usefulness of Group-LASSO, \citet{sparsitykowalski} first state the problem of tonal + transient + noise decomposition as follows:
 
 \begin{quote}
 To decompose a signal into several layers, one chooses a suitable dictionary for each layer. In the audio signal example, the transient layer is known to be sparsely represented in dictionaries of wavelets, or time-frequency dictionaries (like Gabor or MDCT) with a narrow window. At the opposite, the tonal layer is known to be sparsely represented in time-frequency dictionaries with a wide window.
@@ -479,7 +483,7 @@ This section presented a high-level overview of entropy, sparsity, and how these
 
 \subsection{Time-frequency masking}
 
-Surveys on speech \cite{speechmask} and music separation \cite{musicmask} indicate that the majority of separation algorithms use the technique of time-frequency masking (or spectral masking) to separate the sources. The median-filtering algorithms of \citet{fitzgerald1, fitzgerald2, driedger} all use time-frequency masking.
+Surveys on speech \cite{speechmask} and music separation \cite{musicmask} indicate that the majority of separation algorithms use the technique of time-frequency masking (or spectral masking) to separate the sources. The median filtering algorithms of \citet{fitzgerald1, fitzgerald2, driedger} all use time-frequency masking.
 
 \begin{wrapfigure}{r}{8cm}
 	\vspace{-1.0em}
@@ -499,7 +503,7 @@ The hard mask used in \cite{driedger} is of the form:
 \[ M_{\text{harmonic}} = \frac{|\hat{S}_{\text{percussive}}|}{|\hat{S}_{\text{harmonic}}| + \epsilon} > \beta \]
 \[ M_{\text{percussive}} = \frac{|\hat{S}_{\text{harmonic}}|}{|\hat{S}_{\text{percussive}}| + \epsilon} \ge \beta \]
 
-In the median-filtering algorithms, the harmonic and percussive spectrogram estimates are the output of the median filtering step. By setting $\beta > 1$, we are stating that the harmonic and percussive estimates must be at least $\beta$ different from each other -- this gives us the capability to extract a third component, called the residual:
+In the median filtering algorithms, the harmonic and percussive spectrogram estimates are the output of the median filtering step. By setting $\beta > 1$, we are stating that the harmonic and percussive estimates must be at least $\beta$ different from each other -- this gives us the capability to extract a third component, called the residual:
 \[ M_{\text{residual}} = 1 - (M_{\text{harmonic}} + M_{\text{percussive}}) \]
 
 Soft masks generally produce higher quality sound. An illustration of spectral masking is shown in figure \ref{fig:masks}.
@@ -600,7 +604,7 @@ We can consider two generalized frameworks for harmonic/percussive (and optional
 	\label{fig:fitz2}
 \end{figure}
 
-The first and original median-filtering HPSS algorithm with soft masks was introduced by \citet{fitzgerald1}. The modification introduced by \citet{driedger} uses hard masks (the same paper contains the two-pass variant, which will be discussed later).
+The first and original median filtering HPSS algorithm with soft masks was introduced by \citet{fitzgerald1}. The modification introduced by \citet{driedger} uses hard masks (the same paper contains the two-pass variant, which will be discussed later).
 
 \begin{figure}[h]
   \centering
@@ -635,7 +639,7 @@ The first and original median-filtering HPSS algorithm with soft masks was intro
 |$\text{\textbf{final percussive} } p1 = \text{ISTFT}(\hat{P2})\text{\textbf{ or ICQT}}$|
 \end{minted}
  \end{minipage}
-  \captionof{listing}{1- and 2-pass median-filtering HPSS algorithms}
+  \captionof{listing}{1- and 2-pass median filtering HPSS algorithms}
   \label{lst:pseudocodes}
 \end{figure}
 
@@ -682,7 +686,7 @@ CQT-96 demonstrates good results for both harmonic and percussive separation wit
 \vfill
 \clearpage
 
-\subsubsection{Realtime median-filtering}
+\subsubsection{Realtime median filtering}
 
 In a previous project\footnote{\url{https://github.com/sevagh/Real-Time-HPSS}} presented for MUMT 501, the same 1-pass median filtering HPSS algorithms were adapted to work in realtime by using a sliding STFT and causal median filter. Figure \ref{fig:rthpss} describes the realtime system.
 
@@ -692,11 +696,11 @@ In a previous project\footnote{\url{https://github.com/sevagh/Real-Time-HPSS}} p
 	\subfloat[Realtime HPSS block diagram]{{\includegraphics[height=8cm]{./rthpss_diagram.png} }}\\
 	\vspace{0.1em}
 	\subfloat[Realtime HPSS median filter causality]{{\includegraphics[height=6cm]{./rthpss_causality.png} }}
-	\caption{Realtime median-filtering HPSS}
+	\caption{Realtime median filtering HPSS}
 	\label{fig:rthpss}
 \end{figure}
 
-As shown in the results for the simple 1-pass median-filtering algorithms, the CQT with 96 bins per octave had a very good performance in harmonic and percussive separation when used in place of the linear-frequency STFT. The same idea is applied to the realtime STFT-based HPSS, to use the CQT. The realtime version of the CQT is the \textit{sliCQ transform}, or sliced constant-Q transform, described by \citet{rtcqt}. The implementation of realtime median filtering of the sliCQ transform was first attempted using the MATLAB implementation of sliCQ NSGToolbox,\footnote{\url{https://www.univie.ac.at/nonstatgab/toolbox.php}} but the code is not suitable for processing an input signal chunk-by-chunk (it takes the entire input signal). However, the officially recommended Python library for the NSGT\footnote{\url{https://github.com/grrrr/nsgt}} contains an implementation of sliCQ which accepts consecutive chunks of the signal.
+As shown in the results for the simple 1-pass median filtering algorithms, the CQT with 96 bins per octave had a very good performance in harmonic and percussive separation when used in place of the linear-frequency STFT. The same idea is applied to the realtime STFT-based HPSS, to use the CQT. The realtime version of the CQT is the \textit{sliCQ transform}, or sliced constant-Q transform, described by \citet{rtcqt}. The implementation of realtime median filtering of the sliCQ transform was first attempted using the MATLAB implementation of sliCQ NSGToolbox,\footnote{\url{https://www.univie.ac.at/nonstatgab/toolbox.php}} but the code is not suitable for processing an input signal chunk-by-chunk (it takes the entire input signal). However, the officially recommended Python library for the NSGT\footnote{\url{https://github.com/grrrr/nsgt}} contains an implementation of sliCQ which accepts consecutive chunks of the signal.
 
 In the realtime STFT, the hop size is set to be the same as the input stream size, and the window size is $2*\text{hop\_size}$. For example, for an input stream of 1024 samples per chunk, the hop between consecutive chunks is 1024, and every 2 consecutive hops from the stream are stored in a ringbuffer of size 2048 which is the windowed input to the STFT. The equivalent of hop in the sliCQ transform is the transition length, and the equivalent of the window size is the slice length. For a stream size of 1024, the transition length is therefore 1024, and the slice length is 4096.
 
@@ -927,7 +931,7 @@ From the tested configurations in figure \ref{fig:wmdct}, we can see results tha
 	\label{fig:hybridhpss}
 \end{wrapfigure}
 
-The first hybrid algorithm created is for harmonic/percussive source separation. Noting that the \Verb#tfjigsaw-1# configuration achieved the best harmonic separation, and that median-filtering and soft masking with STFT-2048 achieved the best percussive separation, the proposed hybrid is a combination of both. First, the harmonic component is separated using TFJigsaw (the percussive output is discarded).
+The first hybrid algorithm created is for harmonic/percussive source separation. Noting that the \Verb#tfjigsaw-1# configuration achieved the best harmonic separation, and that median filtering and soft masking with STFT-2048 achieved the best percussive separation, the proposed hybrid is a combination of both. First, the harmonic component is separated using TFJigsaw (the percussive output is discarded).
 
 Next, median filtering with STFT-2048 is applied on the input signal, with a twist -- the percussive estimate is computed like typical, with a median filter. However, the harmonic estimate is computed by taking the STFT-2048 magnitude of the harmonic component output by TFJigsaw. The harmonic estimate from median filtering the STFT is discarded.
 
@@ -1044,9 +1048,9 @@ To avoid questions of bias, evaluations on the final HPSS and vocal algorithms w
 		In the harmonic/percussive/vocal separation task, both original configurations of \citet{fitzgerald2} are beat by the hybrid-vocal in the target and artifact score of all 3 components (harmonic, percussive, and vocal). However, the original configurations have a better interference score. This tradeoff appears again and again, and is consistent -- stricter cancellation of interfering sources leads to higher artifacts and an undesired reduction of the desired target.
 \end{tight_itemize}
 
-In contemporary source separation literature \cite{nussl}, \citet{fitzgerald1}'s original HPSS algorithm is referred to as primitive. In SiSEC 2018 \cite{sigsep2018}, HPSS scored very low in the evaluations, and the evaluation campaign showed deep learning solutions at the top of the evaluations. This report showed that by considering different aspects of time-frequency resolution, respectable results could be obtained while maintaining the simplicity of the original median-filtering idea. Using a CQT with 96 bins-per-octave in place of the STFT gives surprisingly good performance in harmonic/percussive source separation, and creating a multi-iteration hybrid algorithm with multiple CQTs (and one STFT), still only using simple median-filtering and soft masking, led to strong separation results for harmonic/percussive/vocal components.
+In contemporary source separation literature \cite{nussl}, \citet{fitzgerald1}'s original HPSS algorithm is referred to as primitive. In SiSEC 2018 \cite{sigsep2018}, HPSS scored very low in the evaluations, and the evaluation campaign showed deep learning solutions at the top of the evaluations. This report showed that by considering different aspects of time-frequency resolution, respectable results could be obtained while maintaining the simplicity of the original median filtering idea. Using a CQT with 96 bins-per-octave in place of the STFT gives surprisingly good performance in harmonic/percussive source separation, and creating a multi-iteration hybrid algorithm with multiple CQTs (and one STFT), still only using simple median filtering and soft masking, led to strong separation results for harmonic/percussive/vocal components.
 
-While the PEASS scores make the median-filtering based techniques look promising, the situation is not as clear-cut when considering BSSv4 scores. For this, I have opened a GitHub issue with the SigSep community,\footnote{\url{https://github.com/sigsep/sigsep-mus-eval/issues/78}} discussing how I found unexpected results in the PEASS scores, and asking if they have considered PEASS over BSS when designing or evaluating Open-Unmix.
+While the PEASS scores make the median filtering based techniques look promising, the situation is not as clear-cut when considering BSSv4 scores. For this, I have opened a GitHub issue with the SigSep community,\footnote{\url{https://github.com/sigsep/sigsep-mus-eval/issues/78}} discussing how I found unexpected results in the PEASS scores, and asking if they have considered PEASS over BSS when designing or evaluating Open-Unmix.
 
 \begin{figure}[ht]
 	\centering
@@ -1075,8 +1079,68 @@ Finally, appendix \ref{appendix:listings} describes all of the algorithms, code 
 
 \begin{appendices}
 
-\section{\textbf{\textcolor{red}{TODO }}Deep learning source separation with the NSGT}
+\section{Deep learning source separation with the NSGT}
 \label{appendix:ml}
+
+\citet{grais2017single} presented a deep learning architecture for performing single-channel source separation based on the Convolutional Denoising Auto-Encoder architecture. The architecture of the neural network is shown in \ref{fig:cdae_arch}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=16cm]{./cdae_arch.png}
+	\caption{Architecture of a Convolutional Denoising Auto-Encoder (CDAE)}
+	\label{fig:cdae_arch}
+\end{figure}
+
+Their proposed system will use $N$ CDAEs for $N$ sources. The CDAE is trained on 15 frames of magnitude spectrograms with 1025 frequency bins ($\text{window\_size} = 1024, \text{nfft} = 2048$) -- at a sampling rate of 44100 Hz, this represents 0.348s of audio in $15 \times 1025 = 15375$ coefficients. The input of the CDAE is the magnitude of the mixed signal, and the learned output is the target source; the training data for a CDAE requires the mixed song as well as recordings of each individual source.
+
+The perform the full source separation, the mixed signal is split into windowed segments of size 1024, and the spectrogram is taken every 15 frames to create a $15 \times 1025$ spectrogram. The magnitude spectrogram is passed into the CDAE, which computes the estimated magnitude spectrogram of the desired source. Then, the complex spectrogram of the desired source is created by combining the estimated magnitude and phase of the original mixture -- finally, the complex spectrogram is inverted to create 15 frames of separated signal for the desired source.
+
+In figure \ref{fig:mixin_arch}, we show the block diagram of a source separation system adapted the one-pass HPSS algorithm to replace median filtering with trained CDAEs. This is a departure from the CDAE paper, which proposes to use the magnitude of the CDAE output and phase of the original mixture to invert into the separated sources. Instead, as in the HPSS framework, we can use the source magnitude estimates to compute soft masks to apply to the original mix. This performs much better in practice than the inversion strategy using the original mixture phase. Another major change is to replace the STFT with the NSGT using the Bark scale. This idea originated from two motivations:
+
+\begin{tight_itemize}
+	\item
+		In line with this report, I wanted to show that the NSGT can replace a linear STFT in any kind of system. In the main body of this report, the CQT based on the NSGT was successfully substituted in DSP algorithms for source separation. In this case, the goal is to show that the NSGT can be used in machine learning algorithms based on the STFT.
+	\item
+		\citet{bfcc1, bfcc2} both report that Bark bands are useful for percussive content, and one of my pet obsessions is to create a high quality drum separator. The NSGT was configured to output 96 bins on the Bark frequency scale between 0 and 22050 Hz.
+\end{tight_itemize}
+
+Instead of splitting the input signal into magnitude spectrograms taken from 15 consecutive frames of size 1024, the input signal is split into 1-second chunks, and the 96-bin Bark-scale NSGT is taken; the magnitude NSGT for the 1 second chunks contains $1948 \times 96 = 187008$ coefficients. The final proposed system is named MiXiN, and is described in figure \ref{fig:mixin_arch}. 
+
+The source code of the system is available,\footnote{\url{https://github.com/sevagh/MiXiN}} as are sound samples for some separations.\footnote{\url{https://sevag.xyz/music_separation.html}} This name was selected since source separation is also called ``unmixing'' (which is the origin of the name Open-Unmix), and also as a backcronym for the letters MXN, for \textbf{M}usic e\textbf{X}traction with \textbf{N}onstationary Gabor Transforms.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=14cm]{./mixin_arch.png}
+	\caption{MiXiN architecture}
+	\label{fig:mixin_arch}
+\end{figure}
+
+The data used to train MiXiN were stems from 4 albums from the progressive metal band Periphery, purchased from their merchandise website.\footnote{\url{https://store.periphery.net/music/music}} The instruments were split as follows -- the drum stem was used for the percussive source, the vocal stem for the vocal source, and a sum of all other sources (rhythm + lead guitar + misc.) for the harmonic source. The data was split into 80\%/20\%/20\% test/train/validation (this is about 128 minutes of total training music). The training curves for the 3 CDAEs (harmonic, percussive, and vocal) are shown in figure \ref{fig:trainingcurves}. The model was implemented using Tensorflow \cite{tensorflow} and Keras \cite{keras}.
+
+The training loss chosen was mean absolute error (MAE) between the input magnitude NSGT of the mixed source and output magnitude NSGT of the desired target. The training data was split into 1-second chunks, and the magnitude NSGT with 96 bins on the Bark scale between 0 and 22050 Hz was taken, creating training data with an input of $1948 \times 96$ for 1 second of mixed audio and an output of $1948 \times 96$ for 1 second of source audio.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Harmonic loss]{{\includegraphics[width=6cm]{./harmonic_train_loss.png} }}
+	\subfloat[Percussive loss]{{\includegraphics[width=6cm]{./percussive_train_loss.png} }}
+	\subfloat[Vocal loss]{{\includegraphics[width=6cm]{./vocal_train_loss.png} }}
+	\caption{Training curves for the MAE loss of the 3 CDAEs}
+	\label{fig:trainingcurves}
+\end{figure}
+
+Finally, the BSSv4 results for MiXiN are shown in figure \ref{fig:bssv4mixin}.
+
+\begin{figure}[ht]
+	\centering
+	\makebox[\textwidth]{\includegraphics[width=16cm]{mixin_bssv4.png}}
+	\caption{Final HPSS results, BSSv4 scores}
+	\label{fig:bssv4mixin}
+\end{figure}
+
+It does not score better than Open-Unmix, but it does show that STFT-based deep learning models can be applied to the NSGT. A useful comparison could have been to compare the STFT-based CDAE architecture to the NSGT-based CDAE architecture, to verify whether the NSGT improves the results in some way. However, the original CDAE paper \cite{grais2017single} did not provide a code implementation, and I couldn't successfully create an STFT-based model which sounded as good as the presented NSGT version.
+
+\vfill
+\clearpage %force a page break
 
 \section{\textbf{\textcolor{red}{TODO }}Code and results}
 \label{appendix:listings}
