@@ -687,6 +687,7 @@ CQT-96 demonstrates good results for both harmonic and percussive separation wit
 \clearpage
 
 \subsubsection{Realtime median filtering}
+\label{sec:rthpss}
 
 In a previous project\footnote{\url{https://github.com/sevagh/Real-Time-HPSS}} presented for MUMT 501, the same 1-pass median filtering HPSS algorithms were adapted to work in realtime by using a sliding STFT and causal median filter. Figure \ref{fig:rthpss} describes the realtime system.
 
@@ -923,6 +924,7 @@ From the tested configurations in figure \ref{fig:wmdct}, we can see results tha
 \clearpage
 
 \subsubsection{Hybrid -- TFJigsaw-HPSS}
+\label{sec:hybridhpss}
 
 \begin{wrapfigure}{r}{5cm}
 	\vspace{-1.0em}
@@ -995,6 +997,7 @@ When choosing between the harmonic separation scores of the linear STFT-16384 an
 \clearpage % force a page break before references
 
 \subsubsection{Hybrid -- Iterative-CQT-Sep}
+\label{sec:hybridvocal}
 
 \begin{wrapfigure}{r}{8cm}
 	\includegraphics[width=8cm]{./hybrid_vocal_block_diagram.png}
@@ -1139,11 +1142,123 @@ Finally, the BSSv4 results for MiXiN are shown in figure \ref{fig:bssv4mixin}.
 
 It does not score better than Open-Unmix, but it does show that STFT-based deep learning models can be applied to the NSGT. A useful comparison could have been to compare the STFT-based CDAE architecture to the NSGT-based CDAE architecture, to verify whether the NSGT improves the results in some way. However, the original CDAE paper \cite{grais2017single} did not provide a code implementation, and I couldn't successfully create an STFT-based model which sounded as good as the presented NSGT version.
 
+MiXiN has some additional flexibility -- it can be configured to run in instrumental mode (i.e., only perform harmonic/percussive source separation) by omitting the vocal CDAE. This performs better on instrumental music.
+
 \vfill
 \clearpage %force a page break
 
-\section{\textbf{\textcolor{red}{TODO }}Code and results}
+\section{Code and results}
 \label{appendix:listings}
+
+The full source code and results will be listed in this section. The project source code is available at \href{https://github.com/sevagh/Music-Separation-TF}{https://github.com/sevagh/Music-Separation-TF}.
+
+There are several external dependencies which are vendored in the project (i.e., their source code is included alongside the git repository), described in table \ref{table:deps}. Some are included as plain source code, and some as git submodules.\footnote{\url{https://git-scm.com/book/en/v2/Git-Tools-Submodules}}
+
+\begin{table}[ht]
+	\centering
+\begin{tabular}{ |l|l|l| }
+	 \hline
+	  Dependency & File path & Type \\
+	 \hline
+	 \hline
+	 PEASS toolkit v2.0.1 & \Verb#vendor/PEASS-Software-v2.0.1# & Source code \\
+	 \hline
+	 ltfat v2.4.0 & \Verb#vendor/ltfat# & Source code \\
+	 \hline
+	 Open-Unmix & \Verb#vendor/open-unmix-pytorch# & Git submodule \\
+	 \hline
+	 MiXiN & \Verb#vendor/MiXiN# & Git submodule \\
+	 \hline
+\end{tabular}
+	\caption{Project dependencies}
+	\label{table:deps}
+\end{table}
+
+The implemented algorithms are described in table \ref{table:algos}. Note that in some cases, the core implementation is in Python, and there is a MATLAB shim (or compatibility layer) to easily execute the Python code within a MATLAB testbench.
+
+\begin{table}[ht]
+	\centering
+\begin{tabular}{ |l|l|l| }
+	 \hline
+	  Algorithms & File path & Language \\
+	 \hline
+	 \hline
+	 HPSS 1-pass \cite{fitzgerald1, driedger} & \Verb#algorithms/HPSS_1pass.m# & MATLAB \\
+	 \hline
+	 HPSS 2-pass (default) \cite{driedger} & \Verb#algorithms/Driedger_Iterative_Default.m# & MATLAB \\
+	 \hline
+	 HPSS 2-pass (with params) \cite{driedger} & \Verb#algorithms/Driedger_Iterative.m# & MATLAB \\
+	 \hline
+	 Fitzgerald 2-pass with vocal \cite{fitzgerald2} & \Verb#algorithms/Fitzgerald_Multipass.m# & MATLAB \\
+	 \hline
+	 TF Jigsaw \cite{tfjigsaw} & \Verb#algorithms/JigsawSep.m# & MATLAB \\
+	 \hline
+	 WMDCTLasso \cite{wmdct} & \Verb#algorithms/WMDCTLassoShrink.m# & MATLAB \\
+	 \hline
+	 Realtime HPSS STFT (sec \ref{sec:rthpss}) & \Verb#algorithms/HPSS_STFT_realtime.m# & MATLAB \\
+	 \hline
+	 Realtime HPSS sliCQ (sec \ref{sec:rthpss}) & \Verb#algorithms/HPSS_CQNSGT_realtime.py# & Python \\
+	 MATLAB shim & \Verb#algorithms/HPSS_CQNSGT_realtime_shim.m# & MATLAB \\
+	 \hline
+	 Hybrid HPSS (sec \ref{sec:hybridhpss}) & \Verb#algorithms/HarmonicPercussive.m# & MATLAB \\
+	 \hline
+	 Hybrid HPSS + vocal (sec \ref{sec:hybridvocal}) & \Verb#algorithms/HarmonicPercussiveVocal.m# & MATLAB \\
+	 \hline
+	 Open-Unmix & \Verb#algorithms/umx.py# & Python \\
+	 MATLAB shim & \Verb#algorithms/UMX_python_shim.m# & MATLAB \\
+	 \hline
+	 MiXiN MATLAB shim & \Verb#algorithms/MiXiN_python_shim.m# & MATLAB \\
+	 \hline
+\end{tabular}
+	\caption{HPSS algorithm implementations}
+	\label{table:algos}
+\end{table}
+
+The different components of the testbench are described in table \ref{table:testbenchcode}. Finally, all of the raw results of all evaluations are stored in PNG files containing the red/yellow/green heatmaps shown throughout this report. The files are located at \Verb#evaluation/heatmaps/#, named after the contender and metric name. For example, the file \Verb#WMDCT_PEASS.png# contains the PEASS scores of WMDCT batch 1, and the file \Verb#Realtime_BSSv4_abbrev.png# contains the abbreviated (i.e., global metric omitted) BSSv4 scores of the realtime algorithms.
+
+\begin{table}[ht]
+	\centering
+\begin{tabular}{ |l|l| }
+	 \hline
+	  Component & Function \\
+	 \hline
+	 \hline
+	 \Verb#init.m# & Initialize project (by adding paths, etc.) \\
+	 \hline
+	 \Verb#requirements.txt# & All Python dependencies \\
+	 \hline
+	 \Verb#Makefile# & Prepare MUSDB18-HQ evaluation segments \\
+	 \hline
+	 \Verb#data/prepare_data.py# & Stem file and test data preparation tool \\
+	 \hline
+	 \Verb#evaluation/eval_hpss.m# & \makecell[l] { Execute HPSS algorithms \\ Evaluate PEASS, PEMO-Q, BSS } \\
+	 \hline
+	 \Verb#evaluation/eval_vocal.m# & \makecell[l] { Execute HPSS + vocal algorithms \\ Evaluate PEASS, PEMO-Q, BSS } \\
+	 \hline
+	 \Verb#evaluation/contenders/# & Various configurations of evaluated algorithms \\
+	 \Verb#evaluation/contenders/onepass_softmask.m# & \citet{fitzgerald1} \\
+	 \Verb#evaluation/contenders/onepass_hardmask.m# & \citet{driedger} \\
+	 \Verb#evaluation/contenders/twopass_hardmask.m# & \citet{driedger} \\
+	 \Verb#evaluation/contenders/twopass_softmask.m# & \citet{fitzgerald2} \\
+	 \Verb#evaluation/contenders/realtime.m# & Realtime HPSS (sec \ref{sec:rthpss}) \\
+	 \Verb#evaluation/contenders/wmdct1.m# & \citet{wmdct} batch 1 \\
+	 \Verb#evaluation/contenders/wmdct2.m# & \citet{wmdct} batch 2 \\
+	 \Verb#evaluation/contenders/jigsaw.m# & \citet{tfjigsaw} batch 1 \\
+	 \Verb#evaluation/contenders/jigsaw2.m# & \citet{tfjigsaw} batch 2 \\
+	 \Verb#evaluation/contenders/final_hpss.m# & Open-Unmix + hybrid (sec \ref{sec:hybridhpss}) \\
+	 \Verb#evaluation/contenders/neural_hpss.m# & Open-Unmix + MiXiN (sec \ref{appendix:ml}) \\
+	 \Verb#evaluation/contenders/neural_vocal.m# & Open-Unmix + MiXiN (sec \ref{appendix:ml}) \\
+	 \hline
+	 \Verb#evaluation/heatmap.py# & Convert evaluations to colored heatmaps \\
+	 \hline
+	 \Verb#evaluation/bssv4_eval.py# & Compute BSSv4 scores \\
+	 \hline
+	 \Verb#evaluation/heatmaps/# & PNG files of metrics heatmaps \\
+	 \hline
+\end{tabular}
+	\caption{Testbench code}
+	\label{table:testbenchcode}
+\end{table}
 
 \end{appendices}
 
