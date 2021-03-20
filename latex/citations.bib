@@ -1,18 +1,21 @@
-%% This BibTeX bibliography file was created using BibDesk.
-%% https://bibdesk.sourceforge.io/
-
-%% Created for François Milot at 2020-12-11 16:27:35 -0500 
-
-
-%% Saved with string encoding Unicode (UTF-8) 
+@article{musicsepgood,
+author = {Cano, Estefanía and Fitzgerald, Derry and Liutkus, Antoine and Plumbley, Mark and Stöter, Fabian-Robert},
+year = {2018},
+month = {01},
+pages = {},
+title = {Musical Source Separation: An Introduction},
+volume = {36},
+journal = {IEEE Signal Processing Magazine},
+doi = {10.1109/MSP.2018.2874719}
+}
 
 @article{fitzgerald1,
 author = {Fitzgerald, Derry},
 year = {2010},
 month = {01},
-pages = {},
 title = {Harmonic/Percussive Separation using Median Filtering},
-journal = {13th International Conference on Digital Audio Effects (DAFx-10)}
+journal = {13th International Conference on Digital Audio Effects (DAFx-10)},
+url = {http://dafx10.iem.at/papers/DerryFitzGerald_DAFx10_P15.pdf}
 }
 
 @misc{driedger,
@@ -20,7 +23,8 @@ author = {Driedger, Jonathan and Müller, Meinard and Disch, Sascha},
 year = {2014},
 month = {01},
 pages = {},
-title = {Extending Harmonic-Percussive Separation of Audio Signals}
+title = {Extending Harmonic-Percussive Separation of Audio Signals},
+url = {https://www.audiolabs-erlangen.de/content/05-fau/assistant/00-driedger/01-publications/2014_DriedgerMuellerDisch_ExtensionsHPSeparation_ISMIR.pdf}
 }
 
 @article{fitzgerald2,
@@ -44,16 +48,6 @@ journal = {International Journal of Wavelets, Multiresolution and Information Pr
 doi = {10.1142/S0219691307001768}
 }
 
-@website{tfjigsaw2,
-title = {TFJIGSAWSEP - Time frequency jigsaw puzzle tonal-transient separation},
-url = {https://ltfat.github.io/doc/sigproc/tfjigsawsep.html},
-}
-
-@website{tfjigsaw3,
-title = {ltfat/demo\_tfjigsawsep.m},
-url = {https://github.com/ltfat/ltfat/blob/00c2929ef069d294dd84974af8887a9b91d1f994/demos/demo_tfjigsawsep.m},
-}
-
 @phdthesis{bayarres,
 author = {Ignacio Irigaray Bayarres},
 title = {Transient and steady-state component separation for audio signals},
@@ -72,21 +66,6 @@ title = {Structured sparsity for audio signals},
 booktitle = {Proc. of the 14th International Conference on Digital Audio Effects (DAFx-11), Paris, France}
 }
 
-@website{wmdct2,
-title = {Structured Sparsity for Audio Signals},
-url = {https://homepage.univie.ac.at/monika.doerfler/StrucAudio.html}
-}
-
-@website{wmdct3,
-title = {DEMO\_AUDIOSHRINK - Decomposition into tonal and transient parts},
-url = {https://ltfat.github.io/doc/demos/demo_audioshrink.html}
-}
-
-@website{wmdct4,
-title = {ltfat/demo\_audioshrink.m},
-url = {https://github.com/ltfat/ltfat/blob/master/demos/demo_audioshrink.m}
-}
-
 @incollection{ltfat,
     year={2014},
     isbn={978-3-319-12975-4},
@@ -97,7 +76,6 @@ url = {https://github.com/ltfat/ltfat/blob/master/demos/demo_audioshrink.m}
     publisher={Springer International Publishing},
     author={Pr\r{u}\v{s}a, Zden\v{e}k and S{\o}ndergaard, Peter L. and Holighaus, Nicki and Wiesmeyr, Christoph and Balazs, Peter},
     pages={419-442},
-    url={{http://dx.doi.org/10.1007/978-3-319-12976-1_25}},
     doi={{10.1007/978-3-319-12976-1_25}},
 }
 
@@ -111,7 +89,6 @@ url = {https://github.com/ltfat/ltfat/blob/master/demos/demo_audioshrink.m}
   month        = dec,
   year         = 2017,
   doi          = {10.5281/zenodo.1117372},
-  url          = {https://doi.org/10.5281/zenodo.1117372}
 }
 
 @misc{musdb18-hq,
@@ -124,7 +101,6 @@ url = {https://github.com/ltfat/ltfat/blob/master/demos/demo_audioshrink.m}
   month        = aug,
   year         = 2019,
   doi          = {10.5281/zenodo.3338373},
-  url          = {https://doi.org/10.5281/zenodo.3338373}
 }
 
 @article{bss,
@@ -171,7 +147,6 @@ doi = {10.1109/ICASSP.2018.8462194}
 
 @article{umx,
   doi = {10.21105/joss.01667},
-  url = {https://doi.org/10.21105/joss.01667},
   year = {2019},
   publisher = {The Open Journal},
   volume = {4},
@@ -181,15 +156,6 @@ doi = {10.1109/ICASSP.2018.8462194}
   title = {Open-Unmix - A Reference Implementation for Music Source Separation},
   journal = {Journal of Open Source Software}
 }
-
-@misc{peassmatlab,
-url = {http://bass-db.gforge.inria.fr/peass/},
-title = {The PEASS Toolkit - Perceptual Evaluation methods for Audio Source Separation},
-year = {2011}}
-
-@website{imagenoise,
-title={Noise Removal - MATLAB \& Simulink},
-url={https://www.mathworks.com/help/images/noise-removal.html}}
 
 @inbook{masking,
 author = {Gerkmann, Timo and Vincent, Emmanuel},
@@ -213,20 +179,12 @@ journal = {Journal of Open Source Software},
 doi = {10.21105/joss.01667}
 }
 
-@website{museval,
-title={museval - source separation evaluation tools for python},
-url={https://github.com/sigsep/sigsep-mus-eval}}
-
-@website{bsseval,
-title={audio source separation evaluation metrics},
-url={https://github.com/sigsep/bsseval}}
-
 @inproceedings{nussl,
     author = {Ethan Manilow and Prem Seetharaman and Bryan Pardo},
     title = "The Northwestern University Source Separation Library",
     publisher = "Proceedings of the 19th International Society of Music Information Retrieval 
         Conference ({ISMIR} 2018), Paris, France, September 23-27",
-    year = 2018
+    year = {2018}
 }
 
 @misc{sigsep2018,
@@ -237,10 +195,6 @@ url={https://github.com/sigsep/bsseval}}
       archivePrefix={arXiv},
       primaryClass={eess.AS}
 }
-
-@website{ghissue,
-title={Your opinion on PEASS? · Issue \#78 · sigsep/sigsep-mus-eval},
-url = {https://github.com/sigsep/sigsep-mus-eval/issues/78}}
 
 @article{numpy,
  title         = {Array programming with {NumPy}},
@@ -262,7 +216,6 @@ url = {https://github.com/sigsep/sigsep-mus-eval/issues/78}}
  pages         = {357--362},
  doi           = {10.1038/s41586-020-2649-2},
  publisher     = {Springer Science and Business Media {LLC}},
- url           = {https://doi.org/10.1038/s41586-020-2649-2}
 }
 
 @software{pandas,
@@ -273,7 +226,6 @@ url = {https://github.com/sigsep/sigsep-mus-eval/issues/78}}
     publisher    = {Zenodo},
     version      = {latest},
     doi          = {10.5281/zenodo.3509134},
-    url          = {https://doi.org/10.5281/zenodo.3509134}
 }
 
 @software{seaborn,
@@ -284,7 +236,6 @@ url = {https://github.com/sigsep/sigsep-mus-eval/issues/78}}
     publisher    = {Zenodo},
     version      = {latest},
     doi          = {10.5281/zenodo.592845},
-    url          = {https://doi.org/10.5281/zenodo.592845},
 }
 
 @article{matplotlib,
@@ -311,4 +262,321 @@ pages = {8024--8035},
 year = {2019},
 publisher = {Curran Associates, Inc.},
 url = {http://papers.neurips.cc/paper/9015-pytorch-an-imperative-style-high-performance-deep-learning-library.pdf}
+}
+
+@misc{speechmask,
+      title={A comprehensive study of speech separation: spectrogram vs waveform separation}, 
+      author={Fahimeh Bahmaninezhad and Jian Wu and Rongzhi Gu and Shi-Xiong Zhang and Yong Xu and Meng Yu and Dong Yu},
+      year={2019},
+      eprint={1905.07497},
+      archivePrefix={arXiv},
+      primaryClass={cs.SD}
+}
+
+@article{musicmask,
+author = {Liu, Ruolun and Li, Suping},
+year = {2009},
+month = {09},
+pages = {},
+title = {A review on music source separation},
+journal = {Proceedings - 2009 IEEE Youth Conference on Information, Computing and Telecommunication, YC-ICT2009},
+doi = {10.1109/YCICT.2009.5382353}
+}
+
+@article{gabor1946,
+title={Theory of Communication},
+author={Dennis Gabor},
+year={1946},
+pages={429-457},
+volume={93},
+number={3},
+journal={Journal of Institution of Electrical Engineers},
+url={http://www.granularsynthesis.com/pdf/gabor.pdf}
+}
+
+@article{dictionary,
+author = {Rubinstein, Ron and Bruckstein, Alfred and Elad, Michael},
+year = {2010},
+month = {07},
+pages = {1045 - 1057},
+title = {Dictionaries for Sparse Representation Modeling},
+volume = {98},
+journal = {Proceedings of the IEEE},
+doi = {10.1109/JPROC.2010.2040551},
+url = {https://www.cs.technion.ac.il/~ronrubin/Publications/dictdesign.pdf}
+}
+
+@article{stftindie,
+	author={J. B. {Allen} and L. R. {Rabiner}},
+	journal={Proceedings of the IEEE},
+	title={A unified approach to short-time Fourier analysis and synthesis},
+	year={1977},
+	volume={65},
+	number={11},
+	pages={1558-1564},
+	doi={10.1109/PROC.1977.10770},
+}
+
+@article{dictionary1,
+author = {Mallat, S.G. and Zhang, Zhifeng},
+title = {Matching Pursuits with Time-Frequency Dictionaries},
+year = {1993},
+publisher = {IEEE Press},
+volume = {41},
+number = {12},
+issn = {1053-587X},
+doi = {10.1109/78.258082},
+abstract = {The authors introduce an algorithm, called matching pursuit, that decomposes any signal into a linear expansion of waveforms that are selected from a redundant dictionary of functions. These waveforms are chosen in order to best match the signal structures. Matching pursuits are general procedures to compute adaptive signal representations. With a dictionary of Gabor functions a matching pursuit defines an adaptive time-frequency transform. They derive a signal energy distribution in the time-frequency plane, which does not include interference terms, unlike Wigner and Cohen class distributions. A matching pursuit isolates the signal structures that are coherent with respect to a given dictionary. An application to pattern extraction from noisy signals is described. They compare a matching pursuit decomposition with a signal expansion over an optimized wavepacket orthonormal basis, selected with the algorithm of Coifman and Wickerhauser see (IEEE Trans. Informat. Theory, vol. 38, Mar. 1992)},
+journal = {Trans. Sig. Proc.},
+month = {12},
+pages = {3397–3415},
+}
+
+@article{dictionary2,
+author = {Chen, S.S. and Donoho, D. and Saunders, Michael},
+year = {2001},
+month = {01},
+pages = {33-61},
+title = {Atomic decomposition by basis pursuit[J]},
+volume = {43},
+journal = {Siam Review}
+}
+
+@phdthesis{doerflerphd,
+author = {Doerfler, Monika},
+year = {2002},
+month = {01},
+pages = {},
+title = {Gabor analysis for a class of signals called music},
+url = {http://www.mathe.tu-freiberg.de/files/thesis/gamu_1.pdf}
+}
+
+@article{jbrown,
+  title={Calculation of a constant Q spectral transform},
+  author={J. Brown},
+  journal={Journal of the Acoustical Society of America},
+  year={1991},
+  volume={89},
+  pages={425-434},
+  url={https://www.ee.columbia.edu/~dpwe/papers/Brown91-cqt.pdf}
+}
+
+@article{psycho1,
+author = {Oppenheim, Jacob and Magnasco, Marcelo},
+year = {2012},
+month = {08},
+pages = {},
+title = {Human Time-Frequency Acuity Beats the Fourier Uncertainty Principle},
+volume = {110},
+journal = {Physical Review Letters},
+doi = {10.1103/PhysRevLett.110.044301}
+}
+
+@article{psycho2,
+author = {Moore,B. C. J. },
+title = {Frequency difference limens for short‐duration tones},
+journal = {The Journal of the Acoustical Society of America},
+volume = {54},
+number = {3},
+pages = {610-619},
+year = {1973},
+doi = {10.1121/1.1913640},
+URL = {https://doi.org/10.1121/1.1913640},
+eprint = {https://doi.org/10.1121/1.1913640}}
+
+@article{balazs,
+author = {Balazs, Peter and Doerfler, Monika and Jaillet, F and Holighaus, Nicki and Velasco, Gino Angelo},
+year = {2011},
+month = {10},
+pages = {1481-1496},
+title = {Theory, implementation and applications of nonstationary Gabor frames},
+volume = {236},
+journal = {Journal of computational and applied mathematics},
+doi = {10.1016/j.cam.2011.09.011},
+url = {https://ltfat.github.io/notes/ltfatnote018.pdf}
+}
+
+@inproceedings{jaillet,
+  title={Nonstationary Gabor Frames},
+  author={Florent Jaillet and P. Bal{\'a}zs and M. D{\"o}rfler},
+  year={2009},
+  booktitle={SAMPTA'09, International Conference on SAMPling Theory and Applications},
+  url={https://github.com/ltfat/ltfat.github.io/blob/master/notes/ltfatnote010.pdf},
+}
+
+@book{gabordiagrams,
+author = {Kutz, J. Nathan},
+title = {Data-Driven Modeling \& Scientific Computation: Methods for Complex Systems},
+year = {2013},
+isbn = {0199660344},
+publisher = {Oxford University Press, Inc.},
+address = {USA},
+pages = {336--338},
+}
+
+@article{stftinvertible,
+author = {Heinzel, Gerhard and Rüdiger, Albrecht and Schilling, R},
+year = {2002},
+month = {01},
+pages = {},
+title = {Spectrum and spectral density estimation by the Discrete Fourier transform (DFT), including a comprehensive list of window functions and some new flat-top windows},
+volume = {12},
+journal = {Max Plank Inst}
+}
+
+@article{adaptivecqt,
+author = {Liuni, Marco and Roebel, Axel and Matusiak, Ewa and Romito, Marco and Rodet, Xavier},
+year = {2013},
+month = {05},
+pages = {},
+title = {Automatic Adaptation of the Time-Frequency Resolution for Sound Analysis and Re-Synthesis},
+volume = {21},
+journal = {IEEE Transactions on Audio Speech and Language Processing},
+doi = {10.1109/TASL.2013.2239989},
+url = {https://arpi.unipi.it/retrieve/handle/11568/159584/458549/tasl.pdf}
+}
+
+@misc{invertiblecqt,
+url = {https://www.univie.ac.at/nonstatgab/pdf_files/dohogrve11_amsart.pdf},
+author = {Velasco, Gino Angelo and Holighaus, Nicki and Doerfler, Monika and Grill, Thomas},
+year = {2011},
+month = {09},
+pages = {},
+title = {Constructing an invertible constant-Q transform with nonstationary Gabor frames},
+journal = {Proceedings of the 14th International Conference on Digital Audio Effects, DAFx 2011}
+}
+
+@article{rtcqt,
+author = {Holighaus, Nicki and Doerfler, Monika and Velasco, Gino Angelo and Grill, Thomas},
+year = {2012},
+month = {09},
+pages = {},
+title = {A Framework for Invertible, Real-Time Constant-Q Transforms},
+volume = {21},
+journal = {IEEE Transactions on Audio, Speech and Language Processing},
+doi = {10.1109/TASL.2012.2234114},
+url = {https://arxiv.org/pdf/1210.0084.pdf}
+}
+
+@article{mdct,
+author = {Wang, Ye and Vilermo, Miikka},
+year = {2012},
+month = {01},
+pages = {},
+title = {Modified discrete cosine transform - Its implications for audio coding and error concealment},
+volume = {51},
+journal = {Advances in Engineering Software - AES},
+url = {https://smcnus.comp.nus.edu.sg/wp-content/uploads/papers/5.Error_Robust_Audio_Streaming/2002_The_Modified_Discrete_Cosine_Transform-Its_Implications_for_Audio_Coding_and_Error_Concealment.pdf}
+}
+
+@misc{honeine2014entropy,
+      title={Entropy of Overcomplete Kernel Dictionaries}, 
+      author={Paul Honeine},
+      year={2014},
+      eprint={1411.0161},
+      archivePrefix={arXiv},
+      primaryClass={cs.IT},
+      url = {https://arxiv.org/pdf/1411.0161.pdf}
+}
+
+@misc{pastor2015mathematics,
+      title={Mathematics of Sparsity and Entropy: Axioms, Core Functions and Sparse Recovery}, 
+      author={Giancarlo Pastor and Inmaculada Mora-Jiménez and Riku Jäntti and Antonio J. Caamaño},
+      year={2015},
+      eprint={1501.05126},
+      archivePrefix={arXiv},
+      primaryClass={cs.IT}
+}
+
+@article{sparsitykowalski,
+author = {Kowalski, Matthieu and Torrésani, Bruno},
+year = {2009},
+month = {09},
+pages = {},
+title = {Sparsity and persistence: Mixed norms provide simple signal models with dependent coefficients},
+volume = {3},
+journal = {Signal Image and Video Processing},
+doi = {10.1007/s11760-008-0076-1}
+}
+
+@misc{grais2017single,
+      title={Single Channel Audio Source Separation using Convolutional Denoising Autoencoders}, 
+      author={Emad M. Grais and Mark D. Plumbley},
+      year={2017},
+      eprint={1703.08019},
+      archivePrefix={arXiv},
+      primaryClass={cs.SD}
+}
+
+@article{bfcc1,
+author = {Herrera, Perfecto and Dehamel, Amaury and Gouyon, Fabien},
+year = {2003},
+month = {01},
+pages = {},
+title = {Automatic labeling of unpitched percussion sounds},
+journal = {AES Audio Engineering Society 114th Convention}
+}
+
+@article{bfcc2,
+author = {Brent, William},
+year = {2009},
+month = {01},
+pages = {},
+title = {Cepstral analysis tools for percussive timbre identification},
+journal = {Proceedings of the 3rd International Pure Data Convention, Sao Paulo, Brazil}
+}
+
+@misc{keras,
+  title={Keras},
+  author={Chollet, Fran\c{c}ois and others},
+  year={2015},
+  howpublished={\url{https://keras.io}},
+}
+
+@misc{tensorflow,
+title={ {TensorFlow}: Large-Scale Machine Learning on Heterogeneous Systems},
+url={https://www.tensorflow.org/},
+note={Software available from tensorflow.org},
+author={
+    Mart\'{\i}n~Abadi and
+    Ashish~Agarwal and
+    Paul~Barham and
+    Eugene~Brevdo and
+    Zhifeng~Chen and
+    Craig~Citro and
+    Greg~S.~Corrado and
+    Andy~Davis and
+    Jeffrey~Dean and
+    Matthieu~Devin and
+    Sanjay~Ghemawat and
+    Ian~Goodfellow and
+    Andrew~Harp and
+    Geoffrey~Irving and
+    Michael~Isard and
+    Yangqing Jia and
+    Rafal~Jozefowicz and
+    Lukasz~Kaiser and
+    Manjunath~Kudlur and
+    Josh~Levenberg and
+    Dandelion~Man\'{e} and
+    Rajat~Monga and
+    Sherry~Moore and
+    Derek~Murray and
+    Chris~Olah and
+    Mike~Schuster and
+    Jonathon~Shlens and
+    Benoit~Steiner and
+    Ilya~Sutskever and
+    Kunal~Talwar and
+    Paul~Tucker and
+    Vincent~Vanhoucke and
+    Vijay~Vasudevan and
+    Fernanda~Vi\'{e}gas and
+    Oriol~Vinyals and
+    Pete~Warden and
+    Martin~Wattenberg and
+    Martin~Wicke and
+    Yuan~Yu and
+    Xiaoqiang~Zheng},
+  year={2015},
 }
