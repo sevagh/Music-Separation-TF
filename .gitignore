@@ -1,3 +1,4 @@
 *.wav
+!latex/*.wav
 *.pyc
 __pycache__
