@@ -1,5 +1,6 @@
 \documentclass{beamer}
 \usetheme{Boadilla}
+\usepackage{minted}
 \usepackage{hyperref}
 \usepackage{tikz}
 \usetikzlibrary{shapes,positioning}
@@ -27,6 +28,13 @@
 \setbeameroption{show notes on second screen=right}
 %\setbeameroption{hide notes}
 
+\newlength{\mintednumbersep}
+\AtBeginDocument{%
+  \sbox0{\tiny00}%
+  \setlength\mintednumbersep{8pt}%
+  \addtolength\mintednumbersep{-\wd0}%
+}
+
 \def\footshortciteintern[#1][#2]#3{%
 \ifx#1\empty 
 % Nur Autor
@@ -48,7 +56,6 @@
 \newcommand*\footmediumcite{%
 \optparams{\footshortciteintern}{[][]}
 }
-
 
 \title[TF representations for music separation]{Time-Frequency Representations for Music Source Separation}
 \subtitle{Final project presentation}
@@ -162,6 +169,45 @@
 	\end{figure}
 \end{frame}
 
+\begin{frame}[fragile]
+	\frametitle{HPSS MATLAB pseudocode}
+\begin{figure}[h]
+  \centering
+ \begin{minipage}{0.48\textwidth}
+  \centering
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
+|$s = \text{mixed audio}$|
+|$\hat{S} = \text{STFT}(s)\text{\textbf{ or CQT}}$|
+|$S = \text{abs}(\hat{S})$|
+|$H = \text{medianfilter}(S, l_{H}, \text{axis}=2)$|
+|$P = \text{medianfilter}(S, l_{P}, \text{axis}=1)$|
+|$\text{\textbf{soft} } M_{H} = \frac{H^{p}}{H^{p} + P^{p}}, M_{P} = \frac{P^{p}}{H^{p} + P^{p}}$|
+|$\text{\textbf{hard} } M_{H} = \frac{H}{P + \epsilon} \ge \beta, M_{P} = \frac{P}{H + \epsilon} > \beta$|
+|$\hat{H} = \hat{S} \cdot M_{H}$|
+|$\hat{P} = \hat{S} \cdot M_{P}$|
+|$h = \text{ISTFT}(\hat{H})\text{\textbf{ or ICQT}}$|
+|$p = \text{ISTFT}(\hat{P})\text{\textbf{  or ICQT}}$|
+\end{minted}
+ \end{minipage}
+\hspace{0.02\textwidth}
+ \begin{minipage}{0.48\textwidth}
+  \centering
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
+|$s = \text{mixed audio}$|
+|$\hat{S1} = \text{STFT}(s)\text{\textbf{ or CQT}}$|
+|$ \text{1-pass algorithm } \rightarrow \hat{H1}, \hat{P1} $|
+|$\text{\textbf{final harmonic} } h1 = \text{ISTFT}(\hat{H1})\text{\textbf{ or ICQT}}$|
+|$p1 = \text{ISTFT}(\hat{P1})\text{\textbf{ or ICQT}}$|
+|$\hat{S2} = \text{STFT}(p1)\text{\textbf{ or CQT}}$|
+|$ \text{1-pass algorithm } \rightarrow \hat{H2}, \hat{P2} $|
+|$h2 = \text{ISTFT}(\hat{H2})\text{\textbf{ or ICQT}}$|
+|$\text{\textbf{final percussive} } p1 = \text{ISTFT}(\hat{P2})\text{\textbf{ or ICQT}}$|
+\end{minted}
+ \end{minipage}
+  \captionof{listing}{1- and 2-pass median filtering HPSS algorithms}
+\end{figure}
+\end{frame}
+
 \begin{frame}
 	\frametitle{STFT, CQT, and TF resolution}
 	STFT vs. CQT\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} (based on NSGT\footmediumcite{balazs}):
@@ -223,6 +269,26 @@
 	Use 2 WMDCT transforms (wide + narrow window) + Group-LASSO to shrink input signal into significant coefficients in ``time'' and ``frequency'' groups
 \end{frame}
 
+\begin{frame}[fragile]
+	\frametitle{Audioshrink MATLAB pseudocode}
+\begin{figure}[h]
+  \centering
+  \centering
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
+|$f = \text{mixed audio}$|
+|$F1 = \text{frametight}(\text{frame}(\text{wmdct}, \text{gauss}, \text{winsize}_{h}))\qquad\text{\textbf{WMDCT} }$|
+|$F2 = \text{frametight}(\text{frame}(\text{wmdct}, \text{gauss}, \text{winsize}_{p}))$|
+|$c1 = \text{franagrouplasso}(F1, f, \lambda_{h}, \text{soft}, \text{freq})$|
+|$c2 = \text{franagrouplasso}(F2, f, \lambda_{p}, \text{soft}, \text{time})$|
+|$xh = \text{frsyn}(F1, c1)\qquad\qquad\qquad\text{\textbf{Inverse WMDCT} }$|
+|$xp = \text{frsyn}(F2, c2)$|
+\end{minted}
+  \captionof{listing}{WMDCTLasso tonal/transient separation algorithm}
+\end{figure}
+\textit{franagrouplasso} in LTFAT solves the Group-LASSO regression problem in the time-frequency domain\\
+Soft thresholding vs. hard thresholding -- similar to soft/hard masking
+\end{frame}
+
 \begin{frame}
 	\frametitle{R{\'e}nyi entropy vs. Lasso}
 	\begin{itemize}
@@ -280,6 +346,30 @@
 			Hann DGT = stft, basically
 	\end{itemize}
 }
+
+\begin{frame}[fragile]
+	\frametitle{TFJigsaw MATLAB pseudocode}
+\begin{figure}[h]
+  \centering
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
+|$f = \text{mixed audio}$|
+|$a,M,\text{winsize},b\{1,2\} = \text{Gabor systems 1 and 2 configuration}$|
+|$r\{1,2\} = \text{significance level of tonal and transient layer re: white noise ref}$|
+|$[\text{ref}1, \text{ref}2] = \text{generate estimate of random white noise entropy within supertile}$|
+|$[\text{tau}1, \text{tau}2] = [\text{ref}1 \cdot r1, \text{ref}2 \cdot r2]$|
+|$c1 = \text{DGTReal}(f, \text{winsize}1, a1, M1)\qquad\text{\textbf{Discrete Gabor Transform}}$|
+|$c2 = \text{DGTReal}(f, \text{winsize}2, a2, M2)$|
+|$\text{for all time and frequency supertiles}$|
+|$\qquad f\{1,2\} = \text{frequency supertile location, Gabor system 1,2}$|
+|$\qquad t\{1,2\} = \text{time supertile location, Gabor system 1,2}$|
+|$\qquad [c1, c2] = \text{decision}(c1,c2,f1,f2,t1,t2,\text{tau}1,\text{tau}2)$|
+|$\text{endfor}$|
+|$f_{\text{tonal}} = \text{IDGTReal}(c1)\qquad\qquad\text{\textbf{Inverse discrete Gabor Transform}}$|
+|$f_{\text{transient}} = \text{IDGTReal}(c2)$|
+\end{minted}
+  \captionof{listing}{TFJigsaw tonal/transient separation algorithm}
+\end{figure}
+\end{frame}
 
 \begin{frame}
 	\frametitle{Evaluation testbench}
@@ -410,6 +500,23 @@
 \end{frame}
 
 \begin{frame}
+	\frametitle{NSGT in STFT-based neural network}
+	\begin{figure}
+		\includegraphics[width=10cm]{./cdae_arch.png}
+		\caption{Convolutional denoising autoencoders\footfullcite{cdae}}
+	\end{figure}
+	Idea: replace STFT spectrogram with NSGT spectrogram. Both MATLAB Wavelet Toolbox CQT (based on NSGT) and reference Python implementation of NSGT (\href{https://github.com/grrrr/nsgt}{https://github.com/grrrr/nsgt}) can produce a rectangular matrix of TF coefficients, solving a common difficulty of using the CQT in spectrogram-based algorithms.
+\end{frame}
+
+\begin{frame}
+	\frametitle{NSGT-spectrogram neural network}
+	\begin{figure}
+		\includegraphics[width=9cm]{./mixin_arch.png}
+		\caption{Toy/demo in \href{https://github.com/sevagh/MiXiN}{https://github.com/sevagh/MiXiN}}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
 	\frametitle{Conclusions}
 	\begin{itemize}
 		\item
@@ -419,8 +526,20 @@
 		\item
 			Competitive PEASS separation results in hybrid algorithms based on advanced DSP/time-frequency analysis (not so good in BSSv4)
 		\item
-			Swap STFT for NSGT in a both traditional DSP algorithms, and machine/deep learning networks\footnote{\url{https://github.com/sevagh/MiXiN}} -- lots of future potential
+			Swap STFT for NSGT in a both traditional DSP algorithms, and machine/deep learning networks -- lots of future potential
 	\end{itemize}
+	501 to 622:
+	\begin{table}[ht]
+	\centering
+	\begin{tabular}{lll c c c}
+		\hline\hline
+		Algorithm & Harmonic & Percussive \\ [0.5ex]
+		\hline\hline
+		HPSS (MUMT 501) \href{run:./elmestizo.wav}{\faVolumeUp \ mix} & \href{run:./elmestizo_harm_501.wav}{\faVolumeUp \ h} & \href{run:./elmestizo_perc_501.wav}{\faVolumeUp \ p} \\ [0.5ex]
+		MiXiN (MUMT 622) & \href{run:./elmestizo_harm_622.wav}{\faVolumeUp \ h} & \href{run:./elmestizo_perc_622.wav}{\faVolumeUp \ p} \\ [0.5ex]
+		\hline
+	\end{tabular}
+	\end{table}
 \end{frame}
 
 \end{document}

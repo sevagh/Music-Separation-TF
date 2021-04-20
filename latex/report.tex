@@ -739,19 +739,19 @@ An algorithm considered which uses a custom time-frequency analysis is the Time-
 
 \begin{figure}[h]
   \centering
-  \centering
 \begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
 |$f = \text{mixed audio}$|
 |$a,M,\text{winsize},b\{1,2\} = \text{Gabor systems 1 and 2 configuration}$|
+|$r\{1,2\} = \text{significance level of tonal and transient layer re: white noise ref}$|
 |$[\text{ref}1, \text{ref}2] = \text{generate estimate of random white noise entropy within supertile}$|
 |$[\text{tau}1, \text{tau}2] = [\text{ref}1 \cdot r1, \text{ref}2 \cdot r2]$|
 |$c1 = \text{DGTReal}(f, \text{winsize}1, a1, M1)\qquad\text{\textbf{Discrete Gabor Transform}}$|
 |$c2 = \text{DGTReal}(f, \text{winsize}2, a2, M2)$|
-|$f1 = \text{frequency supertile location, Gabor system 1}$|
-|$f2 = \text{frequency supertile location, Gabor system 2}$|
-|$t1 = \text{time supertile location, Gabor system 1}$|
-|$t2 = \text{time supertile location, Gabor system 2}$|
-|$[c1, c2] = \text{decision}(c1,c2,f1,f2,t1,t2,\text{tau}1,\text{tau}2)$|
+|$\text{for all time and frequency supertiles}$|
+|$\qquad f\{1,2\} = \text{frequency supertile location, Gabor system 1,2}$|
+|$\qquad t\{1,2\} = \text{time supertile location, Gabor system 1,2}$|
+|$\qquad [c1, c2] = \text{decision}(c1,c2,f1,f2,t1,t2,\text{tau}1,\text{tau}2)$|
+|$\text{endfor}$|
 |$f_{\text{tonal}} = \text{IDGTReal}(c1)\qquad\qquad\text{\textbf{Inverse discrete Gabor Transform}}$|
 |$f_{\text{transient}} = \text{IDGTReal}(c2)$|
 \end{minted}
@@ -842,7 +842,7 @@ The last algorithm, WMDCTLasso\cite{wmdct}, is also implemented in LTFAT. As see
   \label{lst:wmdctlasso}
 \end{figure}
 
-The \Verb#franagrouplasso# function is provided in the LFAT, and solves the Group-LASSO regression problem in the time-frequency domain. The theoretical background was covered in section \ref{sec:theorysparsity}. It is used in the WMDCTLasso algorithm to search for tonal components (with the `freq' argument), and transient components (with the `time' argument). The parameters of WMDCT are $\lambda$, or sparsity, for the Group Lasso regression for each of the tonal and transient systems, and Gaussian window sizes for the WMDCT frames for each system. A variety of parameter combinations were tested, shown in table \ref{table:round2wmdct}. The defaults, taken from the demo, are window sizes of 256 (tonal) and 32 (transient), and lambda values of 0.8 (tonal) and 0.5 (transient) for the percussive system.
+The \Verb#franagrouplasso# function is provided in the LTFAT, and solves the Group-LASSO regression problem in the time-frequency domain. The theoretical background was covered in section \ref{sec:theorysparsity}. It is used in the WMDCTLasso algorithm to search for tonal components (with the `freq' argument), and transient components (with the `time' argument). The parameters of WMDCT are $\lambda$, or sparsity, for the Group Lasso regression for each of the tonal and transient systems, and Gaussian window sizes for the WMDCT frames for each system. A variety of parameter combinations were tested, shown in table \ref{table:round2wmdct}. The defaults, taken from the demo, are window sizes of 256 (tonal) and 32 (transient), and lambda values of 0.8 (tonal) and 0.5 (transient) for the percussive system.
 
 \begin{table}[ht]
 	\centering
